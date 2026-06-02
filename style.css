@@ -1,0 +1,2293 @@
+/* ส่วนหัวเว็บ */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 90px; /* ป้องกันไม่ให้หัวข้อโดนแถบเมนูบังตอนเลื่อนลงมา */
+}
+header {
+    padding: 50px 20px;
+    border-bottom: 1px solid #333;
+    background: linear-gradient(180deg, rgba(0, 255, 255, 0.03) 0%, transparent 100%);
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ตั้งค่ารูปโลโก้ */
+.brand-logo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%; /* ทำให้รูปเป็นวงกลม */
+    border: 2px solid var(--accent-color);
+    object-fit: cover;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2); /* แสงนีออนจางๆ รอบโลโก้ */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.brand-logo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+}
+
+.brand-text {
+    text-align: center; /* เปลี่ยนจาก left เป็น center */
+}
+
+h1.logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 3rem;
+    letter-spacing: -2px;
+    text-transform: uppercase;
+    line-height: 1.1;
+}
+
+h1.logo span {
+    color: var(--accent-color);
+}
+
+.brand-text p {
+    color: #999;
+    margin-top: 5px;
+    font-size: 1.1rem;
+}
+
+/* จัดเลย์เอาต์ใหม่สำหรับหน้าจอมือถือ (จอเล็ก) */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column; /* เปลี่ยนให้เรียงบนลงล่าง */
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .brand-text {
+        text-align: center;
+    }
+
+    h1.logo {
+        font-size: 2.2rem;
+    }
+}
+/* ตัวแปรสี High-Contrast ดิบๆ */
+:root {
+    --bg-color: #050505;
+    --text-main: #e0e0e0;
+    --accent-color: #00ffff; /* เปลี่ยนเป็นสีฟ้า Cyan นีออน */
+    --card-bg: #111111;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Kanit', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* เอฟเฟกต์เส้นแสกน CRT จางๆ ไม่กวนสายตา */
+.crt::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 999;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+/* แถบแจ้งเตือนข่าวสาร (Marquee Ticker) */
+.news-ticker {
+    background-color: var(--accent-color);
+    color: #000;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 8px 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.ticker-text {
+    display: inline-block;
+    animation: marquee 15s linear infinite;
+}
+
+@keyframes marquee {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+}
+
+/* ส่วนหัวเว็บ */
+header {
+    padding: 40px 20px;
+    text-align: center;
+    border-bottom: 1px solid #333;
+}
+
+h1.logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 3rem;
+    letter-spacing: -2px;
+    text-transform: uppercase;
+}
+
+h1.logo span {
+    color: var(--accent-color);
+}
+
+/* เลย์เอาต์ส่วนเนื้อหา */
+main {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.section-title {
+    font-size: 2rem;
+    margin-bottom: 30px;
+    border-left: 5px solid var(--accent-color);
+    padding-left: 15px;
+}
+
+/* Grid การ์ดข่าว */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.news-card {
+    background-color: var(--card-bg);
+    border: 1px solid #222;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    cursor: pointer;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-color);
+}
+
+/* =========================================
+   จัดการรูปภาพและข้อความในการ์ดข่าว
+========================================= */
+
+
+/* ควบคุมรูปภาพ (img) ที่อยู่ข้างในกรอบอีกที */
+/* =========================================
+   ล็อกขนาดกล่องรูปภาพการ์ดข่าว
+========================================= */
+.news-img {
+    width: 100%;
+    height: 250px; /* ล็อกความสูงไว้เป๊ะๆ ห้ามยืดหด (ปรับตัวเลขได้ตามชอบ) */
+    background-color: #111;
+    overflow: hidden; /* คำสั่งเด็ดขาด: รูปไหนยาวเกิน 250px ให้ตัดทิ้งไปเลย! */
+    position: relative;
+}
+
+/* ตั้งค่าให้รูปภาพเติมเต็มกล่อง */
+.news-img img {
+    position: absolute; /* ล็อกติดกล่อง */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; /* บังคับให้สูงเท่ากล่องแม่ (250px) */
+    object-fit: cover; /* ครอปรูปให้เต็มพื้นที่โดยสัดส่วนคนไม่เบี้ยว */
+    object-position: top; /* เนื่องจากเป็นรูปแนวตั้ง ให้โฟกัสด้านบนของรูปไว้ก่อน */
+    transition: transform 0.4s ease;
+}
+
+/* เอฟเฟกต์ซูมตอนชี้ */
+.news-card:hover .news-img img {
+    transform: scale(1.08);
+}
+.news-content {
+    padding: 20px;
+    background-color: var(--card-bg); /* บังคับให้พื้นหลังโซนนี้เป็นสีเทาดำเข้มๆ เสมอ */
+    position: relative; 
+    z-index: 2; /* ดันข้อความให้อยู่เลเยอร์บนสุด ป้องกันรูปทับ */
+}
+
+.news-tag {
+    display: inline-block;
+    background-color: var(--accent-color);
+    color: #000;
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+}
+
+.news-title {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.news-excerpt {
+    font-size: 0.95rem;
+    color: #999;
+    font-weight: 300;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid #333;
+    margin-top: 50px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* =========================================
+   พื้นที่โฆษณา (Ad Banner)
+========================================= */
+.ad-container {
+    max-width: 1200px;
+    margin: 40px auto 10px auto;
+    padding: 0 20px;
+}
+
+.ad-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+    background: linear-gradient(45deg, #050505, #111111);
+    /* กรอบเส้นประสีฟ้า Cyan */
+    border: 2px dashed rgba(0, 255, 255, 0.4); 
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.ad-banner:hover {
+    background: rgba(0, 255, 255, 0.02);
+    border-style: solid; /* เปลี่ยนเส้นประเป็นเส้นทึบตอนชี้ */
+    border-color: var(--accent-color);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+}
+
+/* ป้าย Tag เล็กๆ มุมขวาบน บ่งบอกว่าเป็นโฆษณา */
+.ad-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #333;
+    color: #aaa;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.ad-banner:hover .ad-label {
+    background-color: var(--accent-color);
+    color: #000;
+}
+
+.ad-content h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2rem;
+    color: #444; /* สีเทาเข้มๆ ดูคูลๆ */
+    letter-spacing: 2px;
+    transition: color 0.3s ease;
+}
+
+.ad-banner:hover .ad-content h3 {
+    color: var(--accent-color);
+}
+
+.ad-content p {
+    color: #666;
+    font-size: 0.95rem;
+    margin-top: 5px;
+}
+
+/* ปรับขนาดกล่องโฆษณาสำหรับจอมือถือ */
+@media (max-width: 768px) {
+    .ad-banner {
+        min-height: 120px;
+    }
+    .ad-content h3 {
+        font-size: 1.5rem;
+    }
+}
+
+/* =========================================
+   ปุ่ม Social Media (แบบไอคอนวงกลม)
+========================================= */
+.social-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    justify-content: center; /* เปลี่ยนจาก flex-start เป็น center */
+}
+
+.social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    text-decoration: none;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    background: rgba(0, 255, 255, 0.05);
+    border-radius: 50%; /* ปรับให้เป็นวงกลมสมบูรณ์ */
+    font-size: 1.3rem; /* ขนาดไอคอน */
+    transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+    background-color: var(--accent-color);
+    color: #000;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); /* เรืองแสงสีฟ้า Cyan */
+    transform: translateY(-3px);
+}
+
+/* ปรับให้เรียงตรงกลางเวลาเปิดในมือถือ */
+@media (max-width: 768px) {
+    .social-links {
+        justify-content: center;
+    }
+}
+
+/* =========================================
+   Custom Scrollbar & Text Selection
+========================================= */
+/* เปลี่ยนสีเวลาลากเมาส์คลุมข้อความ */
+::selection {
+    background-color: var(--accent-color);
+    color: #000;
+}
+
+/* ตกแต่งแถบเลื่อนหน้าจอ (Scrollbar) */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+::-webkit-scrollbar-thumb {
+    background-color: #333;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent-color);
+}
+
+
+/* =========================================
+   แก้ไขปัญหาโฆษณารูปเบี้ยว (อัปเดตใหม่)
+========================================= */
+.ad-banner {
+    display: block; /* ยกเลิก Flex เพื่อให้จัดการรูปได้อิสระขึ้น */
+    height: 250px; /* เพิ่มความสูงให้รูปมีพื้นที่โชว์มากขึ้น */
+    background: #050505;
+    border: 2px dashed rgba(0, 255, 255, 0.4); 
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.ad-banner:hover {
+    border-style: solid;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+}
+
+.ad-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ตัวนี้คือหัวใจสำคัญ! ทำให้รูปเต็มกรอบโดยไม่เบี้ยวหรือยืด */
+    object-position: center; /* จัดให้รูปอยู่กึ่งกลางเสมอ */
+    display: block;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+}
+
+.ad-banner:hover .ad-image {
+    opacity: 1; /* สว่างขึ้นตอนเอาเมาส์ชี้ */
+}
+
+/* =========================================
+   โซน MUSIC VIDEOS
+========================================= */
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.video-card {
+    background-color: var(--card-bg);
+    border: 1px solid #222;
+    border-radius: 8px;
+    padding: 15px;
+    transition: all 0.3s ease;
+}
+
+.video-card:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 10px 20px rgba(0, 255, 255, 0.1);
+    transform: translateY(-5px);
+}
+
+.video-card iframe {
+    width: 100%;
+    aspect-ratio: 16 / 9; /* ล็อกสัดส่วนให้เป็นแนวนอนเป๊ะๆ เหมือนจอทีวี */
+    border-radius: 4px;
+    border: none;
+}
+
+/* =========================================
+   GIG GUIDE (ตารางอีเวนต์)
+========================================= */
+.gig-item { 
+    display: flex; 
+    align-items: center; 
+    background: #0a0a0a; 
+    border: 1px solid #222; 
+    margin-bottom: 15px; 
+    border-radius: 8px; 
+    padding: 15px; 
+    transition: 0.3s; 
+}
+.gig-item:hover { 
+    border-color: var(--accent-color); 
+    transform: translateX(5px); 
+}
+.gig-date { 
+    background: var(--accent-color); 
+    color: #000; 
+    padding: 10px 20px; 
+    border-radius: 6px; 
+    text-align: center; 
+    font-weight: 800; 
+    line-height: 1.2; 
+    min-width: 90px; 
+}
+.gig-date span { 
+    display: block; 
+    font-size: 1.8rem; 
+    font-family: 'Space Grotesk', sans-serif;
+}
+.gig-info { flex-grow: 1; padding: 0 20px; }
+.gig-info h3 { color: #fff; font-size: 1.2rem; }
+.gig-info p { color: #aaa; font-size: 0.9rem; margin-top: 5px; }
+/* =========================================
+   จัดการสีปุ่ม GIG GUIDE ตามสถานะ 
+========================================= */
+
+/* 1. แบบ Comingsoon (ไม่มีสี - ดึงจากสไตล์เดิมของคุณแต่ล็อกให้ไม่เติมสีตอน Hover) */
+.gig-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 22px;
+    font-family: 'Space Grotesk', 'Kanit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    min-width: 140px;
+    text-align: center;
+}
+
+/* ── 1. สถานะ Comingsoon (ไม่มีสี / โปร่งแสง) ── */
+.gig-btn.btn-comingsoon {
+    background: transparent;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    cursor: default;
+}
+.gig-btn.btn-comingsoon:hover {
+    background: rgba(0, 255, 255, 0.05); /* เติมแสงจางๆ ตอนเมาส์ชี้ */
+    color: var(--accent-color);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+/* ── 2. สถานะ Ticket / Buy Ticket (มีสีเต็ม / เรืองแสงนีออน) ── */
+.gig-btn.btn-ticket {
+    background: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    color: #020202;
+    cursor: pointer;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+}
+.gig-btn.btn-ticket:hover {
+    background: #ffffff; /* เปลี่ยนเป็นสีขาวสว่างไฮคอนทราสต์ */
+    border-color: #ffffff;
+    color: #000000;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+    transform: translateY(-2px); /* ลอยขึ้นเล็กน้อยเวลากดซื้อ */
+}
+
+/* ── 3. สถานะ งานจบลงแล้ว (สีแดง / ดับไฟ) ── */
+.gig-btn.btn-ended {
+    background: rgba(255, 51, 51, 0.02);
+    border: 1px solid #ff3333;
+    color: #ff3333;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+.gig-btn.btn-ended:hover {
+    background: rgba(255, 51, 51, 0.08);
+    color: #ff4d4d;
+    border-color: #ff4d4d;
+    box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
+}
+@media (max-width: 768px) { 
+    .gig-item { flex-direction: column; text-align: center; gap: 15px; } 
+    .gig-info { padding: 0; } 
+    .gig-btn { width: 100%; } 
+}
+
+/* =========================================
+   ADVERTISE (ติดต่อโฆษณา)
+========================================= */
+.rate-card { 
+    background: linear-gradient(135deg, #0a0a0a, #000); 
+    border: 1px solid #333; 
+    border-radius: 8px; 
+    padding: 40px 20px; 
+    text-align: center; 
+}
+.rate-stats { 
+    display: flex; 
+    justify-content: center; 
+    flex-wrap: wrap; 
+    margin-bottom: 30px; 
+    gap: 40px; 
+}
+.stat-box h4 { 
+    color: var(--accent-color); 
+    font-size: 2.5rem; 
+    font-family: 'Space Grotesk', sans-serif; 
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+.stat-box p { color: #888; font-size: 0.9rem; letter-spacing: 1px; font-weight: 500; }
+.rate-action p { margin-bottom: 20px; color: #ddd; font-size: 1.1rem; }
+.rate-btn { 
+    /* ไล่สี Gradient สไตล์ Instagram */
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); 
+    color: #fff; 
+    text-decoration: none; 
+    padding: 12px 30px; 
+    border-radius: 30px; 
+    font-weight: bold; 
+    font-size: 1.1rem; 
+    display: inline-block; 
+    transition: 0.3s; 
+    border: none;
+}
+.rate-btn:hover { 
+    /* เอฟเฟกต์เรืองแสงสีชมพู/แดง อ่อนๆ */
+    box-shadow: 0 0 20px rgba(220, 39, 67, 0.5); 
+    transform: translateY(-3px); 
+    filter: brightness(1.1); /* สว่างขึ้นนิดนึงตอนชี้ */
+}
+
+/* =========================================
+   SUBMIT NEWS (ฟอร์มส่งข่าว)
+========================================= */
+.submit-form-container { 
+    background: #050505; 
+    border: 1px dashed #333; 
+    padding: 30px; 
+    border-radius: 8px; 
+}
+.custom-form .form-group { margin-bottom: 20px; }
+.custom-form label { 
+    display: block; 
+    margin-bottom: 8px; 
+    color: var(--accent-color); 
+    font-weight: 500; 
+    font-size: 0.95rem; 
+}
+.custom-form input, .custom-form textarea { 
+    width: 100%; 
+    padding: 12px 15px; 
+    background: #111; 
+    border: 1px solid #333; 
+    color: #fff; 
+    border-radius: 4px; 
+    font-family: 'Kanit', sans-serif; 
+    transition: 0.3s; 
+}
+.custom-form input:focus, .custom-form textarea:focus { 
+    outline: none; 
+    border-color: var(--accent-color); 
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.1); 
+}
+.submit-btn { 
+    background: transparent; 
+    color: var(--accent-color); 
+    border: 2px solid var(--accent-color); 
+    width: 100%; 
+    padding: 15px; 
+    border-radius: 4px; 
+    font-size: 1.1rem; 
+    font-weight: 800; 
+    font-family: 'Space Grotesk', sans-serif; 
+    cursor: pointer; 
+    transition: 0.3s; 
+    letter-spacing: 1px; 
+}
+.submit-btn:hover { background: var(--accent-color); color: #000; }
+
+/* =========================================
+   1. Sticky Navigation Bar
+========================================= */
+.sticky-nav {
+    background: rgba(5, 5, 5, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #222;
+    padding: 15px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+.nav-link {
+    color: #888;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    transition: 0.3s;
+}
+.nav-link:hover, .nav-link.active {
+    color: var(--accent-color);
+}
+
+/* =========================================
+   แก้ไขภาพพาดหัวหลัก (Featured) ให้เต็มกรอบ
+========================================= */
+.featured-section {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    margin-bottom: 60px;
+}
+.featured-card {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 100%;
+    min-height: 450px; /* เติมบรรทัดนี้เข้าไปครับ */
+}
+/* ทำให้ container ครอบพื้นที่เต็ม */
+.featured-img-container {
+    width: 100%;
+    height: 100%;
+    position: absolute; /* จัดตำแหน่งให้เป็น background */
+    top: 0;
+    left: 0;
+}
+
+/* ควบคุมรูปภาพให้เต็มพอดี */
+.featured-img-container img {
+    width: 100%;
+    height: 100%; /* ขยายรูปให้เต็มพื้นที่ของ container */
+    object-fit: cover; /* **หัวใจสำคัญ!** ทำให้ภาพเต็มกรอบโดยรักษาสัดส่วน และจะทำการครอปตัดภาพส่วนเกินออกแทนการบีบภาพ */
+    object-position: center; /* จัดให้รูปอยู่กึ่งกลางภาพเสมอ */
+}
+
+/* ปรับตำแหน่ง overlay (ข้อความ) ให้นั่งทับรูปภาพที่อยู่ด้านหลัง */
+.featured-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 40px;
+    background: linear-gradient(to top, rgba(0,0,0,1), transparent);
+    z-index: 10; /* ตรวจสอบให้แน่ใจว่าข้อความอยู่บนสุด */
+}
+.featured-title {
+    font-size: 2.5rem;
+    color: #fff;
+    line-height: 1.1;
+    margin: 15px 0;
+}
+.read-more-btn {
+    display: inline-block;
+    background: var(--accent-color);
+    color: #000;
+    padding: 10px 25px;
+    text-decoration: none;
+    font-weight: 800;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+
+/* ชาร์ตเพลง */
+.chart-list { background: #0a0a0a; border: 1px solid #222; border-radius: 8px; }
+.chart-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #111;
+    transition: 0.3s;
+}
+.chart-item:hover { background: #111; }
+.chart-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    margin-right: 20px;
+    font-weight: 800;
+}
+.track-info h4 { color: #fff; font-size: 1rem; }
+.track-info p { color: #666; font-size: 0.8rem; }
+.chart-play { margin-left: auto; color: #333; font-size: 1.5rem; cursor: pointer; }
+.chart-item:hover .chart-play { color: var(--accent-color); }
+
+/* =========================================
+   4. Instagram Feed Showcase
+========================================= */
+.ig-showcase { padding: 60px 20px; background: #080808; border-top: 1px solid #222; }
+.ig-header { text-align: center; margin-bottom: 40px; }
+.ig-header h3 { font-size: 1.8rem; color: #fff; margin-bottom: 10px; }
+.ig-header p { color: var(--accent-color); font-weight: 800; letter-spacing: 1px; }
+.ig-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.ig-post img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 4px;
+    opacity: 0.7;
+    transition: 0.3s;
+    cursor: pointer;
+}
+.ig-post img:hover { opacity: 1; transform: scale(1.02); }
+
+/* ปรับหน้าจอมือถือ */
+@media (max-width: 992px) {
+    .featured-section { grid-template-columns: 1fr; }
+    .ig-grid { grid-template-columns: repeat(2, 1fr); }
+    .nav-container { gap: 15px; font-size: 0.7rem; }
+}
+@media (max-width: 992px) {
+    .featured-section { grid-template-columns: 1fr; }
+    
+    /* เพิ่ม 2 บรรทัดนี้ เพื่อไม่ให้กล่องข่าวยุบตัวจนไปทับโฆษณา */
+    .featured-card { min-height: 450px; } 
+    .featured-title { font-size: 1.8rem; } 
+    
+    .ig-grid { grid-template-columns: repeat(2, 1fr); }
+    .nav-container { gap: 15px; font-size: 0.7rem; }
+}
+/* =========================================
+   Chart Criteria (กล่องชี้แจงเกณฑ์จัดอันดับ)
+========================================= */
+.chart-criteria {
+    margin-top: 15px;
+    padding: 15px 20px;
+    background: rgba(0, 255, 255, 0.03);
+    border: 1px dashed #333;
+    border-radius: 6px;
+    transition: 0.3s ease;
+}
+
+.chart-criteria:hover {
+    border-color: rgba(0, 255, 255, 0.3);
+    background: rgba(0, 255, 255, 0.05);
+}
+
+.chart-criteria h5 {
+    color: var(--accent-color);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.chart-criteria p {
+    color: #999;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.chart-criteria p strong {
+    color: #e0e0e0;
+}
+
+.chart-criteria .criteria-note {
+    display: block;
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    border-top: 1px solid #222;
+    padding-top: 12px;
+    letter-spacing: 0.5px;
+}
+
+/* =========================================
+   CYBER GRAFFITI WALL SYSTEM (สไตล์ดิบ/นีออน)
+========================================= */
+.graffiti-container {
+    background: #080808;
+    border: 1px dashed var(--accent-color);
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.graffiti-header {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+}
+
+/* กล่องจำลองข้อความบนกำแพง */
+.graffiti-wall-box {
+    background: #111111; /* ใช้สีเดียวกับโซนการ์ดข่าวของคุณ */
+    border: 1px solid #222;
+    border-radius: 4px;
+    height: 220px;
+    overflow-y: auto;
+    padding: 20px;
+    font-family: 'Space Grotesk', 'Kanit', sans-serif;
+    margin-bottom: 20px;
+}
+
+/* ตกแต่งแถบเลื่อนสกรอลบาร์เฉพาะกล่องข้อความ */
+.graffiti-wall-box::-webkit-scrollbar {
+    width: 6px;
+}
+.graffiti-wall-box::-webkit-scrollbar-thumb {
+    background-color: #222;
+    border-radius: 4px;
+}
+.graffiti-wall-box::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent-color);
+}
+
+/* บรรทัดข้อความ */
+/* =========================================
+   GRAFFITI MESSAGES ROW OPTIMIZATION
+========================================= */
+.graffiti-msg {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 8px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03); /* เพิ่มเส้นคั่นจาง ๆ ให้ดูเป็นระเบียบ */
+}
+
+.msg-content {
+    display: flex;
+    align-items: center; /* จัดให้ชื่อ เวลา และข้อความอยู่กึ่งกลางแนวนอนเท่ากัน */
+    flex-grow: 1;
+    flex-wrap: wrap; /* รองรับกรณีเปิดบนจอมือถือเล็ก ๆ ให้ปัดลงมาได้สวยงาม */
+    gap: 6px; 
+}
+
+/* มัดรวมชื่อและเวลาให้อยู่กลุ่มเดียวกัน */
+.msg-user-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 8px; /* เว้นระยะห่างระหว่าง "ชื่อเล่น" กับ "เวลาส่ง" */
+}
+
+.msg-username {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+}
+
+/* ปรับฟอนต์เวลาส่งให้จางลงเล็กน้อยเพื่อไม่ให้แย่งความเด่น */
+.msg-time {
+    color: #555 !important;
+    font-size: 0.75rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 400;
+}
+
+/* เครื่องหมาย : คั่นกลาง */
+.msg-divider {
+    color: #444;
+    font-weight: bold;
+    margin-right: 2px;
+}
+
+/* ตัวข้อความไรม์สเปรย์ */
+.msg-text {
+    color: #e0e0e0;
+    word-break: break-word;
+    font-weight: 400;
+}
+
+/* ปรับระยะปุ่มไฟโหวตบนจอมือถือเล็กน้อย */
+.respect-btn {
+    flex-shrink: 0;
+}
+.graffiti-msg:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.graffiti-msg strong {
+    color: #fff;
+    margin-right: 8px;
+}
+
+/* ไฮไลต์สีให้ผู้ใช้บางคนดูเดือดขึ้น */
+.graffiti-msg strong.neon-user {
+    color: var(--accent-color);
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+}
+
+/* ส่วนของฟอร์มกรอกข้อความ */
+.graffiti-form {
+    display: flex;
+    gap: 12px;
+}
+
+.graffiti-input {
+    flex-grow: 1;
+    padding: 14px 18px;
+    background: #111;
+    border: 1px solid #333;
+    color: #fff;
+    border-radius: 4px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+.graffiti-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.15);
+}
+
+/* ปุ่มกด SPRAY พ่นสี */
+.graffiti-btn {
+    background: var(--accent-color);
+    color: #000;
+    border: none;
+    padding: 0 30px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+.graffiti-btn:hover {
+    background: #ffffff;
+    color: #000000;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+/* ปรับแต่งการแสดงผลบนมือถือ */
+@media (max-width: 576px) {
+    .graffiti-form {
+        flex-direction: column;
+    }
+    .graffiti-btn {
+        padding: 12px;
+        width: 100%;
+    }
+}
+
+/* =========================================
+   RADAR: NEXT UP SECTION (สไตล์สปอตไลต์ศิลปิน)
+========================================= */
+.radar-title {
+    margin-top: 60px;
+}
+
+.news-card.radar-card {
+    display: flex;
+    flex-direction: column;
+    background: #0c0c0c;
+    height: 100%;
+}
+
+/* กรอบครอบรูปภาพโปรไฟล์ */
+.radar-img-wrap {
+    width: 100%;
+    height: 200px;
+    background: #222;
+    overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+/* รูปภาพโปรไฟล์สไตล์คอนทราสต์เกรน */
+.radar-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(100%) contrast(120%);
+    transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+/* เอฟเฟกต์ตอนเมาส์ชี้ให้รูปคืนสีสันเล็กน้อยหรือซูมเท่ ๆ */
+.news-card.radar-card:hover .radar-avatar {
+    transform: scale(1.05);
+    filter: grayscale(50%) contrast(110%);
+}
+
+/* กล่องเนื้อหาด้านล่างรูป */
+.radar-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.radar-tag-wrap {
+    margin-bottom: 10px;
+}
+
+/* สไตล์พื้นฐานของป้ายประเภทเพลง */
+.radar-tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+/* แยกสีป้ายตามแนวเพลง */
+.radar-tag.tag-drill {
+    background: #ff3333;
+    color: #fff;
+}
+
+.radar-tag.tag-boombap {
+    background: var(--accent-color);
+    color: #000;
+}
+
+/* ชื่อแร็ปเปอร์ */
+.radar-name {
+    color: #fff;
+    font-size: 1.4rem;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+/* คำอธิบายประวัติ */
+.radar-bio {
+    color: #777;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    flex-grow: 1;
+    font-weight: 300;
+    line-height: 1.5;
+}
+
+/* ปุ่มวาร์ป Follow */
+.radar-link {
+    color: var(--accent-color);
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 15px;
+    font-weight: bold;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 1px;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.radar-link:hover {
+    color: #fff;
+    transform: translateX(5px); /* เลื่อนลูกศรไปขวาเบา ๆ เวลาชี้ */
+}
+
+/* =========================================
+   QUICK EMOJI BUTTONS STYLE
+========================================= */
+.emoji-btn {
+    background: #111111;
+    border: 1px solid #333;
+    padding: 6px 12px;
+    font-size: 1.1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.emoji-btn:hover {
+    background: rgba(0, 255, 255, 0.05);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.emoji-btn:active {
+    transform: translateY(0);
+}
+
+/* =========================================
+   GRAFFITI RESPECT BUTTON STYLE
+========================================= */
+/* ปรับตัวกล่องข้อความให้เป็น Flex เพื่อดันปุ่มโหวตไปขวาสุด */
+.graffiti-msg {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.msg-content {
+    flex-grow: 1;
+    word-break: break-word; /* ป้องกันข้อความยาวทะลุขอบ */
+}
+
+/* สไตล์ปุ่มกด Respect เปลวไฟ */
+.respect-btn {
+    background: #151515;
+    border: 1px solid #252525;
+    color: #888;
+    padding: 4px 10px;
+    font-size: 0.85rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* เอฟเฟกต์ติดไฟตอนเมาส์ชี้ */
+.respect-btn:hover {
+    background: rgba(255, 68, 0, 0.1);
+    border-color: #ff4500;
+    color: #ff4500;
+    box-shadow: 0 0 10px rgba(255, 69, 0, 0.3);
+    transform: scale(1.05);
+}
+
+/* เมื่อแต้มมากกว่า 0 ให้ตัวเลขเรืองแสงสีส้มเหลือง */
+.respect-btn .count {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #e0e0e0;
+}
+.respect-btn:hover .count {
+    color: #ffaa00;
+}
+
+/* =========================================
+   MOBILE 100% OPTIMIZATION (ฉบับร่างทองสำหรับมือถือ)
+========================================= */
+
+/* ปรับระยะขอบและสัดส่วนของตัวเว็บทั้งหมดเมื่อเปิดบนจอเล็ก */
+@media (max-width: 768px) {
+    /* 1. ส่วนโครงสร้างหลักของเว็บ */
+    main {
+        margin: 20px auto;
+        padding: 0 12px; /* ลด Padding ข้างจอเพื่อให้มีพื้นที่แสดงเนื้อหามากขึ้น */
+    }
+
+    .section-title {
+        font-size: 1.6rem; /* ปรับขนาดหัวข้อให้พอดี ไม่ใหญ่คับจอ */
+        margin-bottom: 20px;
+    }
+
+    /* 2. แถบเมนูนำทาง (Sticky Nav) */
+    .sticky-nav {
+        padding: 10px 0;
+    }
+    .nav-container {
+        gap: 10px; /* ลดระยะห่างระหว่างปุ่ม */
+        flex-wrap: wrap; /* ถ้ารายการเมนูยาวเกินไป ให้ปัดลงมาบรรทัดใหม่ได้ ไม่หลุดขอบจอ */
+        justify-content: center;
+    }
+    .nav-link {
+        font-size: 0.75rem; /* ย่อขนาดตัวอักษรเมนูบนมือถือ */
+        letter-spacing: 1px;
+        padding: 4px 6px;
+    }
+
+    /* 3. ส่วนพาดหัวข่าวหลัก (Featured Section) */
+    .featured-section {
+        grid-template-columns: 1fr !important; /* บังคับให้ข่าวดังกับชาร์ตเพลงเรียงบนลงล่าง */
+        gap: 20px;
+    }
+    .featured-card {
+        min-height: 350px !important; /* ปรับความสูงภาพพาดหัวให้พอดีกับสัดส่วนจอมือถือ */
+    }
+    .featured-title {
+        font-size: 1.6rem;
+    }
+    .featured-overlay {
+        padding: 20px; /* ลดขอบดำจาง ๆ ลงเพื่อโชว์รูป */
+    }
+
+    /* 4. จัดการรูปภาพการ์ดข่าว (News & Drops) */
+    .news-grid {
+        grid-template-columns: 1fr !important; /* บังคับให้การ์ดข่าวเรียงเป็น 1 คอลัมน์เดี่ยว */
+        gap: 20px;
+    }
+    .news-img {
+        height: 200px !important; /* ลดความสูงกล่องรูปบนมือถือให้ดูสมดุล ไม่ยาวเกินไป */
+    }
+
+    /* 5. การ์ดแนะนำศิลปิน (RADAR: NEXT UP) */
+    .news-card.radar-card {
+        height: auto !important;
+    }
+    .radar-img-wrap {
+        height: 180px !important; /* ย่อขนาดพื้นที่รูปโปรไฟล์ศิลปิน */
+    }
+    .radar-body {
+        padding: 15px; /* ลดพื้นที่เว้นวรรค */
+    }
+    .radar-name {
+        font-size: 1.25rem;
+    }
+
+    /* 6. กำแพงพ่นสเปรย์ (CYBER GRAFFITI WALL) */
+    .graffiti-container {
+        padding: 15px; /* ลดขอบนอกกล่อง */
+    }
+    .graffiti-wall-box {
+        height: 280px; /* เพิ่มความสูงกล่องแชทบนมือถือเล็กน้อยให้อ่านไรม์ได้เต็มตา */
+        padding: 12px;
+    }
+    
+    /* โครงสร้างบรรทัดข้อความ + ปุ่ม Respect */
+    .graffiti-msg {
+        flex-direction: row; /* คงความเป็นแถวเดียวกันไว้ */
+        align-items: flex-start; /* ให้ปุ่มไฟชี้ตรงกับบรรทัดแรก */
+        gap: 10px;
+    }
+    .msg-content {
+        font-size: 0.88rem; /* ย่อขนาดฟอนต์ข้อความลงเล็กน้อยให้จัดบรรทัดสวยขึ้น */
+    }
+    .respect-btn {
+        padding: 3px 8px; /* ย่อขนาดปุ่มไฟให้กดง่ายแต่ไม่เบียดเนื้อหา */
+        font-size: 0.75rem;
+        flex-shrink: 0; /* บังคับห้ามปุ่มไฟหดตัวเด็ดขาด */
+    }
+
+    /* กล่องเครื่องมือปุ่มกดคัดลอกอีโมจิด่วน */
+    .graffiti-emojis {
+        gap: 6px !important;
+        justify-content: flex-start;
+    }
+    .graffiti-emojis span {
+        font-size: 0.75rem !important;
+        width: 100%; /* ดันข้อความ "QUICK SPRAY:" ขึ้นด้านบน แล้วให้แผงอีโมจิเรียงกันข้างล่าง */
+        margin-bottom: 5px;
+    }
+    .emoji-btn {
+        padding: 8px 14px; /* ปรับขนาดปุ่มอีโมจิให้ใหญ่ขึ้นนิดนึงเพื่อให้นิ้วจิ้มบนจอมือถือได้ง่าย */
+        font-size: 1.2rem;
+    }
+
+    /* ส่วนฟอร์มส่งข้อมูล (ช่องชื่อเล่น + ช่องข้อความ + ปุ่มพ่นสี) */
+    .graffiti-form {
+        flex-direction: column; /* สับเปลี่ยนเลย์เอาต์จากเรียงซ้ายขวา ให้กลายเป็นเรียงบนลงล่าง */
+        gap: 10px;
+    }
+    #graffitiName {
+        width: 100% !important; /* บังคับช่องใส่ชื่อเล่นให้เต็มความกว้างจอ */
+    }
+    .graffiti-input {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+    .graffiti-btn {
+        width: 100% !important; /* บังคับปุ่ม SPRAY ให้เต็มความกว้างจอ กดง่ายสะใจ */
+        padding: 12px;
+    }
+
+    /* 7. ตารางสรุปอันดับและข้อมูลโฆษณา */
+    .rate-stats {
+        gap: 20px; /* ลดระยะห่างกล่องตัวเลขสถิติ */
+    }
+    .stat-box h4 {
+        font-size: 2rem; /* ย่อตัวเลขยอดวิวสถิติ */
+    }
+    .rate-btn {
+        width: 100%; /* ปุ่มขอเรตการ์ดสไตล์ Instagram ขยายเต็มจอ */
+        font-size: 1rem;
+        padding: 12px 20px;
+    }
+}
+
+/* ออปติไมล์เพิ่มเติมสำหรับโทรศัพท์หน้าจอเล็กมาก (จอกว้างน้อยกว่า 360px เช่น iPhone SE รุ่นเก่า) */
+@media (max-width: 360px) {
+    h1.logo {
+        font-size: 1.8rem !important; /* ย่อขนาดโลโก้เว็บบนหัวเว็บ */
+    }
+    .nav-link {
+        font-size: 0.7rem;
+        padding: 4px 4px;
+    }
+    .emoji-btn {
+        padding: 6px 10px;
+    }
+}
+.graffiti-msg {
+    animation: sprayAppear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes sprayAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* =========================================
+   LIVE CONNECTION COUNTER STYLE
+========================================= */
+.live-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #111;
+    border: 1px solid #222;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.5px;
+}
+
+/* ตัวจุดไฟวงกลมสีแดงกะพริบ */
+.live-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #ff3333;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ff3333;
+    animation: pulseDot 2s infinite;
+}
+
+.live-text {
+    color: #888;
+}
+
+.live-text strong {
+    color: #ff3333;
+    text-shadow: 0 0 5px rgba(255, 51, 51, 0.4);
+}
+
+/* แอนิเมชันไฟกะพริบสมจริง */
+@keyframes pulseDot {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(255, 51, 51, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 51, 51, 0);
+    }
+}
+/* ป้ายกำกับแร็ปเปอร์ตัวจริงเสียงจริง */
+.artist-badge {
+    background: linear-gradient(45deg, #ff8800, #ffcc00);
+    color: #000 !important;
+    font-size: 0.65rem;
+    font-weight: 900;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 2px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 8px rgba(255, 136, 0, 0.4);
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+/* =================================================================
+   🔥 NEW ADITIONS: GRAFFITI WALL VER. FULL RAGNAROK
+================================================================= */
+
+/* ปรับแต่งแอนิเมชันตอนไรม์เด้งขึ้นกำแพง */
+.graffiti-msg {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 8px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    animation: sprayAppear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes sprayAppear {
+    0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* จัดก้อนข้อมูลให้ชื่อและเวลาไม่เบียดสลับที่กัน */
+.msg-content {
+    display: flex;
+    align-items: center; 
+    flex-grow: 1;
+    flex-wrap: wrap; 
+    gap: 6px; 
+}
+
+.msg-user-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 8px; 
+}
+
+.msg-username {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+}
+
+/* ปรับแต่งฟอนต์เวลาส่งให้อ่านง่าย คลาสสิก */
+.msg-time {
+    color: #555 !important;
+    font-size: 0.75rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 400;
+}
+
+.msg-divider {
+    color: #444;
+    font-weight: bold;
+    margin-right: 2px;
+}
+
+.msg-text {
+    color: #e0e0e0;
+    word-break: break-word;
+    font-weight: 400;
+}
+
+/* ป้ายกำกับแร็ปเปอร์ตัวจริงเสียงจริงสีทอง */
+.artist-badge {
+    background: linear-gradient(45deg, #ff8800, #ffcc00);
+    color: #000 !important;
+    font-size: 0.65rem;
+    font-weight: 900;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 2px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 8px rgba(255, 136, 0, 0.4);
+    font-family: 'Space Grotesk', sans-serif;
+}
+/* ไอคอนติ๊กถูกสีฟ้าขวัญใจศิลปินดัง */
+.verified-tick {
+    color: #00aaff; /* สีฟ้า Verified พรีเมียม */
+    font-size: 0.85rem;
+    align-self: center;
+    margin-left: -2px; /* ดึงเข้าใกล้ชื่อเล่นเล็กน้อยให้ดูเป็นเนื้อเดียวกัน */
+    filter: drop-shadow(0 0 4px rgba(0, 170, 255, 0.4)); /* เพิ่มออร่าเรืองแสงจาง ๆ */
+}
+/* =========================================
+   CHAT ROOMS SELECTOR STYLE
+========================================= */
+.room-btn {
+    background: #111;
+    border: 1px solid #333;
+    color: #666;
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 500;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* สถานะเมื่อเมาส์ชี้ หรือห้องที่กำลังเปิดใช้งานอยู่ */
+.room-btn:hover, .room-btn.active {
+    background: rgba(0, 255, 255, 0.05);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
+}
+
+/* =========================================
+   CUSTOM ARTIST VERIFY MODAL STYLE
+========================================= */
+/* ฉากหลังมืด ๆ เบลอ ๆ ครอบทั้งจอ */
+.artist-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+/* เมื่อสั่งเปิดกล่องโหมดอล */
+.artist-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ตัวกล่องข้อความตรงกลาง */
+.artist-modal-box {
+    background: #0d0d0d;
+    border: 1px solid #ffaa00;
+    box-shadow: 0 0 30px rgba(255, 170, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
+    padding: 30px 25px;
+    border-radius: 8px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.artist-modal-overlay.active .artist-modal-box {
+    transform: scale(1);
+}
+
+/* เส้นนีออนคาดหัวกล่อง */
+.modal-glow-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #ff8800, #ffcc00);
+    box-shadow: 0 0 10px #ffaa00;
+}
+
+.modal-icon {
+    font-size: 2.5rem;
+    color: #ffaa00;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 0 8px rgba(255, 170, 0, 0.4));
+}
+
+.artist-modal-box h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #fff;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.artist-modal-box p {
+    color: #777;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+/* กล่องอินพุตรหัสผ่าน */
+.modal-input-wrap {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.modal-input-wrap i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #444;
+    transition: color 0.3s ease;
+}
+
+.modal-input-wrap input {
+    width: 100%;
+    background: #111;
+    border: 1px solid #222;
+    padding: 12px 15px 12px 45px;
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    outline: none;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+}
+
+.modal-input-wrap input:focus {
+    border-color: #ffaa00;
+    box-shadow: 0 0 10px rgba(255, 170, 0, 0.15);
+}
+
+.modal-input-wrap input:focus + i {
+    color: #ffaa00;
+}
+
+/* แผงควบคุมปุ่มกด */
+.modal-action-btns {
+    display: flex;
+    gap: 12px;
+}
+
+.m-btn {
+    flex: 1;
+    padding: 12px;
+    font-family: 'Space Grotesk', 'Kanit', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+}
+
+/* ปุ่มยกเลิก */
+.m-btn.btn-cancel {
+    background: #151515;
+    color: #888;
+    border: 1px solid #252525;
+}
+.m-btn.btn-cancel:hover {
+    background: #222;
+    color: #fff;
+}
+
+/* ปุ่มตกลงยืนยัน */
+.m-btn.btn-submit {
+    background: linear-gradient(45deg, #ff8800, #ffcc00);
+    color: #000;
+    box-shadow: 0 0 10px rgba(255, 136, 0, 0.3);
+}
+.m-btn.btn-submit:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 0 15px rgba(255, 136, 0, 0.5);
+    transform: translateY(-2px);
+}
+/* =========================================
+   CUSTOM ERROR ALERT MODAL STYLE
+========================================= */
+/* =========================================
+   CUSTOM ERROR ALERT MODAL STYLE
+========================================= */
+/* =================================================================
+   🎯 MOBILE RESPONSIVE & LAYER TOP-LEVEL OPTIMIZATION (ฉบับแก้บั๊กทับจอ)
+================================================================= */
+
+/* 1. ดันเลเยอร์กล่องป๊อปอัปแจ้งเตือนภัย/ผลโหวตสำเร็จ ให้ลอยมาอยู่หน้าสุดของเว็บถาวร */
+.error-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    
+    /* 🔥 หัวใจสำคัญ: แก้ไขเลเยอร์จาก 2100 สับพุ่งไปที่ 2500 เพื่ออยู่แถวหน้าสุด เหนือช่องค้นหาเพลงแน่นอน! */
+    z-index: 2500; 
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+/* 2. การ์ดสถานีโหวตเพลงด้านในกล่องโมดอล: เพิ่มกลไกรักษาสเกลช่องปุ่มและแต้ม ไม่ให้บีบเบียดบนจอมือถือขนาดแคบ */
+.vote-station-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0a0a0a;
+    border: 1px solid #222;
+    padding: 12px 14px;
+    border-radius: 6px;
+    gap: 10px;
+}
+
+.vote-station-item .track-info {
+    flex-grow: 1;
+    min-width: 0; /* บังคับให้ข้อความชื่อเพลงยาวตัดบรรทัดได้ ไม่ไปเบียดปุ่มโหวต */
+}
+
+.vote-station-item .track-info h4 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* ถ้าชื่อเพลงยาวเกินพิกัดจอมือถือ ให้หดกลายเป็นจุดไข่ปลา ... ดูหล่อเหลาเป็นระเบียบ */
+}
+
+/* 3. มินิเพลเยอร์ควบคุมเพลงด้านล่างจอ: ปรับดีไซน์ให้อ่านง่ายและขยับขึ้นมาไม่ทับปุ่มควบคุมของสมาร์ตโฟน */
+@media (max-width: 768px) {
+    .mini-player-box {
+        bottom: 15px !important;
+        right: 15px !important;
+        left: 15px !important; /* กางเต็มความกว้างขอบมือถือเพื่อความกระชับ */
+        border-radius: 16px !important;
+        padding: 10px 15px !important;
+        justify-content: space-between;
+        gap: 10px !important;
+    }
+    
+    .track-text h5 {
+        font-size: 0.8rem !important;
+        max-width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+.error-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.error-modal-box {
+    background: #0d0d0d;
+    border: 1px solid #ff3333;
+    box-shadow: 0 0 30px rgba(255, 51, 51, 0.2);
+    width: 90%;
+    max-width: 380px;
+    padding: 30px 25px;
+    border-radius: 8px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.error-modal-overlay.active .error-modal-box {
+    transform: scale(1);
+}
+
+/* เส้นนีออนสีแดงไฟลุกคาดหัวกล่อง */
+.error-glow-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #ff3333, #ff007f);
+    box-shadow: 0 0 10px #ff3333;
+}
+
+.error-modal-icon {
+    font-size: 2.5rem;
+    color: #ff3333;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 0 8px rgba(255, 51, 51, 0.5));
+}
+
+.error-modal-box h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #fff;
+    font-size: 1.3rem;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.error-modal-box p {
+    color: #999;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+/* ปุ่มกดปิดรับทราบ */
+.error-m-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(45deg, #ff3333, #ff007f);
+    color: #fff;
+    font-family: 'Space Grotesk', 'Kanit', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+    transition: all 0.2s ease;
+}
+
+.error-m-btn:hover {
+    filter: brightness(1.2);
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.6);
+    transform: translateY(-2px);
+}
+/* =========================================
+   INTRO GLITCH PRE-LOADER STYLE
+========================================= */
+.intro-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #020202;
+    z-index: 9999; /* อยู่เหนือทุกสิ่งบนโลก */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.6s ease, pointer-events 0.6s ease;
+}
+
+/* คลาสสำหรับสั่งให้ระเบิดตัวเองหายไปเมื่อโหลดเสร็จ */
+.intro-loader.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.intro-content {
+    text-align: center;
+    position: relative;
+}
+
+.intro-logo-glitch {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    animation: glitchAnim 1.2s infinite;
+}
+
+.intro-text-glitch {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    color: #fff;
+    margin-top: 20px;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+    animation: glitchText 1s infinite;
+}
+
+/* แอนิเมชัน Glitch ภาพกระตุกดิบ ๆ */
+@keyframes glitchAnim {
+    0% { transform: translate(0) scale(1); filter: hue-rotate(0deg); }
+    10% { transform: translate(-2px, 1px) scale(1.02); filter: grayscale(100%); }
+    20% { transform: translate(2px, -1px); }
+    30% { transform: translate(0); }
+    90% { transform: translate(-1px, -1px); }
+    92% { transform: translate(3px, 3px) skewX(15deg); filter: invert(1); }
+    95% { transform: translate(0); }
+}
+
+@keyframes glitchText {
+    0%, 90%, 100% { text-shadow: 0 0 8px rgba(0, 255, 255, 0.6); color: #fff; }
+    92% { text-shadow: 2px -2px #ff007f, -2px 2px #00ffff; color: #00ffff; }
+    95% { text-shadow: -3px 1px #fff000, 3px -1px #ff007f; }
+}
+/* =========================================
+   STICKY MINI AUDIO PLAYER STYLE
+========================================= */
+.mini-player-box {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: rgba(10, 10, 10, 0.9);
+    border: 1px solid var(--accent-color);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 12px 18px;
+    border-radius: 30px;
+    z-index: 1500;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transform: translateY(100px); /* ซ่อนไว้ก่อนในตอนแรก */
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* เมื่อมีเพลงเปิดใช้งาน ให้ลอยขึ้นมาโชว์ตัว */
+.mini-player-box.active {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.player-track-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.player-track-info i {
+    color: var(--accent-color);
+    font-size: 1.4rem;
+}
+
+/* แอนิเมชันแผ่นเสียงหมุนติ้ว ๆ ตอนเพลงเล่น */
+.disc-spinning {
+    animation: spin 3s linear infinite;
+    animation-play-state: paused; /* หยุดหมุนถ้าเพลงไม่เล่น */
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+.track-text h5 {
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 0;
+}
+.track-text p {
+    color: #666;
+    font-size: 0.7rem;
+    margin: 0;
+}
+
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.p-control-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.p-control-btn:hover {
+    color: var(--accent-color);
+}
+
+.player-divider {
+    color: #222;
+}
+/* =========================================
+   SPONSOR & LABEL PARTNERS TICKER STYLE (IMAGE 1:1)
+========================================= */
+.sponsor-ticker-container {
+    background: #090909;
+    border: 1px solid #151515;
+    padding: 15px 0; /* ลด padding ลงเล็กน้อยเพื่อให้กระชับพอดีกับรูป */
+    overflow: hidden;
+    position: relative;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+/* ท่อรางเลื่อนสำหรับปล่อยให้ข้อมูลไหล */
+.sponsor-ticker-track {
+    display: flex;
+    width: max-content;
+    gap: 80px; /* เพิ่มระยะห่างระหว่างโลโก้ให้ดูโปร่ง สบายตา */
+    align-items: center;
+    animation: scrollSponsors 25s linear infinite; /* ปรับเวลา 25s ให้ไหลสมูทสบายตาขึ้น */
+}
+
+/* กล่องครอบโลโก้ชิ้นไอเทม */
+.sponsor-logo-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 🎯 จัดการตัวรูปภาพโลโก้ด้านใน ล็อกขนาดสัดส่วน 1:1 */
+.sponsor-logo-item img {
+    width: 60px;       /* ล็อกความกว้าง */
+    height: 60px;      /* ล็อกความสูงให้เท่ากันเพื่อเป็นสี่เหลี่ยมจัตุรัส 1:1 */
+    object-fit: contain; /* บังคับให้รูปทรงโลโก้แสดงครบถ้วน ไม่บดบัง ไม่เบี้ยว และไม่โดนครอปตัด */
+    
+    /* 🎨 สไตล์ดิบสตรีม: ปรับรูปภาพทั้งหมดให้กลายเป็นสีขาวดำ และมืดลง 60% เพื่อไม่ให้แย่งความเด่นของเว็บ */
+    filter: grayscale(100%) opacity(0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+/* 🔥 เอฟเฟกต์เดือด: เมื่อเอาเมาส์ชี้ที่โลโก้แบรนด์ไหน แบรนด์นั้นจะคืนสีสันจริง สว่างวาบ และเรืองแสง */
+.sponsor-logo-item img:hover {
+    filter: grayscale(0%) opacity(1) drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));
+    transform: scale(1.1); /* ขยายใหญ่ขึ้น 10% ให้ดูมีมิติโต้ตอบ */
+}
+
+/* แอนิเมชันสไลด์วนลูปถาวร */
+@keyframes scrollSponsors {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* 📱 ออปติไมล์สำหรับหน้าจอมือถือ (จอเล็ก) */
+@media (max-width: 768px) {
+    .sponsor-logo-item img {
+        width: 45px;  /* ย่อขนาดโลโก้ลงเล็กน้อยบนจอมือถือเพื่อให้ดูน่ารักพอดีจอ */
+        height: 45px;
+    }
+    .sponsor-ticker-track {
+        gap: 50px;    /* ลดช่องไฟระหว่างรูปบนมือถือ */
+    }
+}
+/* =========================================
+   LIVE TRACK VOTE SYSTEM STYLE
+========================================= */
+/* กล่องโหวตเพลงแต่ละชิ้นในสถานีโหวต */
+.vote-station-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0a0a0a;
+    border: 1px solid #222;
+    padding: 12px 18px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.vote-station-item:hover {
+    border-color: rgba(0, 255, 255, 0.3);
+    background: #111;
+}
+
+/* ปุ่มกดสาดแต้มโหวตไฟลุก */
+.vote-up-btn {
+    background: transparent;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    padding: 6px 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+.vote-up-btn:hover {
+    background: var(--accent-color);
+    color: #000;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+/* ป้ายแสดงตัวเลขคะแนนโหวตรวมปัจจุบัน */
+.vote-total-badge {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    color: #666;
+    background: #151515;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+/* =================================================================
+   🔥 OPTIMIZATION: ล็อกความสูงสถานีโหวต ไม่ให้ดันภาพฝั่งซ้ายยืด (FIXED HEIGHT)
+================================================================= */
+
+/* 1. ล็อกขนาดกล่องเป้าหมายรวมของรายการโหวตเพลง */
+#voting-station-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    
+    /* 🎯 สั่งล็อกความสูงสูงสุดไว้ที่ 280 พิกเซล (พอดีกับความสูงประมาณ 3-4 แถวเพลงพอดี ๆ) */
+    max-height: 280px; 
+    
+    /* 🎯 หัวใจสำคัญ: ถ้าเพลงยาวทะลุ 280px ให้เปิดแถบเลื่อน Scrollbar เฉพาะด้านในกล่องนี้ทันที */
+    overflow-y: auto; 
+    
+    /* เว้นช่องไฟขวาเล็กน้อยป้องกันแถบ Scrollbar บดบังตัวเลข PTS */
+    padding-right: 5px; 
+}
+
+/* 2. ตกแต่งแถบเลื่อน (Scrollbar) ด้านในกล่องโหวตให้สวยเข้าธีมสตรีทนีออน ไม่ดูรกสายตา */
+#voting-station-list::-webkit-scrollbar {
+    width: 5px; /* ความกว้างเส้นเลื่อนแบบมินิมอล */
+}
+
+#voting-station-list::-webkit-scrollbar-track {
+    background: #050505; /* สีพื้นหลังรางเลื่อน */
+    border-radius: 4px;
+}
+
+#voting-station-list::-webkit-scrollbar-thumb {
+    background: #222; /* สีตัวปุ่มเลื่อนตอนปกติ */
+    border-radius: 4px;
+}
+
+#voting-station-list::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color); /* คืนแสงสีฟ้า Cyan นีออนเมื่อเอาเมาส์ไปชี้ */
+}
+
+/* =================================================================
+   🗳️ DYNAMIC VOTE MODAL & SEARCH FILTER STYLE 
+================================================================= */
+.vote-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 2200; /* ดันให้อยู่เหนือหน้าแชทเพื่อความชัดเจน */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.vote-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.vote-modal-box {
+    background: #0d0d0d;
+    border: 1px solid var(--accent-color);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.15);
+    width: 90%;
+    max-width: 500px;
+    padding: 30px 25px;
+    border-radius: 8px;
+    position: relative;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.vote-modal-overlay.active .vote-modal-box {
+    transform: scale(1);
+}
+
+.vote-glow-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-color), #ff007f);
+    box-shadow: 0 0 10px var(--accent-color);
+}
+
+/* ปุ่มกากบาทกวนๆ มุมขวาบน */
+.vote-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: #555;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.vote-modal-close:hover {
+    color: var(--accent-color);
+}
+
+.vote-modal-box h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #fff;
+    font-size: 1.3rem;
+    letter-spacing: 1px;
+    margin: 0 0 5px 0;
+}
+
+/* 🎯 โซนช่องค้นหาพิมพ์กรองอักษร */
+.vote-search-wrap {
+    position: relative;
+    margin-bottom: 20px;
+}
+.vote-search-wrap .search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #444;
+    transition: color 0.3s;
+}
+.vote-search-wrap input {
+    width: 100%;
+    background: #111;
+    border: 1px solid #222;
+    padding: 12px 15px 12px 45px;
+    color: #fff;
+    font-family: 'Space Grotesk', 'Kanit', sans-serif;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+.vote-search-wrap input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.15);
+}
+.vote-search-wrap input:focus + .search-icon {
+    color: var(--accent-color);
+}
+
+/* กล่องลิสต์สไลด์รายชื่อเพลงด้านในหน้าต่าง */
+#modal-voting-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 320px; /* ล็อกความสูงเพื่อความสมดุล */
+    overflow-y: auto;
+    padding-right: 5px;
+}
+#modal-voting-list::-webkit-scrollbar { width: 5px; }
+#modal-voting-list::-webkit-scrollbar-track { background: #050505; }
+#modal-voting-list::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
+#modal-voting-list::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
