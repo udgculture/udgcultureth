@@ -27,7 +27,8 @@ let isCooldown = false;
 const artistKeys = {
     '@Dxshane': 'shane999',
     '@JayQ': 'jayq888',
-    '@UndergroundCultureTH': 'udc2026'
+    '@UndergroundCultureTH': 'udc2026',
+    '@VAMPBOYZ': '0709',
 };
 
 const rudeWords = [
