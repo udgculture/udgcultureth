@@ -337,7 +337,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // =================================================================
-// ─── ระบบจัดอันดับและสถานีโหวตโมดอล (VOTE SYSTEM — ANTI-CHEAT ENGINE) ───
+// ─── ระบบจัดอันดับและสถานีโหวตโมดอล (VOTE SYSTEM — SPEED RUN EDITION) ───
 // =================================================================
 
 const musicTracksData = {
@@ -437,57 +437,30 @@ function renderModalVotingStation(currentWeekVotes, filterText = "") {
     }
 }
 
-// 🎯 🔐 อัปเกรดความปลอดภัยสูงสุด: ฟังก์ชันส่งแต้มโหวตแบบล็อก IP ร่วมกับระบบคลาวด์ ป้องกันการปั๊มยอดได้ถาวร!!
+// 🎯 🔐 LIGHTWEIGHT VERSION: ตัดระบบ IP ทิ้งถาวร! โหวตลื่นปรึ๊ด การันตีแจ้งเตือนดีดหน้าสุดทุกรอบชัวร์ 100%
 function submitTrackVote(trackId) {
     const now = new Date();
     const weekId = getWeekIdentifier(now); 
     const todayStr = now.toDateString();
 
-    // ตัวแปรเช็คความจำภายในเครื่องของเดิม (ดักคนกดเล่นระดับแรก)
+    // ดักล็อกสิทธิ์คนกดซ้ำผ่าน LocalStorage ระดับเบราว์เซอร์เครื่อง
     const lastVoteDate = localStorage.getItem(`last_vote_${trackId}`);
     if (lastVoteDate === todayStr) {
         showErrorAlert('VOTE LIMIT!', '❌ YOU ALREADY VOTED TODAY!<br>(น้ากดโหวตเพลงนี้ไปแล้ววันนี้ พรุ่งนี้ค่อยมาดันแต้มใหม่นะครับ BRO!)');
         return;
     }
 
-    // ⚡ ขั้นตอนตึงเปรี๊ยะ: วิ่งไปดึงเลข IP จริงของคนดูจากระบบ API สาธารณะภายนอกทันที (ไม่มีผลเสียต่อเว็บ โหลดไวมาก)
-    fetch('https://api.ipify.org?format=json')
-    .then(response => response.json())
-    .then(ipData => {
-        const userIP = ipData.ip.replace(/\./g, '_'); // แปลงจุดฟูลสต๊อปของ IP ให้เข้าโฟลเดอร์ฐานข้อมูลได้
-        const ipLockRef = database.ref(`weekly_music_votes_locks/${weekId}/${trackId}/${userIP}`);
-
-        // ดึงข้อมูลประวัติ IP เน็ตนี้บน Firebase ว่าวันนี้สาดคะแนนไปหรือยัง
-        ipLockRef.once('value', (snapshot) => {
-            const lastIpVoteTime = snapshot.val();
-            
-            if (lastIpVoteTime && new Date(lastIpVoteTime).toDateString() === todayStr) {
-                showErrorAlert('SECURITY BLOCK!', '❌ IP ADDRESS LOCKED!<br>เน็ตบ้านหรือไอพีเครื่องนี้ได้ส่งคะแนนโหวตให้เพลงนี้ไปแล้วในวันนี้!<br>หมดสิทธิ์ปั๊มโฮมผีชั่วคราว พรุ่งนี้ค่อยมาแชร์กันใหม่ครับ BRO!');
-                return;
-            }
-
-            // ผ่านด่านตรวจบอท -> ทำการบันทึกเพิ่มคะแนนและบันทึก IP ลงประวัติล็อกถาวรทันที
-            const trackVoteRef = database.ref(`weekly_music_votes/${weekId}/${trackId}`);
-            trackVoteRef.transaction((currentVotes) => {
-                return (currentVotes || 0) + 1;
-            }, (error, committed) => {
-                if (committed) {
-                    localStorage.setItem(`last_vote_${trackId}`, todayStr);
-                    ipLockRef.set(Date.now()); // ประทับตรา IP นี้ลงบันทึกประวัติล็อกบนคลาวด์
-                    showErrorAlert('VOTE SUCCESS', '🔥 แต้มคะแนนสะสมของน้าถูกส่งเข้าระบบประจำสัปดาห์นี้เรียบร้อยแล้ว! ขอบคุณที่ช่วยดัน Culture ครับ BRO!');
-                }
-            });
-        });
-    })
-    .catch(() => {
-        // หากเน็ตคนดูมีปัญหาดึง IP ไม่ได้ ให้ดีดระบบเซฟตี้ LocalStorage สำรองทำงานทันที
-        const trackVoteRef = database.ref(`weekly_music_votes/${weekId}/${trackId}`);
-        trackVoteRef.transaction((currentVotes) => { return (currentVotes || 0) + 1; }, (err, committed) => {
-            if (committed) {
-                localStorage.setItem(`last_vote_${trackId}`, todayStr);
-                showErrorAlert('VOTE SUCCESS', '🔥 ระบบรับแต้มโหวตสำรองเสร็จสิ้นครับน้า!');
-            }
-        });
+    // ยิงคะแนนตรงเข้า Firebase Realtime Database ทันที ไม่ต้องรอประมวลผลท่อ API นอก
+    const trackVoteRef = database.ref(`weekly_music_votes/${weekId}/${trackId}`);
+    trackVoteRef.transaction((currentVotes) => {
+        return (currentVotes || 0) + 1;
+    }, (error, committed) => {
+        if (committed) {
+            localStorage.setItem(`last_vote_${trackId}`, todayStr);
+            showErrorAlert('VOTE SUCCESS', '🔥 แต้มคะแนนสะสมของน้าถูกส่งเข้าระบบประจำสัปดาห์นี้เรียบร้อยแล้ว! ขอบคุณที่ช่วยดัน Culture ครับ BRO!');
+        } else {
+            showErrorAlert('DATABASE ERROR', '❌ เกิดข้อผิดพลาดหลังบ้าน ไม่สามารถบันทึกแต้มได้ ลองกดใหม่อีกครั้งครับน้า');
+        }
     });
 }
 
