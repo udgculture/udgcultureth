@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDG CENTRAL DESK | MANAGEMENT PANEL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #050505;
+            color: #fff;
+            font-family: 'Kanit', sans-serif;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .admin-box {
+            background: #0a0a0a;
+            border: 1px solid #ff3333;
+            border-radius: 8px;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 0 30px rgba(255, 51, 51, 0.1);
+        }
+        h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            color: #fff;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255,51,51,0.3);
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        label {
+            color: #ff3333;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        select, input, textarea {
+            width: 100%;
+            padding: 14px;
+            background: #111;
+            border: 1px solid #222;
+            color: #fff;
+            border-radius: 4px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        select:focus, input:focus, textarea:focus {
+            border-color: #ff3333;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);
+        }
+        .post-btn {
+            background: linear-gradient(45deg, #ff3333, #ff007f);
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
+        }
+        .post-btn:hover {
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #444;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        .back-link:hover { color: #ff3333; }
+        .hint-text { color: #555; font-size: 0.75rem; margin-top: 2px; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-box">
+        <h2><i class="fa-solid fa-sliders" style="color: #ff3333;"></i> UDG CENTRAL CONTROL PANEL</h2>
+        <p style="color: #555; font-size: 0.85rem;">แผงควบคุมหลักประจำเพจ UDG อัปเดตจุดไหน เลือกสับเปลี่ยนได้เลยครับน้า</p>
+        
+        <div class="form-group">
+            <label>TARGET ZONE (เลือกตำแหน่งที่ต้องการอัปเดตข้อมูลบนเว็บ)</label>
+            <select id="adminNewsTag" onchange="toggleRadarLinkField()">
+                <option value="NEWS">📰 NEWS GRID (โพสต์ข่าวฟีดหลักด้านล่าง)</option>
+                <option value="FEATURED">🔥 FEATURED CARD (เปลี่ยนข่าวเด่นแผ่นใหญ่สุดตัวบน)</option>
+                <option value="RADAR_1">🎤 RADAR: NEXT UP [การ์ดซ้าย] (แนะนำศิลปินคนที่ 1)</option>
+                <option value="RADAR_2">🎤 RADAR: NEXT UP [การ์ดขวา] (แนะนำศิลปินคนที่ 2)</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="subTagGroup">
+            <label>SUB TAG (ป้ายกำกับย่อย)</label>
+            <input type="text" id="adminNewsSubTag" placeholder="เช่น: BREAKING, DRILL, TRAP, BOOMBAP" value="NEWS">
+            <div class="hint-text">* สำหรับข่าวเด่นหรือการ์ดเรดาร์ แนะนำให้พิมพ์แนวเพลงหรือสถานะตัวหนังสือพิมพ์ใหญ่ครับน้า</div>
+        </div>
+        
+        <div class="form-group">
+            <label id="titleLabel">TITLE (หัวข้อข่าว / ชื่อศิลปิน)</label>
+            <input type="text" id="adminNewsTitle" placeholder="พิมพ์ชื่อเรื่องหรือชื่อศิลปินที่นี่...">
+        </div>
+        
+        <div class="form-group">
+            <label>IMAGE URL (ที่อยู่ลิงก์รูปภาพตรงที่ลงท้ายด้วย .png / .jpg)</label>
+            <input type="text" id="adminNewsImg" placeholder="เอาลิงก์ตรงจากเว็บฝากรูปมาวางที่นี่..." value="image/ขาวใส.png">
+        </div>
+        
+        <div class="form-group">
+            <label id="excerptLabel">EXCERPT (เนื้อหาข่าวสาร / ประวัติ Bio ศิลปินสั้น ๆ)</label>
+            <textarea id="adminNewsExcerpt" placeholder="พิมพ์คำอธิบายสั้น ๆ บรรทัดนี้ได้เลยครับน้า..." rows="4"></textarea>
+        </div>
+
+        <div class="form-group" id="radarUrlGroup" style="display: none;">
+            <label>FOLLOW LINK URL (ลิงก์วาร์ปสำหรับกด FOLLOW ARTIST)</label>
+            <input type="text" id="adminRadarUrl" placeholder="เช่น ลิงก์ IG หรือ ลิงก์ YouTube เพลงใหม่..." value="#">
+        </div>
+        
+        <div class="form-group">
+            <label>SECRET PASSCODE (รหัสผ่านความปลอดภัยเพจ UDG)</label>
+            <input type="password" id="adminNewsPasscode" placeholder="ENTER SECRET PASSCODE TO PUBLISH...">
+        </div>
+        
+        <button type="button" class="post-btn" id="adminPostNewsBtn"><i class="fa-solid fa-paper-plane"></i> UPDATE LIVE WEBSITE</button>
+        
+        <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyClMPrhjK_XLaY2PBAEuP7hvxK4faFdLJk",
+          authDomain: "udg-caht.firebaseapp.com",
+          projectId: "udg-caht",
+          storageBucket: "udg-caht.firebasestorage.app",
+          messagingSenderId: "864209418067",
+          appId: "1:864209418067:web:b3c724198275f4a73b53a6",
+          databaseURL: "https://udg-caht-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        function toggleRadarLinkField() {
+            const targetZone = document.getElementById('adminNewsTag').value;
+            const radarUrlGroup = document.getElementById('radarUrlGroup');
+            const titleLabel = document.getElementById('titleLabel');
+            const excerptLabel = document.getElementById('excerptLabel');
+            const subTagInput = document.getElementById('adminNewsSubTag');
+
+            if (targetZone.startsWith('RADAR')) {
+                radarUrlGroup.style.display = 'flex';
+                titleLabel.innerText = "ARTIST NAME (ชื่อศิลปิน)";
+                excerptLabel.innerText = "ARTIST BIO (คำอธิบายสไตล์หรือประวัติย่อ)";
+                if(targetZone === 'RADAR_1') subTagInput.value = "DRILL";
+                if(targetZone === 'RADAR_2') subTagInput.value = "TRAP";
+            } else if (targetZone === 'FEATURED') {
+                radarUrlGroup.style.display = 'none';
+                titleLabel.innerText = "FEATURED TITLE (หัวข้อข่าวเด่น)";
+                excerptLabel.innerText = "FEATURED EXCERPT (เนื้อหาข่าวเด่น)";
+                subTagInput.value = "BREAKING";
+            } else {
+                radarUrlGroup.style.display = 'none';
+                titleLabel.innerText = "NEWS TITLE (หัวข้อข่าวสารทั่วไป)";
+                excerptLabel.innerText = "NEWS EXCERPT (เนื้อหาข่าวสารแบบย่อ)";
+                subTagInput.value = "NEWS";
+            }
+        }
+
+        document.getElementById('adminPostNewsBtn').addEventListener('click', () => {
+            const zone = document.getElementById('adminNewsTag').value;
+            const subTag = document.getElementById('adminNewsSubTag').value.trim();
+            const title = document.getElementById('adminNewsTitle').value.trim();
+            const img = document.getElementById('adminNewsImg').value.trim();
+            const excerpt = document.getElementById('adminNewsExcerpt').value.trim();
+            const radarUrl = document.getElementById('adminRadarUrl').value.trim();
+            const passcode = document.getElementById('adminNewsPasscode').value.trim();
+            
+            if (!title || !excerpt || !passcode) {
+                alert("❌ กรุณากรอกข้อมูลและรหัสลับป้องกันระบบให้ครบถ้วนก่อนครับน้า!");
+                return;
+            }
+            
+            if (passcode !== "udc2026") {
+                alert("❌ รหัสผ่านลับไม่ถูกต้องครับน้า!");
+                return;
+            }
+
+            const dataPayload = {
+                subTag: subTag ? subTag : zone,
+                title: title,
+                image: img ? img : 'image/ขาวใส.png',
+                excerpt: excerpt,
+                timestamp: Date.now()
+            };
+
+            if (zone.startsWith('RADAR')) {
+                dataPayload.followUrl = radarUrl ? radarUrl : "#";
+            }
+
+            // แยกท่อน้ำส่งข้อมูลตามโซนที่น้าเลือกสับสวิตช์
+            if (zone === 'NEWS') {
+                database.ref('udg_news_drops').push(dataPayload, (error) => {
+                    if (!error) { successAction(); }
+                });
+            } else if (zone === 'FEATURED') {
+                database.ref('udg_homepage_slots/featured_card').set(dataPayload, (error) => {
+                    if (!error) { successAction(); }
+                });
+            } else if (zone === 'RADAR_1') {
+                database.ref('udg_homepage_slots/radar_card_1').set(dataPayload, (error) => {
+                    if (!error) { successAction(); }
+                });
+            } else if (zone === 'RADAR_2') {
+                database.ref('udg_homepage_slots/radar_card_2').set(dataPayload, (error) => {
+                    if (!error) { successAction(); }
+                });
+            }
+        });
+
+        function successAction() {
+            document.getElementById('adminNewsTitle').value = '';
+            document.getElementById('adminNewsExcerpt').value = '';
+            document.getElementById('adminNewsPasscode').value = '';
+            document.getElementById('adminRadarUrl').value = '#';
+            alert("🔥 ทำการเชื่อมข้อมูลและอัปเดตฟีดระบบในโซนดังกล่าวเรียบร้อยครับน้านักพัฒนา!");
+        }
+    </script>
+</body>
+</html>

@@ -24,7 +24,6 @@ let currentRoom = 'general_1';
 let currentRoomRef = null;
 let isCooldown = false;
 
-// 🔐 รหัสลับสำหรับตรวจสิทธิ์แร็ปเปอร์ในเพจ และรหัสผ่านควบคุมโพสต์ข่าวของน้า
 const artistKeys = {
     '@Dxshane': 'shane999',
     '@JayQ': 'jayq888',
@@ -331,6 +330,7 @@ onlineCountRef.on('value', (snapshot) => {
     countElement.innerText = currentOnline > 0 ? currentOnline : 1;
 });
 
+// ⚡ ลื่นหัวแตก: สั่งเคลียร์เอฟเฟกต์หน้ากากโหลดดำให้สลายหายตัวทันที
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         const loader = document.getElementById('web-loader');
@@ -339,9 +339,8 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // =================================================================
-// ─── ระบบจัดอันดับและสถานีโหวตโมดอล (VOTE SYSTEM — SPEED RUN EDITION) ───
+// ─── ระบบจัดอันดับและสถานีโหวตโมดอล (VOTE SYSTEM) ───
 // =================================================================
-
 const musicTracksData = {
     "track_01": { id: "track_01", title: "รอ รอ รอ", artist: "Dxshane feat. JayQ", ytId: "78gSbjE71m8" }, 
     "track_02": { id: "track_02", title: "ซึมเศร้าก็เด้าได้ (Remix)", artist: "S!NS feat. THXWXN, MACNA", ytId: "_H7sCARrYJU" }, 
@@ -370,14 +369,8 @@ window.onYouTubeIframeAPIReady = function() {
         height: '0',
         width: '0',
         videoId: '',
-        playerVars: {
-            'playsinline': 1,
-            'controls': 0,
-            'disablekb': 1
-        },
-        events: {
-            'onStateChange': onPlayerStateChange
-        }
+        playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1 },
+        events: { 'onStateChange': onPlayerStateChange }
     });
 };
 
@@ -385,20 +378,13 @@ function getWeekIdentifier(dateObj) {
     const d = new Date(dateObj);
     const day = d.getDay();
     const hours = d.getHours();
-    
     let target = new Date(d);
     let diff = (day >= 5) ? (day - 5) : (day + 2);
-    if (day === 5 && hours < 10) {
-        diff = -7; 
-    } else if (day === 5 && hours >= 10) {
-        diff = 0;
-    } else {
-        diff = diff * -1;
-    }
-    
+    if (day === 5 && hours < 10) { diff = -7; } 
+    else if (day === 5 && hours >= 10) { diff = 0; } 
+    else { diff = diff * -1; }
     target.setDate(d.getDate() + diff);
     target.setHours(10, 0, 0, 0);
-    
     const yyyy = target.getFullYear();
     const mm = String(target.getMonth() + 1).padStart(2, '0');
     const dd = String(target.getDate()).padStart(2, '0');
@@ -413,10 +399,7 @@ function renderModalVotingStation(currentWeekVotes, filterText = "") {
     Object.keys(musicTracksData).forEach(trackKey => {
         const track = musicTracksData[trackKey];
         const votes = currentWeekVotes[track.id] ? currentWeekVotes[track.id] : 0;
-        
-        if (query !== "" && !track.title.toLowerCase().includes(query) && !track.artist.toLowerCase().includes(query)) {
-            return;
-        }
+        if (query !== "" && !track.title.toLowerCase().includes(query) && !track.artist.toLowerCase().includes(query)) return;
         
         const voteRow = document.createElement('div');
         voteRow.className = 'vote-station-item';
@@ -433,32 +416,22 @@ function renderModalVotingStation(currentWeekVotes, filterText = "") {
         `;
         modalVotingList.appendChild(voteRow);
     });
-    
-    if (modalVotingList.innerHTML === '') {
-        modalVotingList.innerHTML = `<div style="padding:20px; color:#444; text-align:center; font-size:0.85rem;">❌ ไม่พบเพลงหรือศิลปินที่คุณพิมพ์หา...</div>`;
-    }
 }
 
 function submitTrackVote(trackId) {
     const now = new Date();
     const weekId = getWeekIdentifier(now); 
     const todayStr = now.toDateString();
-
     const lastVoteDate = localStorage.getItem(`last_vote_${trackId}`);
     if (lastVoteDate === todayStr) {
         showErrorAlert('VOTE LIMIT!', '❌ YOU ALREADY VOTED TODAY!<br>(น้ากดโหวตเพลงนี้ไปแล้ววันนี้ พรุ่งนี้ค่อยมาดันแต้มใหม่นะครับ BRO!)');
         return;
     }
-
     const trackVoteRef = database.ref(`weekly_music_votes/${weekId}/${trackId}`);
-    trackVoteRef.transaction((currentVotes) => {
-        return (currentVotes || 0) + 1;
-    }, (error, committed) => {
+    trackVoteRef.transaction((currentVotes) => { return (currentVotes || 0) + 1; }, (error, committed) => {
         if (committed) {
             localStorage.setItem(`last_vote_${trackId}`, todayStr);
-            showErrorAlert('VOTE SUCCESS', '🔥 แต้มคะแนนสะสมของน้าถูกส่งเข้าระบบประจำสัปดาห์นี้เรียบร้อยแล้ว! ขอบคุณที่ช่วยดัน Culture ครับ BRO!');
-        } else {
-            showErrorAlert('DATABASE ERROR', '❌ เกิดข้อผิดพลาดหลังบ้าน ไม่สามารถบันทึกแต้มได้ ลองกดใหม่อีกครั้งครับน้า');
+            showErrorAlert('VOTE SUCCESS', '🔥 คะแนนถูกส่งเข้าระบบประจำสัปดาห์เรียบร้อยแล้ว ขอบคุณที่ช่วยดันชาร์ต UDC ครับ BRO!');
         }
     });
 }
@@ -468,31 +441,23 @@ database.ref('weekly_music_votes').on('value', (snapshot) => {
     const now = new Date();
     const currentWeekId = getWeekIdentifier(now);          
     const currentWeekVotes = allWeeksData[currentWeekId] ? allWeeksData[currentWeekId] : {};
-    
     globalCurrentWeekVotes = currentWeekVotes;
     
-    if (voteSearchInput) {
-        renderModalVotingStation(currentWeekVotes, voteSearchInput.value);
-    } else {
-        renderModalVotingStation(currentWeekVotes, "");
-    }
+    if (voteSearchInput) { renderModalVotingStation(currentWeekVotes, voteSearchInput.value); } 
+    else { renderModalVotingStation(currentWeekVotes, ""); }
 
     let sortedList = Object.keys(musicTracksData).map(key => {
         const track = musicTracksData[key];
         return { ...track, votes: currentWeekVotes[track.id] ? currentWeekVotes[track.id] : 0 };
     });
-
     sortedList.sort((a, b) => b.votes - a.votes);
     
     if (liveChartDisplay) {
         liveChartDisplay.innerHTML = '';
-        const topFiveList = sortedList.slice(0, 5);
-
-        topFiveList.forEach((track, index) => {
+        sortedList.slice(0, 5).forEach((track, index) => {
             const rankNum = String(index + 1).padStart(2, '0');
             const chartItem = document.createElement('div');
             chartItem.className = 'chart-item';
-            
             chartItem.innerHTML = `
                 <span class="chart-num">${rankNum}</span>
                 <div class="track-info">
@@ -507,9 +472,7 @@ database.ref('weekly_music_votes').on('value', (snapshot) => {
 });
 
 if (voteSearchInput) {
-    voteSearchInput.addEventListener('input', (e) => {
-        renderModalVotingStation(globalCurrentWeekVotes, e.target.value);
-    });
+    voteSearchInput.addEventListener('input', (e) => { renderModalVotingStation(globalCurrentWeekVotes, e.target.value); });
 }
 
 const voteModal = document.getElementById('voteModal');
@@ -521,18 +484,9 @@ if (openVoteModalBtn && voteModal && closeVoteModalBtn) {
         if (voteSearchInput) voteSearchInput.value = ""; 
         renderModalVotingStation(globalCurrentWeekVotes, ""); 
         voteModal.classList.add('active');
-        if (voteSearchInput) {
-            setTimeout(() => voteSearchInput.focus(), 100); 
-        }
+        if (voteSearchInput) { setTimeout(() => voteSearchInput.focus(), 100); }
     });
-    
-    closeVoteModalBtn.addEventListener('click', () => {
-        voteModal.classList.remove('active');
-    });
-    
-    voteModal.addEventListener('click', (e) => {
-        if (e.target === voteModal) voteModal.classList.remove('active');
-    });
+    closeVoteModalBtn.addEventListener('click', () => { voteModal.classList.remove('active'); });
 }
 
 function triggerPlayerFromChart(trackId) {
@@ -540,16 +494,15 @@ function triggerPlayerFromChart(trackId) {
     const miniPlayer = document.getElementById('mini-audio-player');
     const pTitle = document.getElementById('player-title');
     const pArtist = document.getElementById('player-artist');
-
     if (targetTrack && miniPlayer && ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-        pTitle.innerText = targetTrack.title;
-        pArtist.innerText = targetTrack.artist;
-        
-        ytPlayer.loadVideoById(targetTrack.ytId);
-        miniPlayer.classList.add('active');
+        pTitle.innerText = targetTrack.title; pArtist.innerText = targetTrack.artist;
+        ytPlayer.loadVideoById(targetTrack.ytId); miniPlayer.classList.add('active');
     }
 }
 
+// =================================================================
+// ─── ระบบปุ่มควบคุมป๊อปอัปเครื่องเล่นมินิ YouTube CONTROLLER ───
+// =================================================================
 const playerPlayBtn = document.getElementById('player-play-btn');
 const playerTimeDisplay = document.getElementById('player-time-display');
 const discSpinningIcon = document.querySelector('.disc-spinning');
@@ -577,160 +530,97 @@ function startProgressTimer() {
         }
     }, 1000);
 }
-
-function stopProgressTimer() {
-    if (updateTimerInterval) clearInterval(updateTimerInterval);
-}
+function stopProgressTimer() { if (updateTimerInterval) clearInterval(updateTimerInterval); }
 
 if (playerPlayBtn) {
     playerPlayBtn.addEventListener('click', () => {
         if (ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
             const state = ytPlayer.getPlayerState();
-            if (state === 1) {
-                ytPlayer.pauseVideo();
-            } else {
-                ytPlayer.playVideo();
-            }
+            if (state === 1) { ytPlayer.pauseVideo(); } else { ytPlayer.playVideo(); }
         }
     });
 }
 
 // =================================================================
-// ─── 📰 🔥 NEW ADDITION: ระบบคลาวด์ดูดฟีดข่าวสารออโต้ + แผงแอดมินส่งข้อมูล ───
+// ─── 📰 🔥 CENTRAL APP FEED: ระบบคลาวด์ดูดฟีดอัตโนมัติ สลัดโค้ดแอดมินเก่าทิ้งถาวร ───
 // =================================================================
 const liveNewsGrid = document.getElementById('live-news-grid');
-const adminPostNewsBtn = document.getElementById('adminPostNewsBtn');
+const liveFeaturedCard = document.getElementById('live-featured-card');
+const liveRadarGrid = document.getElementById('live-radar-grid');
 
-// 🔄 สั่งหูฟังของ Firebase เปิดโหมดดักจ้องมองคลังโฟลเดอร์ข่าว ดึงข้อมูลมาสร้างการ์ดข่าวออโต้ทันที
-database.ref('udc_news_drops').on('value', (snapshot) => {
-    if (!liveNewsGrid) return;
-    liveNewsGrid.innerHTML = '';
-    
-    const allNewsData = snapshot.val();
-    
-    if (!allNewsData) {
-        liveNewsGrid.innerHTML = `<div style="padding:40px; color:#555; text-align:center; grid-column:1/-1;">📰 ยังไม่มีข่าวสารอัปเดตในระบบคลาวด์ขณะนี้ พิมพ์โพสต์เพิ่มข่าวได้ที่แผงควบคุมด้านล่างครับน้า</div>`;
+database.ref('udc_homepage_slots/featured_card').on('value', (snapshot) => {
+    if (!liveFeaturedCard) return;
+    const data = snapshot.val();
+    if (!data) {
+        liveFeaturedCard.innerHTML = `
+            <div class="featured-img-container"><img src="image/BREAKING.png" alt="Featured News"></div>
+            <div class="featured-overlay">
+                <span class="news-tag">BREAKING</span>
+                <h2 class="featured-title">Dxshane - รอ รอ รอ feat. JayQ</h2>
+                <p class="featured-excerpt">Dxshane ปล่อย MV เพลงใหม่ "รอ รอ รอ" feat. JayQ ใครฟังแล้วโดนใจบ้าง😓🩹</p>
+            </div>`;
         return;
     }
+    liveFeaturedCard.innerHTML = `
+        <div class="featured-img-container"><img src="${data.image}" alt="Featured News" onerror="this.src='image/BREAKING.png'"></div>
+        <div class="featured-overlay">
+            <span class="news-tag">${data.subTag}</span>
+            <h2 class="featured-title">${data.title}</h2>
+            <p class="featured-excerpt">${data.excerpt}</p>
+        </div>`;
+});
+
+let radarDataCard1 = null; let radarDataCard2 = null;
+function renderRadarZone() {
+    if (!liveRadarGrid) return; liveRadarGrid.innerHTML = '';
+    const card1 = radarDataCard1 ? radarDataCard1 : { subTag: "DRILL", title: "รอประมวลผล", excerpt: "รอประมวลผล", image: "image/ขาวใส.png", followUrl: "#" };
+    const card2 = radarDataCard2 ? radarDataCard2 : { subTag: "รอประมวลผล", title: "รอประมวลผล", excerpt: "รอประมวลผล", image: "image/ขาวใส.png", followUrl: "#" };
     
-    // แปลงข้อมูลเป็นลิสต์แล้วเรียงลำดับเอาข่าวที่อัพใหม่ขึ้นก่อนเพื่อน (เรียงจาก Timestamp ล่าสุด)
-    let newsList = Object.keys(allNewsData).map(key => {
-        return { newsId: key, ...allNewsData[key] };
+    [card1, card2].forEach(rc => {
+        const rcStyle = (rc.subTag === "DRILL") ? "tag-drill" : "tag-boombap";
+        const cardBox = document.createElement('div');
+        cardBox.className = 'news-card radar-card';
+        cardBox.innerHTML = `
+            <div class="radar-img-wrap"><img src="${rc.image}" alt="Artist Profile" class="radar-avatar" onerror="this.src='image/ขาวใส.png'"></div>
+            <div class="radar-body">
+                <div class="radar-tag-wrap"><span class="radar-tag ${rcStyle}">${rc.subTag}</span></div>
+                <h3 class="radar-name">${rc.title}</h3>
+                <p class="radar-bio">${rc.excerpt}</p>
+                <a href="${rc.followUrl}" target="_blank" class="radar-link">FOLLOW ARTIST &rarr;</a>
+            </div>`;
+        liveRadarGrid.appendChild(cardBox);
     });
+}
+
+database.ref('udc_homepage_slots/radar_card_1').on('value', (snapshot) => { radarDataCard1 = snapshot.val(); renderRadarZone(); });
+database.ref('udc_homepage_slots/radar_card_2').on('value', (snapshot) => { radarDataCard2 = snapshot.val(); renderRadarZone(); });
+
+database.ref('udc_news_drops').on('value', (snapshot) => {
+    if (!liveNewsGrid) return; liveNewsGrid.innerHTML = '';
+    const allNewsData = snapshot.val();
+    if (!allNewsData) {
+        liveNewsGrid.innerHTML = `<div style="padding:40px; color:#555; text-align:center; grid-column:1/-1;">📰 ยังไม่มีข่าวสารอัปเดตเพิ่มเติมในระบบขณะนี้ พิมพ์เพิ่มข่าวได้ที่หน้าแอดมินลับแยกครับน้า</div>`;
+        return;
+    }
+    let newsList = Object.keys(allNewsData).map(key => { return { newsId: key, ...allNewsData[key] }; });
     newsList.sort((a, b) => b.timestamp - a.timestamp);
-    
-    // วนลูปสาดแท็กการ์ดข่าวขึ้นหน้าเว็บหลักโดยตรง ไม่ต้องผ่านโค้ด HTML อีกต่อไป
     newsList.forEach(news => {
         const articleCard = document.createElement('article');
         articleCard.className = 'news-card';
-        
-        // ถ้าเป็นแอดมินเพจ UDC เปิดดูเว็บ จะมีปุ่มกากบาทแอบซ่อนเพื่อใช้กดลบข่าวขยะทิ้งได้ทันทีหลังบ้าน
         articleCard.innerHTML = `
-            <div class="news-img">
-                <img src="${news.image}" alt="News Image" onerror="this.src='image/ขาวใส.png'">
-            </div>
+            <div class="news-img"><img src="${news.image}" alt="News Image" onerror="this.src='image/ขาวใส.png'"></div>
             <div class="news-content">
                 <span class="news-tag">${news.tag}</span>
                 <h3 class="news-title">${news.title}</h3>
                 <p class="news-excerpt">${news.excerpt}</p>
-                <button type="button" style="background:transparent; border:none; color:#333; font-size:0.75rem; margin-top:15px; cursor:pointer; display:block; padding:0;" onclick="deleteNewsItemByAdmin('${news.newsId}')">// REMOVE NEWS</button>
-            </div>
-        `;
+                <button type="button" style="background:transparent; border:none; color:#1a1a1a; font-size:0.75rem; margin-top:15px; cursor:pointer; display:block; padding:0;" onclick="deleteNewsItemByAdmin('${news.newsId}')">// REMOVE NEWS</button>
+            </div>`;
         liveNewsGrid.appendChild(articleCard);
     });
 });
 
-// 🚀 คำสั่งเมื่อน้าแอดมินกดปุ่ม PUBLISH NEWS ส่งข้อมูลขึ้นระบบคลาวด์[cite: 2]
-if (adminPostNewsBtn) {
-    adminPostNewsBtn.addEventListener('click', async () => {
-        const tag = document.getElementById('adminNewsTag').value;
-        const title = document.getElementById('adminNewsTitle').value.trim();
-        const img = document.getElementById('adminNewsImg').value.trim();
-        const excerpt = document.getElementById('adminNewsExcerpt').value.trim();
-        const passcode = document.getElementById('adminNewsPasscode').value.trim();
-        
-        if (!title || !excerpt || !passcode) {
-            await showErrorAlert('INPUT REQUIRED', '❌ กรุณากรอกหัวข้อ เนื้อหาข่าว และรหัสลับป้องกันระบบให้ครบถ้วนก่อนโพสต์ครับน้า!');
-            return;
-        }
-        
-        // ตรวจสอบความถูกต้องของกุญแจความปลอดภัย (ใช้รหัสผ่านของแอดมินเพจสปอตไลต์หลัก)[cite: 2]
-        if (passcode !== artistKeys['@UndergroundCultureTH']) {
-            await showErrorAlert('ACCESS DENIED', '❌ รหัสผ่านลับสำหรับโพสต์ข่าวไม่ถูกต้อง!<br>อย่ามาแอบเจาะระบบควบคุมเพจ UDC นะครับไอ้หนู!');
-            return;
-        }
-        
-        // ผ่านด่านตรวจ -> ส่งก้อนข้อมูลขึ้นไปเก็บที่ Firebase คลาวด์ทันที[cite: 2]
-        database.ref('udc_news_drops').push({
-            tag: tag,
-            title: title,
-            image: img ? img : 'image/ขาวใส.png',
-            excerpt: excerpt,
-            timestamp: Date.now()
-        }, async (error) => {
-            if (!error) {
-                // ล้างข้อมูลในช่องฟอร์มหลังโพสต์เสร็จ
-                document.getElementById('adminNewsTitle').value = '';
-                document.getElementById('adminNewsExcerpt').value = '';
-                document.getElementById('adminNewsPasscode').value = '';
-                await showErrorAlert('NEWS PUBLISHED', '🔥 พ่นข่าวสารชิ้นใหม่ขึ้นหน้าจอหลักเพจ UDC เรียบร้อยแล้วครับน้าบักหำทิว! อัปเดตไวสะใจสตรีต!');
-            } else {
-                await showErrorAlert('UPLOAD FAILED', '❌ ระบบบันทึกข่าวขัดข้อง ลองเช็กสัญญาณเน็ตดูอีกครั้งครับน้า');
-            }
-        });
-    });
-}
-
-// 🗑️ ฟังก์ชันพิเศษของน้าแอดมิน: กดสั่งลบข่าวสารจากหน้าเว็บตรง ๆ[cite: 2]
 async function deleteNewsItemByAdmin(newsId) {
-    const adminPass = prompt("กรอกรหัสลับผู้ดูแลระบบเพจ UDC เพื่อยืนยันการลบข่าวสารชิ้นนี้ถาวร:");
+    const adminPass = prompt("กรอกรหัสลับผู้ดูแลระบบเพจ UDC เพื่อยืนยันการลบข่าว:");
     if (!adminPass) return;
-    
-    if (adminPass === artistKeys['@UndergroundCultureTH']) {
-        database.ref(`udc_news_drops/${newsId}`).remove(async (err) => {
-            if (!err) {
-                await showErrorAlert('DELETED SUCCESS', 'ลบข่าวสารชิ้นดังกล่าวออกจากระบบฐานข้อมูลคลาวด์ถาวรเรียบร้อยครับน้า!');
-            }
-        });
-    } else {
-        alert("❌ รหัสลับผู้ดูแลระบบไม่ถูกต้อง! ยกเลิกคำสั่งลบข่าวสารครับ");
-    }
+    if (adminPass === "udc2026") { database.ref(`udc_news_drops/${newsId}`).remove(); }
 }
-// =================================================================
-// ─── 🔐 SECRET KEYBOARD TRIGGER: พิมพ์คำว่า udcadmin เพื่อเปิดแผงควบคุม ───
-// =================================================================
-let secretAdminInputCode = "";
-const targetAdminSecretWord = "udcadmin"; // รหัสผ่านบนคีย์บอร์ดที่น้าต้องพิมพ์เพื่อเปิดกล่อง
-
-document.addEventListener('keydown', (e) => {
-    // ป้องกันระบบค้างขณะแอดมินพิมพ์ข้อความในช่องพิมพ์แชทพ่นสีทั่วไป
-    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
-        return;
-    }
-    
-    // บันทึกปุ่มกดภาษาอังกฤษที่พิมพ์เข้ามา
-    secretAdminInputCode += e.key.toLowerCase();
-    
-    // ล็อกความยาวตัวอักษรไม่ให้ยาวเกินไป
-    if (secretAdminInputCode.length > 20) {
-        secretAdminInputCode = secretAdminInputCode.substring(secretAdminInputCode.length - 10);
-    }
-    
-    // ตรวจสอบว่าพิมพ์คำว่า udcadmin ถูกต้องล็อกสเปกไหม
-    if (secretAdminInputCode.includes(targetAdminSecretWord)) {
-        const adminPanelBox = document.getElementById('adminNewsPanel');
-        if (adminPanelBox) {
-            // สั่งให้กล่องนีออนแดงดีดตัวโชว์ขึ้นมาหน้าเว็บทันที!
-            adminPanelBox.style.display = "block";
-            
-            // เลื่อนหน้าจอลงมาโฟกัสที่แผงควบคุมข่าวให้อัตโนมัติ
-            adminPanelBox.scrollIntoView({ behavior: 'smooth' });
-            
-            // ล้างแคชข้อความพิมพ์ดักจับ
-            secretAdminInputCode = "";
-            
-            // ดีดแจ้งเตือนหล่อ ๆ หลังบ้านแอดมิน
-            showErrorAlert('WELCOME ADMIN', '🔓 แผงควบคุม UDC NEWS DESK เปิดใช้งานเต็มระบบแล้วครับน้าบักหำทิว!');
-        }
-    }
-});
