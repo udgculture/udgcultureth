@@ -746,3 +746,87 @@ database.ref('udg_culture_partners_logos').on('value', (snapshot) => {
     // เนรมิตแถบลูปขบวนพาเหรดโลโก้พาร์ทเนอร์อินฟินิตี้ไหลลื่น
     renderSponsorTickerItems(currentLogosList);
 });
+
+// =================================================================
+// ─── 📅🤝 DYNAMIC UPCOMING GIGS & EVENTS ENGINE (ดูดฟีดภาพโปสเตอร์และสับเปลี่ยนสถานะ) ───
+// =================================================================
+const liveGigListContainer = document.querySelector('.gig-list');
+
+database.ref('udg_upcoming_gigs').on('value', (snapshot) => {
+    if (!liveGigListContainer) return;
+    liveGigListContainer.innerHTML = '';
+    const gigsData = snapshot.val();
+
+    if (!gigsData) {
+        liveGigListContainer.innerHTML = `
+            <div style="padding:30px; color:#444; text-align:center; font-size:0.9rem; font-family:'Space Grotesk',sans-serif; letter-spacing:0.5px;">
+                📅 NO UPCOMING GIGS CURRENTLY SCHEDULED.<br>STAY TUNED FOR SPECIAL PARTY DROPS!
+            </div>`;
+        return;
+    }
+
+    // แปลงก้อนอ็อบเจกต์คลาวด์เป็น Array เพื่อนำมาจัดคิวเรียงเวลา
+    let sortedGigs = Object.keys(gigsData).map(key => {
+        return { gigId: key, ...gigsData[key] };
+    });
+    
+    // เรียงคิวเพื่อให้งานที่แอดเข้ามาใหม่ล่าสุดเด้งขึ้นแท่นโชว์ตัวด้านบนสุด
+    sortedGigs.sort((a, b) => b.timestamp - a.timestamp);
+
+    sortedGigs.forEach(gig => {
+        const gigItemDiv = document.createElement('div');
+        gigItemDiv.className = 'gig-item';
+
+        let buttonText = "ดูรายละเอียดงาน";
+        if (gig.status === "btn-comingsoon") buttonText = "COMING SOON";
+        if (gig.status === "btn-ticket") buttonText = "BUY TICKET";
+        if (gig.status === "btn-ended") buttonText = "งานจบลงแล้ว";
+
+        // ระบบเซฟตี้ดักจับ: หากน้าไม่ได้ใส่ลิงก์รูปโปสเตอร์มา ระบบจะดึงภาพค่ายมาตรฐาน ขาวใส.png มาแสตนบายรอออโต้
+        const posterImg = gig.image ? gig.image : "image/ขาวใส.png";
+
+        gigItemDiv.innerHTML = `
+            <div class="gig-date"><span>${gig.day}</span>${gig.month}</div>
+            
+            <div class="gig-poster-wrap">
+                <img src="${posterImg}" alt="GIG POSTER" onerror="this.src='image/ขาวใส.png'">
+            </div>
+            
+            <div class="gig-info">
+                <h3>${gig.title}</h3>
+                <p><i class="fa-solid fa-location-dot"></i> ${gig.location}</p>
+            </div>
+            <a href="${gig.url}" target="_blank" class="gig-btn ${gig.status}">${buttonText}</a>
+        `;
+        liveGigListContainer.appendChild(gigItemDiv);
+    });
+});
+// ค้นหาฟังก์ชันดักฟีดงานเดิม (database.ref('udg_upcoming_gigs').on('value'...)
+// แล้วสลับสวมเนื้อหาภายในตรงท่อนกวาดลูปพ่น tag .innerHTML เป็นแบบนี้ครับน้า:
+
+    sortedGigs.forEach(gig => {
+        const gigItemDiv = document.createElement('div');
+        gigItemDiv.className = 'gig-item';
+
+        let buttonText = "ดูรายละเอียดงาน";
+        if (gig.status === "btn-comingsoon") buttonText = "COMING SOON";
+        if (gig.status === "btn-ticket") buttonText = "BUY TICKET";
+        if (gig.status === "btn-ended") buttonText = "งานจบลงแล้ว";
+
+        // ดักเช็กตัวแปรภาพโปสเตอร์ (หากงานไหนลงไว้ก่อนแล้วไม่มีรูปภาพ ให้ดึงภาพ ขาวใส.png ค่ายมาสแตนบายรอออโต้)
+        const posterImg = gig.image ? gig.image : "image/ขาวใส.png";
+
+        gigItemDiv.innerHTML = `
+            <div class="gig-date"><span>${gig.day}</span>${gig.month}</div>
+            <!-- 📸 แทรกแท็กแสดงรูปภาพโปสเตอร์งานอีเวนต์เดือด ๆ ลงไปตรงนี้ครับน้า -->
+            <div class="gig-poster-wrap">
+                <img src="${posterImg}" alt="GIG POSTER" onerror="this.src='image/ขาวใส.png'">[cite: 2]
+            </div>
+            <div class="gig-info">
+                <h3>${gig.title}</h3>
+                <p><i class="fa-solid fa-location-dot"></i> ${gig.location}</p>
+            </div>
+            <a href="${gig.url}" target="_blank" class="gig-btn ${gig.status}">${buttonText}</a>
+        `;
+        liveGigListContainer.appendChild(gigItemDiv);
+    });

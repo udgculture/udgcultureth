@@ -1,0 +1,420 @@
+/* =================================================================
+   🚨 UDG CENTRAL CONTROL DESK - MAIN SYSTEM STYLE (admin-css.css)
+================================================================= */
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
+body {
+    background-color: #050505;
+    color: #fff;
+    font-family: 'Kanit', sans-serif;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* 🔒 หน้ากากล็อกอินคัสตอมนีออนแดง */
+.login-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(2, 2, 2, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s ease;
+}
+
+.login-box {
+    background: #0d0d0d;
+    border: 1px solid #ff3333;
+    box-shadow: 0 0 40px rgba(255, 51, 51, 0.15);
+    width: 90%;
+    max-width: 400px;
+    padding: 35px 25px;
+    border-radius: 8px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-glow-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #ff3333, #ff007f);
+    box-shadow: 0 0 10px #ff3333;
+}
+
+.login-icon {
+    font-size: 2.8rem;
+    color: #ff3333;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 0 8px rgba(255, 51, 51, 0.4));
+}
+
+.login-box h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #fff;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.login-box p {
+    color: #666;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+.login-input-wrap {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.login-input-wrap i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #444;
+}
+
+.login-input-wrap input {
+    width: 100%;
+    background: #111;
+    border: 1px solid #222;
+    padding: 14px 15px 14px 45px;
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    border-radius: 4px;
+    outline: none;
+    letter-spacing: 3px;
+}
+
+.login-input-wrap input:focus {
+    border-color: #ff3333;
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);
+}
+
+.login-btn-group { 
+    display: flex; 
+    gap: 12px; 
+}
+
+.login-action-btn {
+    flex: 1;
+    padding: 14px;
+    font-family: 'Space Grotesk', 'Kanit', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+}
+
+.login-action-btn.btn-confirm {
+    background: linear-gradient(45deg, #ff3333, #ff007f);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.3);
+}
+
+.login-action-btn.btn-confirm:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+}
+
+.login-action-btn.btn-cancel { 
+    background: #151515; 
+    color: #666; 
+    border: 1px solid #222; 
+}
+
+.login-action-btn.btn-cancel:hover { 
+    background: #222; 
+    color: #fff; 
+}
+
+/* 🎛️ 🎯 เมนูสับเปลี่ยนแท็บด่วนหลังบ้าน */
+.tabs-container {
+    display: none;
+    width: 100%;
+    max-width: 650px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.tab-trigger-btn {
+    background: #0d0d0d;
+    border: 1px solid #222;
+    color: #666;
+    padding: 12px 4px;
+    font-family: 'Space Grotesk', 'Kanit', sans-serif;
+    font-weight: 800;
+    font-size: 0.72rem;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-trigger-btn i { font-size: 0.95rem; }
+
+.tab-trigger-btn[data-target="newsPanelBox"].active { border-color: #ff3333; color: #ff3333; box-shadow: 0 0 12px rgba(255, 51, 51, 0.15); background: rgba(255, 51, 51, 0.02); }
+.tab-trigger-btn[data-target="musicPanelBox"].active { border-color: #00ffff; color: #00ffff; box-shadow: 0 0 12px rgba(0, 255, 255, 0.15); background: rgba(0, 255, 255, 0.02); }
+.tab-trigger-btn[data-target="artistPanelBox"].active { border-color: #ffaa00; color: #ffaa00; box-shadow: 0 0 12px rgba(255, 170, 0, 0.15); background: rgba(255, 170, 0, 0.02); }
+.tab-trigger-btn[data-target="adPanelBox"].active { border-color: #39ff14; color: #39ff14; box-shadow: 0 0 12px rgba(57, 255, 20, 0.15); background: rgba(57, 255, 20, 0.02); }
+.tab-trigger-btn[data-target="archivePanelBox"].active { border-color: #cc00ff; color: #cc00ff; box-shadow: 0 0 12px rgba(204, 0, 255, 0.15); background: rgba(204, 0, 255, 0.02); }
+.tab-trigger-btn[data-target="logoPanelBox"].active { border-color: #fff000; color: #fff000; box-shadow: 0 0 12px rgba(255, 240, 0, 0.15); background: rgba(255, 240, 0, 0.02); }
+
+/* โครงสร้างหลักกล่องควบคุมแต่ละส่วน */
+.admin-box {
+    display: none;
+    background: #0a0a0a;
+    border: 1px solid #ff3333;
+    border-radius: 8px;
+    padding: 30px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 0 30px rgba(255, 51, 51, 0.1);
+}
+.admin-box-glow { border-color: #ffaa00; box-shadow: 0 0 30px rgba(255, 170, 0, 0.05); }
+.admin-box-cyan { border-color: #00ffff; box-shadow: 0 0 30px rgba(0, 255, 255, 0.05); }
+.admin-box-purple { border-color: #cc00ff; box-shadow: 0 0 30px rgba(204, 0, 255, 0.05); }
+.admin-box-yellow { border-color: #fff000; box-shadow: 0 0 30px rgba(255, 240, 0, 0.05); }
+
+h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #fff;
+    font-size: 1.4rem;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(255,51,51,0.3);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+label {
+    color: #ff3333;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+select, input, textarea {
+    width: 100%;
+    padding: 14px;
+    background: #111;
+    border: 1px solid #222;
+    color: #fff;
+    border-radius: 4px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+select:focus, input:focus, textarea:focus {
+    border-color: #ff3333;
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);
+}
+
+.post-btn {
+    background: linear-gradient(45deg, #ff3333, #ff007f);
+    color: #fff;
+    border: none;
+    width: 100%;
+    padding: 16px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 25px;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
+}
+
+.post-btn:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+}
+
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #444;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.back-link:hover { color: #ff3333; }
+
+/* รายการตารางข้อมูลพ่นสรุปในหลังบ้าน */
+.artist-list-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.artist-list-table th, .artist-list-table td {
+    border: 1px solid #222;
+    padding: 10px;
+    text-align: left;
+}
+
+.artist-list-table th {
+    background: #111;
+    color: #ff3333;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.delete-artist-btn {
+    background: transparent;
+    border: none;
+    color: #ff3333;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.delete-artist-btn:hover { text-decoration: underline; }
+
+/* 🎨 🔥 สไตล์พรีวิวการ์ดจำลองข่าวด้านล่างจอ */
+.preview-zone-wrapper {
+    background: #111;
+    border: 1px dashed #ff3333;
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 25px;
+}
+
+.preview-card-mockup {
+    background: #000;
+    border: 1px solid #222;
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 320px;
+    margin: 15px auto 0 auto;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+.mock-img-box {
+    width: 100%;
+    height: 180px;
+    background: #222;
+    overflow: hidden;
+}
+
+.mock-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mock-content-box { padding: 15px; }
+
+.mock-tag {
+    background: #ff3333;
+    color: #000;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Space Grotesk', sans-serif;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.mock-title { 
+    font-size: 1.1rem; 
+    font-weight: 800; 
+    color: #fff; 
+    line-height: 1.3; 
+    margin-bottom: 6px; 
+}
+
+.mock-excerpt { 
+    font-size: 0.8rem; 
+    color: #aaa; 
+    line-height: 1.4; 
+}
+
+/* แผงโลโก้พาร์ทเนอร์สไลด์แนวนอนจำลอง */
+.logo-preview-box {
+    display: flex;
+    gap: 15px;
+    background: #090909;
+    padding: 15px;
+    border: 1px solid #222;
+    border-radius: 4px;
+    margin-top: 15px;
+    overflow-x: auto;
+    justify-content: center;
+}
+
+.logo-preview-item {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #333;
+    background: #000;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: grayscale(100%) opacity(0.5);
+}
+/* ค้นหาคลาส .tabs-container ในไฟล์เดิม แล้วแก้จำนวน minmax ให้หดรับ 7 ปุ่มพอดี */
+.tabs-container {
+    display: none;
+    width: 100%;
+    max-width: 650px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* ย่อ min-width เหลือ 80px เพื่อรับแท็บที่ 7 */
+    gap: 6px;
+    margin-top: 10px;
+}
+
+/* 🎯 เพิ่มสีไฟนีออนของปุ่มแท็บ GIGS ไว้ล่างสุดของไฟล์ */
+.tab-trigger-btn[data-target="gigPanelBox"].active { 
+    border-color: #00ffaa; 
+    color: #00ffaa; 
+    box-shadow: 0 0 12px rgba(0, 255, 170, 0.15); 
+    background: rgba(0, 255, 170, 0.02); 
+}

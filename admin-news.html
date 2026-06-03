@@ -4,353 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UDG CENTRAL DESK | MANAGEMENT PANEL</title>
+    <link rel="icon" type="image/x-icon" href="image/ขาวใส.png">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background-color: #050505;
-            color: #fff;
-            font-family: 'Kanit', sans-serif;
-            padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            align-items: center;
-            min-height: 100vh;
-        }
-        
-        /* 🔒 หน้ากากล็อกอินคัสตอมนีออนแดง */
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(2, 2, 2, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.4s ease;
-        }
-        .login-box {
-            background: #0d0d0d;
-            border: 1px solid #ff3333;
-            box-shadow: 0 0 40px rgba(255, 51, 51, 0.15);
-            width: 90%;
-            max-width: 400px;
-            padding: 35px 25px;
-            border-radius: 8px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .login-glow-line {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, #ff3333, #ff007f);
-            box-shadow: 0 0 10px #ff3333;
-        }
-        .login-icon {
-            font-size: 2.8rem;
-            color: #ff3333;
-            margin-bottom: 15px;
-            filter: drop-shadow(0 0 8px rgba(255, 51, 51, 0.4));
-        }
-        .login-box h3 {
-            font-family: 'Space Grotesk', sans-serif;
-            color: #fff;
-            font-size: 1.4rem;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-        .login-box p {
-            color: #666;
-            font-size: 0.85rem;
-            line-height: 1.5;
-            margin-bottom: 25px;
-        }
-        .login-input-wrap {
-            position: relative;
-            margin-bottom: 25px;
-        }
-        .login-input-wrap i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #444;
-        }
-        .login-input-wrap input {
-            width: 100%;
-            background: #111;
-            border: 1px solid #222;
-            padding: 14px 15px 14px 45px;
-            color: #fff;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1rem;
-            border-radius: 4px;
-            outline: none;
-            letter-spacing: 3px;
-        }
-        .login-input-wrap input:focus {
-            border-color: #ff3333;
-            box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);
-        }
-        .login-btn-group { display: flex; gap: 12px; }
-        .login-action-btn {
-            flex: 1;
-            padding: 14px;
-            font-family: 'Space Grotesk', 'Kanit', sans-serif;
-            font-weight: 800;
-            font-size: 0.9rem;
-            border-radius: 4px;
-            cursor: pointer;
-            border: none;
-            letter-spacing: 1px;
-            transition: all 0.2s ease;
-        }
-        .login-action-btn.btn-confirm {
-            background: linear-gradient(45deg, #ff3333, #ff007f);
-            color: #fff;
-            box-shadow: 0 0 15px rgba(255, 51, 51, 0.3);
-        }
-        .login-action-btn.btn-confirm:hover {
-            filter: brightness(1.2);
-            transform: translateY(-2px);
-        }
-        .login-action-btn.btn-cancel { background: #151515; color: #666; border: 1px solid #222; }
-        .login-action-btn.btn-cancel:hover { background: #222; color: #fff; }
-
-        /* 🎛️ 🎯 เมนูสับเปลี่ยนแท็บด่วนรุ่น 6 ปุ่ม ขจัดปัญหาหน้าจอยาว */
-        .tabs-container {
-            display: none;
-            width: 100%;
-            max-width: 650px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
-            gap: 6px;
-            margin-top: 10px;
-        }
-        .tab-trigger-btn {
-            background: #0d0d0d;
-            border: 1px solid #222;
-            color: #666;
-            padding: 12px 4px;
-            font-family: 'Space Grotesk', 'Kanit', sans-serif;
-            font-weight: 800;
-            font-size: 0.72rem;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .tab-trigger-btn i { font-size: 0.95rem; }
-        
-        .tab-trigger-btn[data-target="newsPanelBox"].active { border-color: #ff3333; color: #ff3333; box-shadow: 0 0 12px rgba(255, 51, 51, 0.15); background: rgba(255, 51, 51, 0.02); }
-        .tab-trigger-btn[data-target="musicPanelBox"].active { border-color: #00ffff; color: #00ffff; box-shadow: 0 0 12px rgba(0, 255, 255, 0.15); background: rgba(0, 255, 255, 0.02); }
-        .tab-trigger-btn[data-target="artistPanelBox"].active { border-color: #ffaa00; color: #ffaa00; box-shadow: 0 0 12px rgba(255, 170, 0, 0.15); background: rgba(255, 170, 0, 0.02); }
-        .tab-trigger-btn[data-target="adPanelBox"].active { border-color: #39ff14; color: #39ff14; box-shadow: 0 0 12px rgba(57, 255, 20, 0.15); background: rgba(57, 255, 20, 0.02); }
-        .tab-trigger-btn[data-target="archivePanelBox"].active { border-color: #cc00ff; color: #cc00ff; box-shadow: 0 0 12px rgba(204, 0, 255, 0.15); background: rgba(204, 0, 255, 0.02); }
-        .tab-trigger-btn[data-target="logoPanelBox"].active { border-color: #fff000; color: #fff000; box-shadow: 0 0 12px rgba(255, 240, 0, 0.15); background: rgba(255, 240, 0, 0.02); }
-
-        /* ─── โครงสร้างหลักกล่องควบคุมหลังบ้าน ─── */
-        .admin-box {
-            display: none;
-            background: #0a0a0a;
-            border: 1px solid #ff3333;
-            border-radius: 8px;
-            padding: 30px;
-            width: 100%;
-            max-width: 600px;
-            box-shadow: 0 0 30px rgba(255, 51, 51, 0.1);
-        }
-        .admin-box-glow { border-color: #ffaa00; box-shadow: 0 0 30px rgba(255, 170, 0, 0.05); }
-        .admin-box-cyan { border-color: #00ffff; box-shadow: 0 0 30px rgba(0, 255, 255, 0.05); }
-        .admin-box-purple { border-color: #cc00ff; box-shadow: 0 0 30px rgba(204, 0, 255, 0.05); }
-        .admin-box-yellow { border-color: #fff000; box-shadow: 0 0 30px rgba(255, 240, 0, 0.05); }
-        
-        h2 {
-            font-family: 'Space Grotesk', sans-serif;
-            color: #fff;
-            font-size: 1.4rem;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-            text-shadow: 0 0 10px rgba(255,51,51,0.3);
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 20px;
-        }
-        label {
-            color: #ff3333;
-            font-size: 0.8rem;
-            font-weight: 800;
-            letter-spacing: 1px;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-        select, input, textarea {
-            width: 100%;
-            padding: 14px;
-            background: #111;
-            border: 1px solid #222;
-            color: #fff;
-            border-radius: 4px;
-            font-family: 'Kanit', sans-serif;
-            font-size: 0.95rem;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-        select:focus, input:focus, textarea:focus {
-            border-color: #ff3333;
-            box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);
-        }
-        .post-btn {
-            background: linear-gradient(45deg, #ff3333, #ff007f);
-            color: #fff;
-            border: none;
-            width: 100%;
-            padding: 16px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 800;
-            font-size: 1.1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 25px;
-            transition: all 0.3s ease;
-            letter-spacing: 1px;
-            box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
-        }
-        .post-btn:hover {
-            filter: brightness(1.2);
-            transform: translateY(-2px);
-        }
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: #444;
-            text-decoration: none;
-            font-size: 0.85rem;
-        }
-        .back-link:hover { color: #ff3333; }
-        
-        .artist-list-table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-        .artist-list-table th, .artist-list-table td {
-            border: 1px solid #222;
-            padding: 10px;
-            text-align: left;
-        }
-        .artist-list-table th {
-            background: #111;
-            color: #ff3333;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-        .delete-artist-btn {
-            background: transparent;
-            border: none;
-            color: #ff3333;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        .delete-artist-btn:hover { text-decoration: underline; }
-
-        /* 🎨 🔥 สไตล์กล่องพรีวิวการ์ดเสมือนจริง จำลองการ์ดหน้าแรก UDG */
-        .preview-zone-wrapper {
-            background: #111;
-            border: 1px dashed #ff3333;
-            border-radius: 6px;
-            padding: 15px;
-            margin-top: 25px;
-        }
-        .preview-card-mockup {
-            background: #000;
-            border: 1px solid #222;
-            border-radius: 8px;
-            overflow: hidden;
-            max-width: 320px;
-            margin: 15px auto 0 auto;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-        }
-        .mock-img-box {
-            width: 100%;
-            height: 180px;
-            background: #222;
-            overflow: hidden;
-        }
-        .mock-img-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .mock-content-box { padding: 15px; }
-        .mock-tag {
-            background: #ff3333;
-            color: #000;
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Space Grotesk', sans-serif;
-            display: inline-block;
-            margin-bottom: 8px;
-        }
-        .mock-title { font-size: 1.1rem; font-weight: 800; color: #fff; line-height: 1.3; margin-bottom: 6px; }
-        .mock-excerpt { font-size: 0.8rem; color: #aaa; line-height: 1.4; }
-
-        /* 🎯 สไตล์พิเศษจำลองแผงโลโก้พาร์ทเนอร์ 1:1 */
-        .logo-preview-box {
-            display: flex;
-            gap: 15px;
-            background: #090909;
-            padding: 15px;
-            border: 1px solid #222;
-            border-radius: 4px;
-            margin-top: 15px;
-            overflow-x: auto;
-            justify-content: center;
-        }
-        .logo-preview-item {
-            width: 50px;
-            height: 50px;
-            border: 1px solid #333;
-            background: #000;
-            border-radius: 4px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .logo-preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter: grayscale(100%) opacity(0.5);
-        }
-    </style>
+    <link rel="stylesheet" href="admin-css.css">
 </head>
 <body>
 
-    <!-- 🔒 🛡️ หน้ากากความปลอดภัยหลัก -->
+    <!-- 🔒 หน้ากากล็อกอินประตูหลัก -->
     <div class="login-overlay" id="gateOverlay">
         <div class="login-box">
             <div class="login-glow-line"></div>
@@ -368,18 +31,18 @@
         </div>
     </div>
 
-    <!-- 🎛️ 🎯 เมนูสับเปลี่ยนแท็บด่วน 6 แท็บรุ่นท็อป -->
+    <!-- 🎛️ 🎯 เมนูสับเปลี่ยนแท็บด่วนหลังบ้านรุ่น 7 ปุ่มควบคุมครอบจักรวาล -->
     <div class="tabs-container" id="adminTabsMenu" style="display: none;">
         <button type="button" class="tab-trigger-btn active" data-target="newsPanelBox"><i class="fa-solid fa-sliders"></i>📰 CONTENT</button>
         <button type="button" class="tab-trigger-btn" data-target="musicPanelBox"><i class="fa-solid fa-music"></i>🎵 MUSIC</button>
         <button type="button" class="tab-trigger-btn" data-target="artistPanelBox"><i class="fa-solid fa-user-shield"></i>🎤 ARTISTS</button>
         <button type="button" class="tab-trigger-btn" data-target="adPanelBox" style="border-color:#39ff14; color:#39ff14;"><i class="fa-solid fa-rectangle-ad"></i>💸 ADS</button>
         <button type="button" class="tab-trigger-btn" data-target="archivePanelBox" style="border-color:#cc00ff; color:#cc00ff;"><i class="fa-solid fa-box-archive"></i>🗳️ ARCHIVE</button>
-        <!-- แท็บคุมแผงโลโก้พาร์ทเนอร์เพิ่มใหม่ -->
         <button type="button" class="tab-trigger-btn" data-target="logoPanelBox" style="border-color:#fff000; color:#fff000;"><i class="fa-solid fa-handshake"></i>🤝 LOGOS</button>
+        <button type="button" class="tab-trigger-btn" data-target="gigPanelBox" style="border-color:#00ffaa; color:#00ffaa;"><i class="fa-solid fa-calendar-days"></i>📅 GIGS</button>
     </div>
 
-    <!-- 📰 [แท็บที่ 1] ข่าวสารทั่วไป / ข่าวเด่น / เรดาร์ -->
+    <!-- 📰 [แท็บที่ 1] CONTENT ข่าวสาร -->
     <div class="admin-box" id="newsPanelBox">
         <h2><i class="fa-solid fa-sliders" style="color: #ff3333;"></i> UDG CENTRAL CONTROL PANEL</h2>
         <p style="color: #555; font-size: 0.85rem;">แผงควบคุมข่าวเด่น ข่าวสารทั่วไป และพื้นที่การ์ดเรดาร์แร็ปเปอร์</p>
@@ -392,120 +55,68 @@
                 <option value="RADAR_2">🎤 RADAR: NEXT UP [การ์ดขวา] (แนะนำศิลปินคนที่ 2)</option>
             </select>
         </div>
-        <div class="form-group" id="subTagGroup">
-            <label>SUB TAG (ป้ายกำกับย่อย)</label>
-            <input type="text" id="adminNewsSubTag" value="NEWS" oninput="updateLivePreview()">
-        </div>
-        <div class="form-group">
-            <label id="titleLabel">TITLE</label>
-            <input type="text" id="adminNewsTitle" placeholder="พิมพ์เนื้อหาที่นี่..." oninput="updateLivePreview()">
-        </div>
-        <div class="form-group">
-            <label>IMAGE URL</label>
-            <input type="text" id="adminNewsImg" value="image/ขาวใส.png" oninput="updateLivePreview()">
-        </div>
-        <div class="form-group">
-            <label id="excerptLabel">EXCERPT</label>
-            <textarea id="adminNewsExcerpt" rows="4" oninput="updateLivePreview()"></textarea>
-        </div>
-        <div class="form-group" id="radarUrlGroup" style="display: none;">
-            <label>FOLLOW LINK URL</label>
-            <input type="text" id="adminRadarUrl" value="#">
-        </div>
+        <div class="form-group" id="subTagGroup"><label>SUB TAG</label><input type="text" id="adminNewsSubTag" value="NEWS" oninput="updateLivePreview()"></div>
+        <div class="form-group"><label id="titleLabel">TITLE</label><input type="text" id="adminNewsTitle" oninput="updateLivePreview()"></div>
+        <div class="form-group"><label>IMAGE URL</label><input type="text" id="adminNewsImg" value="image/ขาวใส.png" oninput="updateLivePreview()"></div>
+        <div class="form-group"><label id="excerptLabel">EXCERPT</label><textarea id="adminNewsExcerpt" rows="4" oninput="updateLivePreview()"></textarea></div>
+        <div class="form-group" id="radarUrlGroup" style="display: none;"><label>FOLLOW LINK URL</label><input type="text" id="adminRadarUrl" value="#"></div>
         <div class="preview-zone-wrapper">
             <span style="font-size:0.75rem; color:#ff3333; font-weight:800;"><i class="fa-solid fa-eye"></i> LIVE PREVIEW MOCKUP</span>
             <div class="preview-card-mockup">
                 <div class="mock-img-box"><img id="mockupImage" src="image/ขาวใส.png" alt="Preview"></div>
-                <div class="mock-content-box">
-                    <span class="mock-tag" id="mockupTag">NEWS</span>
-                    <h4 class="mock-title" id="mockupTitle">หัวข้อข่าวสารจำลอง...</h4>
-                    <p class="mock-excerpt" id="mockupExcerpt">คำอธิบายข่าวโปรยฟีดจะปรากฏตรงนี้...</p>
-                </div>
+                <div class="mock-content-box"><span class="mock-tag" id="mockupTag">NEWS</span><h4 class="mock-title" id="mockupTitle">หัวข้อจำลอง...</h4><p class="mock-excerpt" id="mockupExcerpt">คำอธิบายข่าวโปรยฟีด...</p></div>
             </div>
         </div>
         <button type="button" class="post-btn" id="adminPostNewsBtn"><i class="fa-solid fa-paper-plane"></i> UPDATE LIVE WEBSITE</button>
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <!-- 🎵 [แท็บที่ 2] จัดการเพลงโหวต -->
+    <!-- 🎵 [แท็บที่ 2] MUSIC จัดการเพลง -->
     <div class="admin-box admin-box-cyan" id="musicPanelBox">
         <h2><i class="fa-solid fa-music" style="color: #00ffff;"></i> UDG MUSIC TRACKS MANAGER</h2>
         <p style="color: #555; font-size: 0.85rem;">เพิ่มชื่อเพลงเซ็ตแบทเทิลรายสัปดาห์ (แต้มโหวตล้างกระดานนับ 0 ออโต้ทุกวันศุกร์)</p>
-        <div class="form-group">
-            <label style="color: #00ffff;">TRACK TITLE</label>
-            <input type="text" id="newTrackTitle" placeholder="ชื่อเพลงปล่อยใหม่...">
-        </div>
-        <div class="form-group">
-            <label style="color: #00ffff;">ARTIST NAME</label>
-            <input type="text" id="newTrackArtist" placeholder="ชื่อแร็ปเปอร์...">
-        </div>
-        <div class="form-group">
-            <label style="color: #00ffff;">YOUTUBE VIDEO ID</label>
-            <input type="text" id="newTrackYtId" placeholder="รหัสคีย์ท้ายลิงก์ยูทูบ...">
-        </div>
+        <div class="form-group"><label style="color: #00ffff;">TRACK TITLE</label><input type="text" id="newTrackTitle"></div>
+        <div class="form-group"><label style="color: #00ffff;">ARTIST NAME</label><input type="text" id="newTrackArtist"></div>
+        <div class="form-group"><label style="color: #00ffff;">YOUTUBE VIDEO ID</label><input type="text" id="newTrackYtId"></div>
         <button type="button" class="post-btn" id="addTrackBtn" style="background: linear-gradient(45deg, #00ffff, #0088cc); color: #000;"><i class="fa-solid fa-plus-circle"></i> ADD NEW MUSIC TRACK</button>
         <table class="artist-list-table">
-            <thead>
-                <tr><th>ชื่อเพลง / ศิลปิน</th><th>YouTube ID</th><th>จัดการ</th></tr>
-            </thead>
+            <thead><tr><th>ชื่อเพลง / ศิลปิน</th><th>YouTube ID</th><th>จัดการ</th></tr></thead>
             <tbody id="track-list-tbody"><tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังโหลด...</td></tr></tbody>
         </table>
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <!-- 🎤 [แท็บที่ 3] คีย์ลับศิลปิน -->
+    <!-- 🎤 [แท็บที่ 3] ARTISTS คีย์ลับศิลปิน -->
     <div class="admin-box admin-box-glow" id="artistPanelBox">
         <h2><i class="fa-solid fa-user-shield" style="color: #ffaa00;"></i> UDG ARTIST KEYS MANAGER</h2>
         <p style="color: #555; font-size: 0.85rem;">มอบรหัสผ่านลับให้แร็ปเปอร์ใช้เข้าสิทธิ์พ่นสีฉลามทองในห้องแชท</p>
-        <div class="form-group">
-            <label style="color: #ffaa00;">ARTIST USERNAME</label>
-            <input type="text" id="newArtistName" placeholder="เช่น: @Dxshane">
-        </div>
-        <div class="form-group">
-            <label style="color: #ffaa00;">ARTIST PASSCODE</label>
-            <input type="text" id="newArtistPass" placeholder="ตั้งรหัสผ่านลับให้ศิลปิน...">
-        </div>
+        <div class="form-group"><label style="color: #ffaa00;">ARTIST USERNAME</label><input type="text" id="newArtistName"></div>
+        <div class="form-group"><label style="color: #ffaa00;">ARTIST PASSCODE</label><input type="text" id="newArtistPass"></div>
         <button type="button" class="post-btn" id="addArtistBtn" style="background: linear-gradient(45deg, #ffaa00, #ff5500); color: #000;"><i class="fa-solid fa-user-plus"></i> REGISTER ARTIST KEY</button>
         <table class="artist-list-table">
-            <thead>
-                <tr><th>แร็ปเปอร์</th><th>รหัสผ่าน</th><th>จัดการ</th></tr>
-            </thead>
+            <thead><tr><th>แร็ปเปอร์</th><th>รหัสผ่าน</th><th>จัดการ</th></tr></thead>
             <tbody id="artist-list-tbody"><tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังโหลด...</td></tr></tbody>
         </table>
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <!-- 💸 [แท็บที่ 4] จัดการโฆษณาหมุนเวียน -->
+    <!-- 💸 [แท็บที่ 4] ADS จัดการโฆษณา -->
     <div class="admin-box" id="adPanelBox" style="border-color: #39ff14; box-shadow: 0 0 30px rgba(57, 255, 20, 0.05);">
         <h2><i class="fa-solid fa-rectangle-ad" style="color: #39ff14;"></i> UDG LIVE ADS ROTATOR</h2>
         <p style="color: #555; font-size: 0.85rem;">เพิ่มสปอนเซอร์ของลูกค้าหลายเจ้า ระบบจะสลับหมุนเวียนบนหน้าเว็บหลักให้ทุก 10 วินาที</p>
-        <div class="form-group">
-            <label style="color: #39ff14;">SPONSOR NAME</label>
-            <input type="text" id="newAdTitle">
-        </div>
-        <div class="form-group">
-            <label style="color: #39ff14;">AD DESCRIPTION</label>
-            <input type="text" id="newAdDesc">
-        </div>
-        <div class="form-group">
-            <label style="color: #39ff14;">AD IMAGE URL</label>
-            <input type="text" id="newAdImage">
-        </div>
-        <div class="form-group">
-            <label style="color: #39ff14;">TARGET LINK URL</label>
-            <input type="text" id="newAdUrl" value="#">
-        </div>
+        <div class="form-group"><label style="color: #39ff14;">SPONSOR NAME</label><input type="text" id="newAdTitle"></div>
+        <div class="form-group"><label style="color: #39ff14;">AD DESCRIPTION</label><input type="text" id="newAdDesc"></div>
+        <div class="form-group"><label style="color: #39ff14;">AD IMAGE URL</label><input type="text" id="newAdImage"></div>
+        <div class="form-group"><label style="color: #39ff14;">TARGET LINK URL</label><input type="text" id="newAdUrl" value="#"></div>
         <button type="button" class="post-btn" id="addAdBtn" style="background: linear-gradient(45deg, #39ff14, #00ff88); color: #000;"><i class="fa-solid fa-cloud-arrow-up"></i> PUBLISH LIVE ADVERTISEMENT</button>
         <table class="artist-list-table">
-            <thead>
-                <tr><th>แบรนด์ลูกค้า</th><th>ลิงก์วาร์ปปลายทาง</th><th>จัดการ</th></tr>
-            </thead>
+            <thead><tr><th>แบรนด์ลูกค้า</th><th>ลิงก์วาร์ปปลายทาง</th><th>จัดการ</th></tr></thead>
             <tbody id="ad-list-tbody"><tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังโหลด...</td></tr></tbody>
         </table>
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <!-- 🗳️ [แท็บที่ 5] ล็อกยอดจดบันทึกประวัติพาร์ทประวัติศาสตร์ -->
+    <!-- 🗳️ [แท็บที่ 5] ARCHIVE ประวัติชาร์ตเพลง -->
     <div class="admin-box admin-box-purple" id="archivePanelBox">
         <h2><i class="fa-solid fa-box-archive" style="color: #cc00ff;"></i> UDG VOTES WEEKLY ARCHIVE</h2>
         <p style="color: #555; font-size: 0.85rem;">จดบันทึกประวัติหาแชมป์ประจำสัปดาห์ปัจจุบันมัดรวมส่งเข้าสู่แฟ้มประวัติหอเกียรติยศ</p>
@@ -517,299 +128,86 @@
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <!-- 🤝 💛 [แท็บที่ 6 เพิ่มใหม่!] แผงสำหรับกด แอด-ลบ โลโก้แบรนด์พาร์ทเนอร์ (Sponsor Ticker) -->
+    <!-- 🤝 [แท็บที่ 6] LOGOS โลโก้พาร์ทเนอร์วิ่งด้านล่าง -->
     <div class="admin-box admin-box-yellow" id="logoPanelBox">
         <h2><i class="fa-solid fa-handshake" style="color: #fff000;"></i> UDG CULTURE PARTNERS LOGOS</h2>
         <p style="color: #555; font-size: 0.85rem;">เพิ่มหรือถอดถอนรูปภาพโลโก้สปอนเซอร์/ค่ายเพลงพันธมิตร หมุนเวียนแถบสไลด์แนวนอนด้านล่าง</p>
-
-        <div class="form-group">
-            <label style="color: #fff000;">PARTNER / BRAND NAME (ชื่อแบรนด์หรือสปอนเซอร์เพื่อลงบันทึกกันลืม)</label>
-            <input type="text" id="newPartnerName" placeholder="เช่น: Nevervibe, Beazy BKK, ร้านสตรีทแวร์" oninput="updateLogoPreview()">
-        </div>
-
-        <div class="form-group">
-            <label style="color: #fff000;">LOGO IMAGE URL (ลิงก์ที่อยู่รูปภาพแบรนด์ แนะนำให้ใช้รูปอัตราส่วน 1:1 หรือสี่เหลี่ยมจัตุรัส)</label>
-            <input type="text" id="newPartnerImg" placeholder="เอาลิงก์ตรงที่ลงท้ายด้วย .png / .jpg มาวางที่นี่..." oninput="updateLogoPreview()">
-        </div>
-
+        <div class="form-group"><label style="color: #fff000;">PARTNER / BRAND NAME</label><input type="text" id="newPartnerName"></div>
+        <div class="form-group"><label style="color: #fff000;">LOGO IMAGE URL</label><input type="text" id="newPartnerImg" oninput="updateLogoPreview()"></div>
         <div class="logo-preview-box">
-            <div class="logo-preview-item">
-                <img id="mockupPartnerLogo" src="image/ขาวใส.png" alt="Logo Preview">
+            <div class="logo-preview-item"><img id="mockupPartnerLogo" src="image/ขาวใส.png" alt="Logo Preview"></div>
+            <span style="font-size: 0.72rem; color: #fff000; align-self: center; font-family: monospace;">&larr; LIVE LOGO MOCKUP</span>
+        </div>
+        <button type="button" class="post-btn" id="addPartnerLogoBtn" style="background: linear-gradient(45deg, #fff000, #ffaa00); color: #000;"><i class="fa-solid fa-square-plus"></i> PUBLISH PARTNER LOGO TO TICKER</button>
+        <table class="artist-list-table">
+            <thead><tr><th>แบรนด์/ค่ายเพลง</th><th>ตัวอย่างภาพ</th><th>จัดการ</th></tr></thead>
+            <tbody id="logo-list-tbody"><tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังโหลด...</td></tr></tbody>
+        </table>
+        <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
+    </div>
+
+    <!-- 📅🤝 [แท็บที่ 7 ซ่อมแซมเสร็จสิ้น] แผงสำหรับกดแอด คอนเสิร์ต / อีเวนต์ใต้ดิน (UPCOMING GIGS) -->
+    <div class="admin-box" id="gigPanelBox" style="border-color: #00ffaa; box-shadow: 0 0 30px rgba(0, 255, 170, 0.05);">
+        <h2><i class="fa-solid fa-calendar-days" style="color: #00ffaa;"></i> UDG GIGS & EVENTS DESK</h2>
+        <p style="color: #555; font-size: 0.85rem;">เพิ่ม ลบ คอนเสิร์ต ปาร์ตี้ใต้ดิน หรืออีเวนต์ใหญ่ประจำค่าย พร้อมสับสีปุ่มสถานะและพ่นภาพโปสเตอร์</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin-top: 20px;">
+            <div class="admin-group" style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="color: #00ffaa;">DAY (วันที่เลข)</label>
+                <input type="text" id="newGigDay" placeholder="เช่น: 31">
             </div>
-            <span style="font-size: 0.72rem; color: #fff000; align-self: center; font-family: monospace;">&larr; LIVE LOGO MOCKUP (สไตล์โมโนโครมหลังบ้าน)</span>
+            <div class="admin-group" style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="color: #00ffaa;">MONTH (เดือนย่ออังกฤษ)</label>
+                <input type="text" id="newGigMonth" placeholder="เช่น: MAY, JUN, DEC">
+            </div>
         </div>
 
-        <button type="button" class="post-btn" id="addPartnerLogoBtn" style="background: linear-gradient(45deg, #fff000, #ffaa00); color: #000; box-shadow: 0 0 15px rgba(255,240,0,0.2);"><i class="fa-solid fa-square-plus"></i> PUBLISH PARTNER LOGO TO TICKER</button>
+        <div class="form-group">
+            <label style="color: #00ffaa;">EVENT TITLE (ชื่อคอนเสิร์ต/ชื่องานปาร์ตี้)</label>
+            <input type="text" id="newGigTitle" placeholder="เช่น: BANGKOK OUTLAWS 2026">
+        </div>
+
+        <div class="form-group">
+            <label style="color: #00ffaa;">GIG POSTER IMAGE URL (ลิงก์รูปภาพโปสเตอร์งาน แนะนำสัดส่วน 1:1)</label>
+            <input type="text" id="newGigImg" placeholder="เอาลิงก์ตรงรูปโปสเตอร์งานที่ลงท้ายด้วย .png / .jpg มาวางที่นี่...">
+        </div>
+
+        <div class="form-group">
+            <label style="color: #00ffaa;">LOCATION VENUE (ชื่อสถานที่จัดงานและจังหวัด)</label>
+            <input type="text" id="newGigLocation" placeholder="เช่น: BEAZY® Bangkok - สาทร ซอย 11, BKK">
+        </div>
+
+        <div class="form-group">
+            <label style="color: #00ffaa;">TICKET STATUS & STYLE (เลือกสถานะปุ่มและโทนสีตรงหน้าบ้าน)</label>
+            <select id="newGigStatus">
+                <option value="btn-comingsoon">⚪ COMING SOON (ป้ายสีฟ้าโปร่งแสง - ยังไม่เปิดขายบัตร)</option>
+                <option value="btn-ticket">🟢 BUY TICKET (ป้ายสีฟ้านีออนเรืองแสง - เปิดขายบัตรด่วน)</option>
+                <option value="btn-ended">🔴 EVENT ENDED (ป้ายสีแดงไฟดับ - งานจบลงแล้วเดือด ๆ)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label style="color: #00ffaa;">TARGET BUTTON LINK URL (ลิงก์วาร์ปปลายทางไปหน้าซื้อบัตร หรือเพจจอง)</label>
+            <input type="text" id="newGigUrl" value="#">
+        </div>
+
+        <button type="button" class="post-btn" id="addGigBtn" style="background: linear-gradient(45deg, #00ffaa, #00bbff); color: #000; box-shadow: 0 0 15px rgba(0,255,170,0.2);"><i class="fa-solid fa-calendar-plus"></i> PUBLISH LIVE EVENT GIG</button>
 
         <table class="artist-list-table">
             <thead>
                 <tr>
-                    <th>แบรนด์/ค่ายเพลง</th>
-                    <th>ตัวอย่างภาพ</th>
+                    <th>รอบงาน / ชื่อคอนเสิร์ต</th>
+                    <th>สถานะปุ่ม</th>
                     <th>จัดการ</th>
                 </tr>
             </thead>
-            <tbody id="logo-list-tbody">
-                <tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังระเบิดกระแสจิตเชื่อมต่อคลังโลโก้สปอนเซอร์...</td></tr>
+            <tbody id="gig-list-tbody">
+                <tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังค้นหาเอกสารสารบบผังคอนเสิร์ตค่าย UDG...</td></tr>
             </tbody>
         </table>
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <script>
-        const MASTER_ADMIN_PASS = "udg2026"; 
-
-        function checkGateLogin() {
-            const userInput = document.getElementById("gatePasscodeInput").value.trim();
-            if (userInput === MASTER_ADMIN_PASS) {
-                sessionStorage.setItem("udg_admin_authenticated", "true");
-                unlockCentralPanel();
-            } else {
-                alert("❌ ACCESS DENIED:\nรหัสผ่านลับผู้ดูแลระบบไม่ถูกต้อง! โปรดระบุใหม่อีกครั้งครับน้า");
-                document.getElementById("gatePasscodeInput").value = "";
-                document.getElementById("gatePasscodeInput").focus();
-            }
-        }
-
-        function unlockCentralPanel() {
-            document.getElementById("gateOverlay").style.display = "none";
-            document.getElementById("adminTabsMenu").style.display = "grid"; 
-            switchTabMenu("newsPanelBox"); 
-        }
-
-        function kickUserToHome() { window.location.href = "index.html"; }
-
-        function switchTabMenu(targetId) {
-            document.querySelectorAll(".admin-box").forEach(box => { box.style.display = "none"; });
-            document.querySelectorAll(".tab-trigger-btn").forEach(btn => { btn.classList.remove("active"); });
-            document.getElementById(targetId).style.display = "block";
-            document.querySelector(`.tab-trigger-btn[data-target="${targetId}"]`).classList.add("active");
-        }
-
-        document.querySelectorAll(".tab-trigger-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const target = btn.getAttribute("data-target");
-                switchTabMenu(target);
-            });
-        });
-
-        if (sessionStorage.getItem("udg_admin_authenticated") === "true") { unlockCentralPanel(); }
-        document.getElementById("gatePasscodeInput").addEventListener("keypress", function(e) { if (e.key === "Enter") { checkGateLogin(); } });
-
-        function updateLivePreview() {
-            const subTagInput = document.getElementById("adminNewsSubTag").value.trim();
-            const titleInput = document.getElementById("adminNewsTitle").value.trim();
-            const imgInput = document.getElementById("adminNewsImg").value.trim();
-            const excerptInput = document.getElementById("adminNewsExcerpt").value.trim();
-            document.getElementById("mockupTag").innerText = subTagInput ? subTagInput : "NEWS";
-            document.getElementById("mockupTitle").innerText = titleInput ? titleInput : "หัวข้อข่าวสารจำลองประจำค่าย...";
-            document.getElementById("mockupExcerpt").innerText = excerptInput ? excerptInput : "คำอธิบายข่าวโปรยฟีดจะปรากฏตรงนี้...";
-            document.getElementById("mockupImage").src = imgInput ? imgInput : "image/ขาวใส.png";
-        }
-
-        // ฟังก์ชันอัปเดต Live Preview ของช่องแอดโลโก้
-        function updateLogoPreview() {
-            const imgUrl = document.getElementById("newPartnerImg").value.trim();
-            document.getElementById("mockupPartnerLogo").src = imgUrl ? imgUrl : "image/ขาวใส.png";
-        }
-
-        // =================================================================
-        // ─── การต่อเชื่อมสัญญาณคลาวด์ Realtime DATABASE ───
-        // =================================================================
-        const firebaseConfig = {
-          apiKey: "AIzaSyClMPrhjK_XLaY2PBAEuP7hvxK4faFdLJk",
-          authDomain: "udg-caht.firebaseapp.com",
-          projectId: "udg-caht",
-          storageBucket: "udg-caht.firebasestorage.app",
-          messagingSenderId: "864209418067",
-          appId: "1:864209418067:web:b3c724198275f4a73b53a6",
-          databaseURL: "https://udg-caht-default-rtdb.asia-southeast1.firebasedatabase.app/"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        // [ระบบแท็บที่ 1] โพสต์ข่าวสาร
-        function toggleRadarLinkField() {
-            const targetZone = document.getElementById('adminNewsTag').value;
-            const radarUrlGroup = document.getElementById('radarUrlGroup');
-            const titleLabel = document.getElementById('titleLabel');
-            const excerptLabel = document.getElementById('excerptLabel');
-            const subTagInput = document.getElementById('adminNewsSubTag');
-            if (targetZone.startsWith('RADAR')) {
-                radarUrlGroup.style.display = 'flex'; titleLabel.innerText = "ARTIST NAME"; excerptLabel.innerText = "ARTIST BIO";
-                if(targetZone === 'RADAR_1') subTagInput.value = "DRILL"; if(targetZone === 'RADAR_2') subTagInput.value = "TRAP";
-            } else if (targetZone === 'FEATURED') {
-                radarUrlGroup.style.display = 'none'; titleLabel.innerText = "FEATURED TITLE"; excerptLabel.innerText = "FEATURED EXCERPT"; subTagInput.value = "BREAKING";
-            } else {
-                radarUrlGroup.style.display = 'none'; titleLabel.innerText = "NEWS TITLE"; excerptLabel.innerText = "NEWS EXCERPT"; subTagInput.value = "NEWS";
-            }
-            updateLivePreview();
-        }
-
-        document.getElementById('adminPostNewsBtn').addEventListener('click', () => {
-            const zone = document.getElementById('adminNewsTag').value;
-            const subTag = document.getElementById('adminNewsSubTag').value.trim();
-            const title = document.getElementById('adminNewsTitle').value.trim();
-            const img = document.getElementById('adminNewsImg').value.trim();
-            const excerpt = document.getElementById('adminNewsExcerpt').value.trim();
-            const radarUrl = document.getElementById('adminRadarUrl').value.trim();
-            if (!title || !excerpt) { alert("❌ กรุณากรอกข้อมูลให้ครบถ้วนก่อนกดอัปเดตครับน้า!"); return; }
-            const dataPayload = { tag: subTag ? subTag : zone, title: title, image: img ? img : 'image/ขาวใส.png', excerpt: excerpt, timestamp: Date.now() };
-            if (zone.startsWith('RADAR')) dataPayload.followUrl = radarUrl ? radarUrl : "#";
-            if (zone === 'NEWS') { database.ref('udg_news_drops').push(dataPayload, (e) => { if(!e) successAction(); }); }
-            else if (zone === 'FEATURED') { database.ref('udg_homepage_slots/featured_card').set(dataPayload, (e) => { if(!e) successAction(); }); }
-            else if (zone === 'RADAR_1') { database.ref('udg_homepage_slots/radar_card_1').set(dataPayload, (e) => { if(!e) successAction(); }); }
-            else if (zone === 'RADAR_2') { database.ref('udg_homepage_slots/radar_card_2').set(dataPayload, (e) => { if(!e) successAction(); }); }
-        });
-        function successAction() { document.getElementById('adminNewsTitle').value = ''; document.getElementById('adminNewsExcerpt').value = ''; alert("🔥 อัปเดตข้อมูลขึ้นหน้าเว็บหลักเรียบร้อยครับน้า!"); updateLivePreview(); }
-
-        // [ระบบแท็บที่ 2] จัดการตู้เพลงคลาวด์
-        const trackTbody = document.getElementById('track-list-tbody');
-        function getAdminCurrentWeekKey() {
-            const d = new Date(); const day = d.getDay(); const hours = d.getHours(); let target = new Date(d);
-            let diff = (day >= 5) ? (day - 5) : (day + 2);
-            if (day === 5 && hours < 10) { diff = -7; } else if (day === 5 && hours >= 10) { diff = 0; } else { diff = diff * -1; }
-            target.setDate(d.getDate() + diff); target.setHours(10, 0, 0, 0);
-            const yyyy = target.getFullYear(); const mm = String(target.getMonth() + 1).padStart(2, '0'); const dd = String(target.getDate()).padStart(2, '0');
-            return `week_${yyyy}_${mm}_${dd}`;
-        }
-        function listenToCurrentWeekTracks() {
-            const currentWeekId = getAdminCurrentWeekKey();
-            database.ref(`udg_weekly_tracks_vault/${currentWeekId}`).on('value', (s) => {
-                trackTbody.innerHTML = ''; const weeklyTracks = s.val();
-                if (!weeklyTracks) { trackTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center;">🎵 เซ็ตโหวตสัปดาห์นี้ยังว่างเปล่า สาดเพลงโฆษณาค่ายชุดใหม่บรรทัดบนได้เลยครับน้าบักหำทิว!</td></tr>`; return; }
-                Object.keys(weeklyTracks).forEach(key => {
-                    const track = weeklyTracks[key]; const tr = document.createElement('tr');
-                    tr.innerHTML = `<td><strong>${track.title}</strong><br><span style="color:#555; font-size:0.75rem;">${track.artist}</span></td><td style="color:#00ffff; font-family:monospace;">${track.ytId}</td><td><button class="delete-artist-btn" onclick="removeTrackFromCurrentWeek('${key}')">// REMOVE</button></td>`;
-                    trackTbody.appendChild(tr);
-                });
-            });
-        }
-        listenToCurrentWeekTracks();
-        document.getElementById('addTrackBtn').addEventListener('click', () => {
-            const currentWeekId = getAdminCurrentWeekKey(); const title = document.getElementById('newTrackTitle').value.trim(); const artist = document.getElementById('newTrackArtist').value.trim(); const ytId = document.getElementById('newTrackYtId').value.trim();
-            if (!title || !artist || !ytId) { alert("❌ กรุณากรอกรายละเอียดช่องเพลงให้ครบถ้วนก่อนครับน้า!"); return; }
-            const trackRandomId = "track_" + Date.now();
-            database.ref(`udg_weekly_tracks_vault/${currentWeekId}/${trackRandomId}`).set({ id: trackRandomId, title: title, artist: artist, ytId: ytId }, (err) => { if (!err) { document.getElementById('newTrackTitle').value = ''; document.getElementById('newTrackArtist').value = ''; document.getElementById('newTrackYtId').value = ''; alert(`🔥 สาดเพลงใหม่สำเร็จแล้วครับน้า!`); } });
-        });
-        function removeTrackFromCurrentWeek(trackKey) { const currentWeekId = getAdminCurrentWeekKey(); if (confirm("คุณต้องการถอดเพลงนี้ออกใช่หรือไม่?")) database.ref(`udg_weekly_tracks_vault/${currentWeekId}/${trackKey}`).remove(); }
-
-        // [ระบบแท็บที่ 3] คีย์แร็ปเปอร์
-        const tbody = document.getElementById('artist-list-tbody');
-        database.ref('udg_artist_credentials').on('value', (s) => {
-            tbody.innerHTML = ''; const list = s.val(); if (!list) { tbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center;">🎤 ยังไม่มีรายชื่อแร็ปเปอร์</td></tr>`; return; }
-            Object.keys(list).forEach(k => {
-                const tr = document.createElement('tr'); tr.innerHTML = `<td style="color:#ffaa00; font-weight:bold;">${k}</td><td style="color:#aaa;">${list[k]}</td><td><button class="delete-artist-btn" onclick="removeArtistFromCloud('${k}')">// REMOVE</button></td>`; tbody.appendChild(tr);
-            });
-        });
-        document.getElementById('addArtistBtn').addEventListener('click', () => {
-            let name = document.getElementById('newArtistName').value.trim(); const pass = document.getElementById('newArtistPass').value.trim();
-            if (!name || !pass) { alert("❌ กรุณากรอกข้อมูลศิลปินให้ครบถ้วนก่อน!"); return; }
-            if (!name.startsWith('@')) name = '@' + name;
-            database.ref(`udg_artist_credentials/${name}`).set(pass, (err) => { if (!err) { document.getElementById('newArtistName').value = ''; document.getElementById('newArtistPass').value = ''; alert(`🔥 เพิ่มสิทธิ์แร็ปเปอร์ ${name} สำเร็จ!`); } });
-        });
-        function removeArtistFromCloud(k) { if (confirm(`คุณต้องการลบสิทธิ์แร็ปเปอร์ ${k} ใช่หรือไม่?`)) database.ref(`udg_artist_credentials/${k}`).remove(); }
-
-        // [ระบบแท็บที่ 4] จัดการโฆษณา 10 วิ
-        const adTbody = document.getElementById('ad-list-tbody');
-        database.ref('udg_live_advertisements').on('value', (s) => {
-            adTbody.innerHTML = ''; const ads = s.val(); if (!ads) { adTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center;">💸 ยังไม่มีโฆษณาหมุนเวียน</td></tr>`; return; }
-            Object.keys(ads).forEach(k => {
-                const tr = document.createElement('tr'); tr.innerHTML = `<td style="color:#39ff14;">${ads[k].title}</td><td style="color:#aaa; font-size:0.8rem;">${ads[k].url}</td><td><button class="delete-artist-btn" onclick="removeAdFromCloud('${k}')">// REMOVE</button></td>`; adTbody.appendChild(tr);
-            });
-        });
-        document.getElementById('addAdBtn').addEventListener('click', () => {
-            const title = document.getElementById('newAdTitle').value.trim(); const desc = document.getElementById('newAdDesc').value.trim(); const img = document.getElementById('newAdImage').value.trim(); const url = document.getElementById('newAdUrl').value.trim();
-            if (!title || !desc) { alert("❌ กรุณากรอกรายละเอียดโฆษณาให้ครบถ้วน!"); return; }
-            database.ref('udg_live_advertisements').push({ title: title, description: desc, image: img ? img : "", url: url ? url : "#" }, (err) => { if (!err) { document.getElementById('newAdTitle').value = ''; document.getElementById('newAdDesc').value = ''; document.getElementById('newAdImage').value = ''; document.getElementById('newAdUrl').value = '#'; alert(`🔥 เพิ่มป้ายสปอนเซอร์ "${title}" เข้าคิวเรียบร้อยครับ!`); } });
-        });
-        function removeAdFromCloud(k) { if(confirm("ต้องการลบป้ายโฆษณานี้ใช่หรือไม่?")) database.ref(`udg_live_advertisements/${k}`).remove(); }
-
-        // [ระบบแท็บที่ 5] บันทึกประวัติสัปดาห์
-        const archivedWeeksList = document.getElementById('archivedWeeksList');
-        database.ref('udg_votes_archive_logs').on('value', (snapshot) => {
-            archivedWeeksList.innerHTML = ''; const logs = snapshot.val();
-            if (!logs) { archivedWeeksList.innerHTML = `<li style="color: #555; font-size: 0.85rem;">📜 ทำเนียบประวัติว่างเปล่า</li>`; return; }
-            Object.keys(logs).forEach(weekKey => {
-                const log = logs[weekKey]; const li = document.createElement('li');
-                li.style.cssText = "background:#111; padding:10px 15px; border-radius:4px; border-left:3px solid #cc00ff; display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;";
-                li.innerHTML = `<div><strong style="color:#fff;">🗓️ รอบสัปดาห์เซ็ต: ${weekKey.replace('week_', '').replace(/_/g, '-')}</strong><br><span style="color:#aaa;">🥇 แชมป์ประจำเซ็ต: <span style="color:#00ffff; font-weight:bold;">${log.winnerTitle}</span> - ${log.winnerArtist} (${log.winnerVotes} PTS)</span></div><button class="delete-artist-btn" onclick="deleteArchiveLog('${weekKey}')" style="color:#ff3333;">// DELETE LOG</button>`; archivedWeeksList.appendChild(li);
-            });
-        });
-        document.getElementById('archiveWeeklyBtn').addEventListener('click', async () => {
-            const currentWeekId = getAdminCurrentWeekKey();
-            if (!confirm(`🚨 ยืนยันการสรุปชาร์ตและปิดยอดเซ็ตเพลงสัปดาห์ [${currentWeekId}] ใช่หรือไม่?`)) return;
-            const voteSnapshot = await database.ref(`weekly_music_votes/${currentWeekId}`).once('value'); const votesData = voteSnapshot.val() ? voteSnapshot.val() : {};
-            const trackSnapshot = await database.ref(`udg_weekly_tracks_vault/${currentWeekId}`).once('value'); const weeklyTracks = trackSnapshot.val() ? trackSnapshot.val() : {};
-            if (Object.keys(weeklyTracks).length === 0) { alert("❌ ไม่มีรายชื่อเพลงเลยครับน้า!"); return; }
-            let sortedChartList = Object.keys(weeklyTracks).map(key => { const track = weeklyTracks[key]; return { title: track.title, artist: track.artist, votes: votesData[track.id] ? votesData[track.id] : 0 }; });
-            sortedChartList.sort((a, b) => b.votes - a.votes); const winner = sortedChartList[0];
-            const archivePayload = { winnerTitle: winner.title, winnerArtist: winner.artist, winnerVotes: winner.votes, closedTimestamp: Date.now() };
-            database.ref(`udg_votes_archive_logs/${currentWeekId}`).set(archivePayload, (error) => { if (!error) alert(`🏆 LOCK ARCHIVE SUCCESS!`); });
-        });
-        function deleteArchiveLog(weekKey) { if (confirm(`คุณต้องการลบแฟ้มบันทึกประวัติรอบสัปดาห์ ${weekKey} ใช่หรือไม่?`)) database.ref(`udg_votes_archive_logs/${weekKey}`).remove(); }
-
-        // =================================================================
-        // ─── 🤝 💛 [ระบบแท็บที่ 6] ENGINE: เพิ่ม-ลบ ลิงก์โลโก้แบรนด์พาร์ทเนอร์ ───
-        // =================================================================
-        const logoTbody = document.getElementById('logo-list-tbody');
-
-        // สั่งหูฟังคู่ขนาน คอยดึงรายชื่อลิงก์โลโก้แบรนด์จาก Firebase คลาวด์มาพ่นลงตาราง
-        database.ref('udg_culture_partners_logos').on('value', (snapshot) => {
-            logoTbody.innerHTML = '';
-            const logos = snapshot.val();
-            
-            if (!logos) {
-                logoTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center;">🤝 แถบลูปโลโก้ว่างเปล่า สาดลิงก์รูปพาร์ทเนอร์ด้านบนเข้ามาเติมไฟได้เลยครับน้าบักหำทิว!</td></tr>`;
-                return;
-            }
-
-            Object.keys(logos).forEach(key => {
-                const partner = logos[key];
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong style="color:#fff000;">${partner.name}</strong></td>
-                    <td>
-                        <div style="width:40px; height:40px; background:#000; border:1px solid #222; border-radius:4px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
-                            <img src="${partner.image}" alt="Logo" style="width:100%; height:100%; object-fit:contain; filter:grayscale(100%);">
-                        </div>
-                    </td>
-                    <td><button class="delete-artist-btn" onclick="removePartnerLogo('${key}')" style="color:#ff3333;">// REMOVE</button></td>
-                `;
-                logoTbody.appendChild(tr);
-            });
-        });
-
-        // ฟังก์ชันสั่งยิงเพิ่มรายชื่อพาร์ทเนอร์แบรนด์ขึ้นระบบคลาวด์คุมลูปสไลด์
-        document.getElementById('addPartnerLogoBtn').addEventListener('click', () => {
-            const name = document.getElementById('newPartnerName').value.trim();
-            const image = document.getElementById('newPartnerImg').value.trim();
-
-            if (!name || !image) {
-                alert("❌ กรุณากรอกชื่อแบรนด์พาร์ทเนอร์และลิงก์ URL รูปภาพโลโก้ให้ครบถ้วนก่อนครับน้า!");
-                return;
-            }
-
-            database.ref('udg_culture_partners_logos').push({
-                name: name,
-                image: image,
-                timestamp: Date.now()
-            }, (error) => {
-                if (!error) {
-                    document.getElementById('newPartnerName').value = '';
-                    document.getElementById('newPartnerImg').value = '';
-                    alert(`🔥 สาดโลโก้แบรนด์ "${name}" เข้าสู่คิวสไลด์แถบวัฒนธรรม UDG สำเร็จเรียบร้อยคร้าบน้า!`);
-                    updateLogoPreview();
-                }
-            });
-        });
-
-        function removePartnerLogo(key) {
-            if (confirm("แจ้งเตือนแอดมิน: คุณต้องการถอดถอนโลโก้พาร์ทเนอร์เจ้านี้ออกจากแถบสไลด์หน้าเว็บหลักใช่หรือไม่?")) {
-                database.ref(`udg_culture_partners_logos/${key}`).remove();
-            }
-        }
-    </script>
+    <script src="admin-js.js"></script>
 </body>
 </html>
