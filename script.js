@@ -617,3 +617,86 @@ async function deleteNewsItemByAdmin(newsId) {
     if (!adminPass) return;
     if (adminPass === "udg2026") { database.ref(`udg_news_drops/${newsId}`).remove(); }
 }
+
+// =================================================================
+// ─── 💸 🔄 AUTOMATED AD ROTATOR SYSTEM: ระบบสลับโฆษณาออโต้ทุก 10 วิ ───
+// =================================================================
+const liveAdBanner = document.getElementById('live-ad-banner');
+const liveAdContent = document.getElementById('live-ad-content');
+
+let currentAdIndex = 0;
+let cloudAdsList = [];
+let adRotationInterval = null;
+
+// ป้ายโฆษณาตั้งต้นเซฟตี้หลักของระบบ กรณีที่ยังไม่มีสปอนเซอร์มาติดต่อโฆษณาตามรูป image_f43347.png
+const fallbackDefaultAd = {
+    url: "#",
+    title: "ADVERTISE WITH US",
+    description: "พื้นที่โฆษณาว่าง ติดต่อเพื่อโปรโมทแบรนด์หรืออีเวนต์ของคุณที่นี่",
+    image: "" // ไม่มีรูปให้โชว์ข้อความเท่ ๆ แบบเดิม
+};
+
+function renderActiveAd() {
+    if (!liveAdBanner || !liveAdContent) return;
+
+    // ถ้าไม่มีข้อมูลสปอนเซอร์ในคลาวด์ ให้ดึงค่ามาตรฐานสแตนบายไว้ก่อน
+    if (cloudAdsList.length === 0) {
+        liveAdBanner.href = fallbackDefaultAd.url;
+        // เคลียร์ภาพพื้นหลังกรณีเป็นป้ายว่าง
+        liveAdBanner.style.backgroundImage = 'none'; 
+        liveAdContent.innerHTML = `
+            <h3>${fallbackDefaultAd.title}</h3>
+            <p>${fallbackDefaultAd.description}</p>
+        `;
+        return;
+    }
+
+    // ดึงข้อมูลโฆษณาชิ้นปัจจุบันขึ้นมาเปิดการ์ดโชว์
+    const activeAd = cloudAdsList[currentAdIndex];
+    liveAdBanner.href = activeAd.url;
+
+    // ถ้าน้าใส่ลิงก์รูปภาพมาด้วย ให้เปลี่ยนพื้นหลังเป็นรูปภาพแบนเนอร์เจ้าของโฆษณานั้น ๆ ทันที
+    if (activeAd.image && activeAd.image !== "") {
+        liveAdBanner.style.backgroundImage = `url('${activeAd.image}')`;
+        liveAdBanner.style.backgroundSize = 'cover';
+        liveAdBanner.style.backgroundPosition = 'center';
+        liveAdContent.innerHTML = ''; // เคลียร์ตัวหนังสือทิ้งเพื่อโชว์รูปภาพแบนเนอร์เต็มกรอบ
+    } else {
+        // หากไม่มีรูปภาพ ให้โชว์ตัวหนังสือหัวข้อโฆษณาที่กรอกมาให้สวยงาม
+        liveAdBanner.style.backgroundImage = 'none';
+        liveAdContent.innerHTML = `
+            <h3>${activeAd.title}</h3>
+            <p>${activeAd.description}</p>
+        `;
+    }
+
+    // คำนวณขยับลำดับไปคิวถัดไป วนลูปต่อเนื่องไม่มีสิ้นสุด
+    currentAdIndex = (currentAdIndex + 1) % cloudAdsList.length;
+}
+
+// หูฟังตรวจจับคลังตู้โฆษณาบน Firebase
+database.ref('udg_live_advertisements').on('value', (snapshot) => {
+    const data = snapshot.val();
+    cloudAdsList = [];
+    currentAdIndex = 0;
+
+    if (data) {
+        // กวาดข้อมูลสปอนเซอร์ทั้งหมดแปลงเป็น Array ลิสต์
+        Object.keys(data).forEach(key => {
+            cloudAdsList.push(data[key]);
+        });
+    }
+
+    // สั่งรันแสดงผลโฆษณาชิ้นแรกทันที
+    renderActiveAd();
+
+    // เคลียร์ตัวนับเวลาเก่าทิ้งเพื่อป้องกันลูปเดินซ้อนทับกัน
+    if (adRotationInterval) clearInterval(adRotationInterval);
+
+    // ⏳ 🎯 หัวใจสำคัญ: ตั้งเวลานับถอยหลังพ่นสลับป้ายโฆษณาชิ้นถัดไปทุก 10 วินาที (10000ms) ออโต้!
+    if (cloudAdsList.length > 1) {
+        adRotationInterval = setInterval(() => {
+            renderActiveAd();
+        }, 10000);
+    }
+});

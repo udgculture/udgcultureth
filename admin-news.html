@@ -303,10 +303,12 @@
     </div>
 
     <!-- 🎛️ 🎯 ปุ่มกดสลับแท็บเมนูด่วน (Tabs Bar ขจัดปัญหาหน้าจอแคบ/เลื่อนยาว) -->
-    <div class="tabs-container" id="adminTabsMenu">
+<div class="tabs-container" id="adminTabsMenu">
         <button type="button" class="tab-trigger-btn active" data-target="newsPanelBox"><i class="fa-solid fa-sliders"></i>📰 CONTENT</button>
         <button type="button" class="tab-trigger-btn" data-target="musicPanelBox"><i class="fa-solid fa-music"></i>🎵 MUSIC</button>
         <button type="button" class="tab-trigger-btn" data-target="artistPanelBox"><i class="fa-solid fa-user-shield"></i>🎤 ARTISTS</button>
+        <!-- ปุ่มแท็บคุมโฆษณาเพิ่มใหม่ -->
+        <button type="button" class="tab-trigger-btn" data-target="adPanelBox" style="border-color:#39ff14; color:#39ff14;"><i class="fa-solid fa-rectangle-ad"></i>💸 ADS MANAGER</button>
     </div>
 
     <!-- 📰 [แท็บที่ 1] กล่องคอนเทนต์ส่วนจัดการ ข่าวเด่น ข่าวสาร และศิลปินเรดาร์ -->
@@ -423,7 +425,46 @@
 
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
+<!-- 💸 🔄 [แท็บที่ 4 เพิ่มใหม่!] แผงจัดการระบบคลังสปอนเซอร์โฆษณาหมุนเวียน 10 วิ -->
+    <div class="admin-box" id="adPanelBox" style="border-color: #39ff14; box-shadow: 0 0 30px rgba(57, 255, 20, 0.05);">
+        <h2><i class="fa-solid fa-rectangle-ad" style="color: #39ff14;"></i> UDG LIVE ADS ROTATOR</h2>
+        <p style="color: #555; font-size: 0.85rem;">เพิ่มแบรนด์สปอนเซอร์ของลูกค้าหลายเจ้า ระบบจะสลับหมุนเวียนบนหน้าเว็บหลักให้ทุก 10 วินาที</p>
 
+        <div class="form-group">
+            <label style="color: #39ff14;">SPONSOR NAME (ชื่อแบรนด์ / หัวข้อโฆษณา)</label>
+            <input type="text" id="newAdTitle" placeholder="เช่น: คอนเสิร์ตใหญ่ค่าย UDG, แบรนด์เสื้อผ้าสตรีต">
+        </div>
+
+        <div class="form-group">
+            <label style="color: #39ff14;">AD DESCRIPTION (คำอธิบายหรือสโลแกนสั้น ๆ กรณีไม่ลงรูปภาพแบนเนอร์)</label>
+            <input type="text" id="newAdDesc" placeholder="เช่น: ซื้อบัตรได้แล้ววันนี้ที่เคาน์เตอร์, คอลเลคชันใหม่ลด 20%">
+        </div>
+
+        <div class="form-group">
+            <label style="color: #39ff14;">AD IMAGE URL (ลิงก์รูปภาพแบนเนอร์ขนาดสี่เหลี่ยมผืนผ้าแนวนอน ปล่อยว่างได้ถ้าร้านไม่มีรูป)</label>
+            <input type="text" id="newAdImage" placeholder="เอาลิงก์ตรงจากเว็บฝากรูปมาวางที่นี่...">
+        </div>
+
+        <div class="form-group">
+            <label style="color: #39ff14;">TARGET LINK URL (ลิงก์วาร์ปปลายทางเมื่อแฟนเพลงกดคลิกที่กล่องโฆษณา)</label>
+            <input type="text" id="newAdUrl" placeholder="เช่น ลิงก์เพจเฟซบุ๊กลูกค้า หรือลิงก์ซื้อบัตรคอนเสิร์ต..." value="#">
+        </div>
+
+        <button type="button" class="post-btn" id="addAdBtn" style="background: linear-gradient(45deg, #39ff14, #00ff88); box-shadow: 0 0 15px rgba(57,255,20,0.2); color: #000;"><i class="fa-solid fa-cloud-arrow-up"></i> PUBLISH LIVE ADVERTISEMENT</button>
+
+        <table class="artist-list-table">
+            <thead>
+                <tr>
+                    <th>แบรนด์ลูกค้า</th>
+                    <th>ลิงก์วาร์ปปลายทาง</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody id="ad-list-tbody">
+                <tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังระเบิดสัญญาณดึงข้อมูลลิสต์สปอนเซอร์...</td></tr>
+            </tbody>
+        </table>
+    </div>
     <script>
     const MASTER_ADMIN_PASS = "udg2026"; // รหัสกุญแจตรวจสอบหลักประจำเพจ UDG
 
@@ -685,6 +726,76 @@
         function removeArtistFromCloud(artistKey) {
             if (confirm(`คุณต้องการถอนรากถอนโคนลบสิทธิ์แร็ปเปอร์ ${artistKey} ใช่หรือไม่?`)) {
                 database.ref(`udg_artist_credentials/${artistKey}`).remove();
+            }
+        }
+        // ฟังก์ชันเพิ่มเติมสำหรับระบบสลับแท็บที่ 4
+        document.querySelectorAll(".tab-trigger-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const target = btn.getAttribute("data-target");
+                // สลัดเปิดปิดสีปุ่มแท็บโฆษณาคัสตอม
+                document.querySelectorAll(".admin-box").forEach(box => box.style.display = "none");
+                document.querySelectorAll(".tab-trigger-btn").forEach(b => b.classList.remove("active"));
+                document.getElementById(target).style.display = "block";
+                btn.classList.add("active");
+            });
+        });
+
+        // =================================================================
+        // ─── 💸 🔄 ENGINE: แผงเพิ่ม-ลบ ข้อมูลโฆษณาหมุนเวียน 10 วิ ───
+        // =================================================================
+        const adTbody = document.getElementById('ad-list-tbody');
+
+        // ดักฟังรายการโฆษณามาพ่นลงตารางหลังบ้าน
+        database.ref('udg_live_advertisements').on('value', (snapshot) => {
+            adTbody.innerHTML = '';
+            const ads = snapshot.val();
+            if (!ads) {
+                adTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center;">💸 ยังไม่มีสปอนเซอร์มาลงโฆษณาหมุนเวียนในขณะนี้</td></tr>`;
+                return;
+            }
+            Object.keys(ads).forEach(key => {
+                const ad = ads[key];
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong style="color:#39ff14;">${ad.title}</strong></td>
+                    <td style="font-size:0.8rem; color:#aaa; max-width:200px; overflow:hidden; text-overflow:ellipsis;">${ad.url}</td>
+                    <td><button class="delete-artist-btn" onclick="removeAdFromCloud('${key}')">// REMOVE</button></td>
+                `;
+                adTbody.appendChild(tr);
+            });
+        });
+
+        // สั่งยิงข้อมูลโฆษณาใหม่ขึ้นคลาวด์คุม 10 วิ
+        document.getElementById('addAdBtn').addEventListener('click', () => {
+            const title = document.getElementById('newAdTitle').value.trim();
+            const desc = document.getElementById('newAdDesc').value.trim();
+            const img = document.getElementById('newAdImage').value.trim();
+            const url = document.getElementById('newAdUrl').value.trim();
+
+            if (!title || !desc) {
+                alert("❌ กรุณากรอกชื่อแบรนด์ลูกค้าและคำอธิบายโฆษณาให้ครบถ้วนก่อนสาดขึ้นระบบครับน้า!");
+                return;
+            }
+
+            database.ref('udg_live_advertisements').push({
+                title: title,
+                description: desc,
+                image: img ? img : "",
+                url: url ? url : "#"
+            }, (error) => {
+                if (!error) {
+                    document.getElementById('newAdTitle').value = '';
+                    document.getElementById('newAdDesc').value = '';
+                    document.getElementById('newAdImage').value = '';
+                    document.getElementById('newAdUrl').value = '#';
+                    alert(`🔥 อัปโหลดระบบสปอนเซอร์ของแบรนด์ "${title}" เข้าสู่คิวหมุนเวียนเว็บหลัก UDG เรียบร้อยครับน้า!`);
+                }
+            });
+        });
+
+        function removeAdFromCloud(adKey) {
+            if (confirm("คุณต้องการยกเลิกสัญญาและลบป้ายโฆษณาสปอนเซอร์เจ้านี้ออกจากหน้าเว็บหลักใช่หรือไม่?")) {
+                database.ref(`udg_live_advertisements/${adKey}`).remove();
             }
         }
     </script>
