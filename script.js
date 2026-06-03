@@ -321,28 +321,16 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // =================================================================
-// ─── 🗳️ 🎵 DYNAMIC LIVE MUSIC CHART ENGINE (แต้มโหวตเก่าไม่หาย) ───
+// ─── 🗳️ 🎵 NEW CENTRAL WEEKLY SET CHART ENGINE (ล้างกระดานออโต้ทุกวันศุกร์) ───
 // =================================================================
-let musicTracksData = {}; 
-
 const liveChartDisplay = document.getElementById('live-chart-display');
 const modalVotingList = document.getElementById('modal-voting-list');
 const voteSearchInput = document.getElementById('voteSearchInput');
 
+let musicTracksData = {}; // เปลี่ยนเป็นคลังรับเซ็ตเพลง Dynamic ประจำสัปดาห์จากคลาวด์ 100%
 let globalCurrentWeekVotes = {};
 let ytPlayer = null; 
 let updateTimerInterval = null;
-
-// รายชื่อเพลงตั้งต้นเซฟตี้หลักของระบบ สล็อตคีย์ดั้งเดิมห้ามแก้
-const fallbackStaticTracks = {
-    "track_01": { id: "track_01", title: "รอ รอ รอ", artist: "Dxshane feat. JayQ", ytId: "78gSbjE71m8" }, 
-    "track_02": { id: "track_02", title: "ซึมเศร้าก็เด้าได้ (Remix)", artist: "S!NS feat. THXWXN, MACNA", ytId: "_H7sCARrYJU" }, 
-    "track_03": { id: "track_03", title: "หนุ่มบ้านนอก (Remix)", artist: "Aniydy, JayQ", ytId: "L2OSHr5UikU" },
-    "track_04": { id: "track_04", title: "Miss คิด", artist: "Ezchill", ytId: "L2OSHr5UikU" },
-    "track_05": { id: "track_05", title: "U CAN'T SEE ME", artist: "YOUNGGU X P6ICK", ytId: "KHyw-tyxrE4" },
-    "track_06": { id: "track_06", title: "พิษภัย II", artist: "FIIXD, 1MILL, 4BANG, KING KRAZY & SUNNYBONE", ytId: "YmqfFYvpIwc" },
-    "track_07": { id: "track_07", title: "NOBODY", artist: "N4 x wh0dafvckis19", ytId: "LDfk_7RJctc" }
-};
 
 const tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
@@ -381,7 +369,13 @@ function renderModalVotingStation(currentWeekVotes, filterText = "") {
     modalVotingList.innerHTML = '';
     const query = filterText.toLowerCase().trim();
     
-    Object.keys(musicTracksData).forEach(trackKey => {
+    const trackKeys = Object.keys(musicTracksData);
+    if (trackKeys.length === 0) {
+        modalVotingList.innerHTML = `<div style="color:#555; text-align:center; padding:20px; font-size:0.9rem;">🎵 วันศุกร์สัปดาห์ใหม่เริ่มขึ้นแล้ว!<br>รอแอดมินสาดเพลงเซ็ตโหวตประจำสัปดาห์นี้เข้าสู่ระบบครับน้า BRO!</div>`;
+        return;
+    }
+
+    trackKeys.forEach(trackKey => {
         const track = musicTracksData[trackKey];
         const votes = currentWeekVotes[track.id] ? currentWeekVotes[track.id] : 0;
         if (query !== "" && !track.title.toLowerCase().includes(query) && !track.artist.toLowerCase().includes(query)) return;
@@ -421,17 +415,18 @@ function submitTrackVote(trackId) {
     });
 }
 
-function setupCombinedMusicEngine() {
-    database.ref('udg_music_tracks').on('value', (trackSnapshot) => {
-        const cloudTracks = trackSnapshot.val();
-        if (!cloudTracks) { musicTracksData = fallbackStaticTracks; } 
-        else { musicTracksData = { ...fallbackStaticTracks, ...cloudTracks }; }
+// 🔄 ⚡ หูฟังอัจฉริยะรุ่นปฏิวัติวงการ: ดึงรายชื่อเพลงพ่วงคะแนนโหวตเจาะจงเฉพาะสัปดาห์ปัจจุบัน (หมดปัญหาเพลงเก่าคาจอ)
+function setupWeeklySetMusicEngine() {
+    const currentWeekId = getWeekIdentifier(new Date());
 
-        database.ref('weekly_music_votes').once('value', (voteSnapshot) => {
-            const allWeeksData = voteSnapshot.val() ? voteSnapshot.val() : {};
-            const now = new Date();
-            const currentWeekId = getWeekIdentifier(now);          
-            const currentWeekVotes = allWeeksData[currentWeekId] ? allWeeksData[currentWeekId] : {};
+    // 🎯 หันไปดึงรายชื่อเพลงที่อยู่ในตู้ประจำสัปดาห์นั้น ๆ โดยตรงจากคลาวด์
+    database.ref(`udg_weekly_tracks_vault/${currentWeekId}`).on('value', (trackSnapshot) => {
+        const weeklyTracks = trackSnapshot.val();
+        musicTracksData = weeklyTracks ? weeklyTracks : {}; // ถ้าสัปดาห์ใหม่ยังไม่มีเพลง จะได้กล่องเปล่าเคลียร์กระดานออโต้ ทันที!
+
+        // ดึงแต้มคะแนนโหวตสะสมประจำสัปดาห์นั้นมาแมตช์คู่กันคู่ขนาน
+        database.ref(`weekly_music_votes/${currentWeekId}`).on('value', (voteSnapshot) => {
+            const currentWeekVotes = voteSnapshot.val() ? voteSnapshot.val() : {};
             globalCurrentWeekVotes = currentWeekVotes;
             
             if (voteSearchInput) { renderModalVotingStation(currentWeekVotes, voteSearchInput.value); } 
@@ -441,10 +436,14 @@ function setupCombinedMusicEngine() {
                 const track = musicTracksData[key];
                 return { ...track, votes: currentWeekVotes[track.id] ? currentWeekVotes[track.id] : 0 };
             });
-            sortedList.sort((a, b) => b.votes - a.votes);
             
             if (liveChartDisplay) {
                 liveChartDisplay.innerHTML = '';
+                if (sortedList.length === 0) {
+                    liveChartDisplay.innerHTML = `<div style="padding:20px; color:#444; text-align:center; font-size:0.85rem;">⏳ WAITING FOR THIS WEEK'S MUSIC SET DROPS...</div>`;
+                    return;
+                }
+                sortedList.sort((a, b) => b.votes - a.votes);
                 sortedList.slice(0, 5).forEach((track, index) => {
                     const rankNum = String(index + 1).padStart(2, '0');
                     const chartItem = document.createElement('div');
@@ -464,8 +463,8 @@ function setupCombinedMusicEngine() {
     });
 }
 
-setupCombinedMusicEngine();
-database.ref('weekly_music_votes').on('value', () => { setupCombinedMusicEngine(); });
+// สั่งลุยรันระบบชาร์ตหมุนเวียน Dynamic รายสัปดาห์ทันที
+setupWeeklySetMusicEngine();
 
 if (voteSearchInput) {
     voteSearchInput.addEventListener('input', (e) => { renderModalVotingStation(globalCurrentWeekVotes, e.target.value); });
@@ -535,7 +534,7 @@ if (playerPlayBtn) {
 }
 
 // =================================================================
-// ─── 📰 🔥 CENTRAL APP FEED: ระบบคลาวด์ดูดฟีดอัตโนมัติ UDG FULL OPTION ───
+// ─── 📰 🔥 CENTRAL APP FEED: ระบบดูดฟีดข่าวสาร ───
 // =================================================================
 const liveNewsGrid = document.getElementById('live-news-grid');
 const liveFeaturedCard = document.getElementById('live-featured-card');
@@ -617,7 +616,6 @@ async function deleteNewsItemByAdmin(newsId) {
     if (!adminPass) return;
     if (adminPass === "udg2026") { database.ref(`udg_news_drops/${newsId}`).remove(); }
 }
-
 // =================================================================
 // ─── 💸 🔄 AUTOMATED AD ROTATOR SYSTEM: ระบบสลับโฆษณาออโต้ทุก 10 วิ ───
 // =================================================================

@@ -260,36 +260,45 @@ footer {
 /* =========================================
    พื้นที่โฆษณา (Ad Banner)
 ========================================= */
+/* =================================================================
+   💸 🔄 AD BANNER RESPONSIVE RAGNAROK (ฉบับล็อกสัดส่วนตายตัว ไม่ล้นจอ 100%)
+================================================================= */
 .ad-container {
     max-width: 1200px;
-    margin: 40px auto 10px auto;
+    margin: 30px auto 10px auto;
     padding: 0 20px;
+    width: 100%;
 }
 
 .ad-banner {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 150px;
-    background: linear-gradient(45deg, #050505, #111111);
-    /* กรอบเส้นประสีฟ้า Cyan */
+    width: 100%;
+    
+    /* 🎯 หัวใจสำคัญ: บังคับล็อกสัดส่วนแบนเนอร์ให้เป็น 16:5 เสมอ (ห้ามใช้ความสูง px ดิบ ๆ ค้ำจอ) */
+    aspect-ratio: 16 / 5; 
+    
+    background: #0a0a0a;
     border: 2px dashed rgba(0, 255, 255, 0.4); 
     border-radius: 8px;
     text-align: center;
     text-decoration: none;
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .ad-banner:hover {
-    background: rgba(0, 255, 255, 0.02);
-    border-style: solid; /* เปลี่ยนเส้นประเป็นเส้นทึบตอนชี้ */
+    background-color: rgba(0, 255, 255, 0.02);
+    border-style: solid;
     border-color: var(--accent-color);
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.25);
 }
 
-/* ป้าย Tag เล็กๆ มุมขวาบน บ่งบอกว่าเป็นโฆษณา */
 .ad-label {
     position: absolute;
     top: 10px;
@@ -301,7 +310,7 @@ footer {
     padding: 3px 8px;
     border-radius: 4px;
     letter-spacing: 1px;
-    transition: all 0.3s ease;
+    z-index: 10;
 }
 
 .ad-banner:hover .ad-label {
@@ -309,11 +318,22 @@ footer {
     color: #000;
 }
 
+/* ควบคุมกล่องเนื้อหาด้านในไม่ให้เบียดดันป้ายขยาย */
+.ad-content {
+    padding: 10px 20px;
+    width: 100%;
+    z-index: 5;
+    box-sizing: border-box;
+}
+
 .ad-content h3 {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 2rem;
-    color: #444; /* สีเทาเข้มๆ ดูคูลๆ */
+    font-size: 2.2rem; /* ขนาดบนจอคอมใหญ่สะใจ */
+    color: #444;
     letter-spacing: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     transition: color 0.3s ease;
 }
 
@@ -324,19 +344,47 @@ footer {
 .ad-content p {
     color: #666;
     font-size: 0.95rem;
-    margin-top: 5px;
+    margin-top: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* ปรับขนาดกล่องโฆษณาสำหรับจอมือถือ */
+/* 📱 🎯 จุดสับสวิตช์ย่อขนาดแบนเนอร์และฟอนต์เมื่อเปิดบนจอมือถือ (Mobile Match) */
 @media (max-width: 768px) {
-    .ad-banner {
-        min-height: 120px;
+    .ad-container {
+        padding: 0 15px;
+        margin: 20px auto 5px auto;
     }
+    
+    .ad-banner {
+        /* 🎯 ปรับสัดส่วนจอมือถือให้บางลงกระชับขึ้นเป็นแนวนอนผืนผ้าสวย ๆ */
+        aspect-ratio: 16 / 4.5; 
+        border-width: 1px;
+    }
+    
+    .ad-content {
+        padding: 10px;
+    }
+    
     .ad-content h3 {
-        font-size: 1.5rem;
+        font-size: 1.1rem !important; /* หดฟอนต์หัวข้อลงมาให้พอดีเฟรมนีออน */
+        letter-spacing: 1px;
+        margin-top: 5px;
+    }
+    
+    .ad-content p {
+        font-size: 0.75rem !important; /* หดฟอนต์อธิบายลงมาให้เนียนตา */
+        margin-top: 2px;
+    }
+    
+    .ad-label {
+        font-size: 0.6rem;
+        padding: 2px 6px;
+        top: 5px;
+        right: 5px;
     }
 }
-
 /* =========================================
    ปุ่ม Social Media (แบบไอคอนวงกลม)
 ========================================= */
