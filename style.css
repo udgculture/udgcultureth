@@ -257,11 +257,8 @@ footer {
     font-size: 0.9rem;
 }
 
-/* =========================================
-   พื้นที่โฆษณา (Ad Banner)
-========================================= */
 /* =================================================================
-   💸 🔄 AD BANNER RESPONSIVE RAGNAROK (ฉบับล็อกสัดส่วนตายตัว ไม่ล้นจอ 100%)
+   💸 🔄 NEW AD BANNER RESPONSIIVE SHIELD (ฉบับขจัดกล่องดำโบ๋และภาพล้นเฟรม)
 ================================================================= */
 .ad-container {
     max-width: 1200px;
@@ -271,41 +268,44 @@ footer {
 }
 
 .ad-banner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block; /* สับสวิตช์เป็นบล็อกอิสระ เพื่อปล่อยให้ภาพจริงดันมิติความสูงเองร้อยเปอร์เซ็นต์ */
     width: 100%;
     
-    /* 🎯 หัวใจสำคัญ: บังคับล็อกสัดส่วนแบนเนอร์ให้เป็น 16:5 เสมอ (ห้ามใช้ความสูง px ดิบ ๆ ค้ำจอ) */
-    aspect-ratio: 16 / 5; 
+    /* 🎯 จุดตายที่ 1: ลบ height: 250px ตัวเก่าทิ้งไป! แล้วปล่อยให้ความสูงปรับตามรูปภาพอัตโนมัติ */
+    height: auto !important; 
     
     background: #0a0a0a;
     border: 2px dashed rgba(0, 255, 255, 0.4); 
     border-radius: 8px;
-    text-align: center;
     text-decoration: none;
     position: relative;
     overflow: hidden;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .ad-banner:hover {
-    background-color: rgba(0, 255, 255, 0.02);
     border-style: solid;
     border-color: var(--accent-color);
     box-shadow: 0 0 25px rgba(0, 255, 255, 0.25);
+}
+
+/* 🎯 จุดตายที่ 2: บังคับล็อกสัดส่วนรูปภาพโฆษณาให้แนบสนิทชิดขอบเฟรมนีออน ไม่ล้น ไม่เหลือช่องดำ */
+#live-ad-img {
+    width: 100%;
+    height: auto !important; /* ยืดหยุ่นความสูงตามสเกลความกว้างจริงของหน้าจออุปกรณ์ */
+    display: block;
+    object-fit: contain;
+    margin: 0;
+    padding: 0;
 }
 
 .ad-label {
     position: absolute;
     top: 10px;
     right: 10px;
-    background-color: #333;
-    color: #aaa;
-    font-size: 0.7rem;
+    background-color: rgba(17, 17, 17, 0.85); 
+    color: #fff;
+    font-size: 0.65rem;
     font-weight: 800;
     padding: 3px 8px;
     border-radius: 4px;
@@ -313,76 +313,50 @@ footer {
     z-index: 10;
 }
 
-.ad-banner:hover .ad-label {
-    background-color: var(--accent-color);
-    color: #000;
-}
-
-/* ควบคุมกล่องเนื้อหาด้านในไม่ให้เบียดดันป้ายขยาย */
+/* ควบคุมกล่องข้อความโฆษณาว่าง (จะเห็นเฉพาะตอนที่ยังไม่มีแบรนด์ลูกค้ามาลงโฆษณา) */
 .ad-content {
-    padding: 10px 20px;
+    padding: 40px 20px;
+    text-align: center;
     width: 100%;
-    z-index: 5;
-    box-sizing: border-box;
 }
 
 .ad-content h3 {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 2.2rem; /* ขนาดบนจอคอมใหญ่สะใจ */
+    font-size: 2.2rem;
     color: #444;
     letter-spacing: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: color 0.3s ease;
-}
-
-.ad-banner:hover .ad-content h3 {
-    color: var(--accent-color);
 }
 
 .ad-content p {
     color: #666;
     font-size: 0.95rem;
     margin-top: 6px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
-/* 📱 🎯 จุดสับสวิตช์ย่อขนาดแบนเนอร์และฟอนต์เมื่อเปิดบนจอมือถือ (Mobile Match) */
+/* 📱 ออปติไมซ์ช่องไฟกล่องครอบบนจอมือถือ */
 @media (max-width: 768px) {
     .ad-container {
         padding: 0 15px;
         margin: 20px auto 5px auto;
     }
-    
     .ad-banner {
-        /* 🎯 ปรับสัดส่วนจอมือถือให้บางลงกระชับขึ้นเป็นแนวนอนผืนผ้าสวย ๆ */
-        aspect-ratio: 16 / 4.5; 
         border-width: 1px;
     }
-    
     .ad-content {
-        padding: 10px;
+        padding: 25px 15px;
     }
-    
     .ad-content h3 {
-        font-size: 1.1rem !important; /* หดฟอนต์หัวข้อลงมาให้พอดีเฟรมนีออน */
+        font-size: 1.25rem;
         letter-spacing: 1px;
-        margin-top: 5px;
     }
-    
     .ad-content p {
-        font-size: 0.75rem !important; /* หดฟอนต์อธิบายลงมาให้เนียนตา */
-        margin-top: 2px;
+        font-size: 0.78rem;
     }
-    
     .ad-label {
-        font-size: 0.6rem;
-        padding: 2px 6px;
-        top: 5px;
-        right: 5px;
+        font-size: 0.55rem;
+        padding: 2px 5px;
+        top: 6px;
+        right: 6px;
     }
 }
 /* =========================================

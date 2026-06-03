@@ -619,29 +619,32 @@ async function deleteNewsItemByAdmin(newsId) {
 // =================================================================
 // ─── 💸 🔄 AUTOMATED AD ROTATOR SYSTEM: ระบบสลับโฆษณาออโต้ทุก 10 วิ ───
 // =================================================================
+// =================================================================
+// ─── 💸 🔄 AUTOMATED AD ROTATOR SYSTEM: ระบบสลับโฆษณาออโต้ฉบับรูปภาพเต็มใบ ───
+// =================================================================
 const liveAdBanner = document.getElementById('live-ad-banner');
 const liveAdContent = document.getElementById('live-ad-content');
+const liveAdImg = document.getElementById('live-ad-img'); // ดึงแท็กภาพตัวใหม่มาร่วมรันสัญญาณ
 
 let currentAdIndex = 0;
 let cloudAdsList = [];
 let adRotationInterval = null;
 
-// ป้ายโฆษณาตั้งต้นเซฟตี้หลักของระบบ กรณีที่ยังไม่มีสปอนเซอร์มาติดต่อโฆษณาตามรูป image_f43347.png
 const fallbackDefaultAd = {
     url: "#",
     title: "ADVERTISE WITH US",
     description: "พื้นที่โฆษณาว่าง ติดต่อเพื่อโปรโมทแบรนด์หรืออีเวนต์ของคุณที่นี่",
-    image: "" // ไม่มีรูปให้โชว์ข้อความเท่ ๆ แบบเดิม
+    image: ""
 };
 
 function renderActiveAd() {
-    if (!liveAdBanner || !liveAdContent) return;
+    if (!liveAdBanner || !liveAdContent || !liveAdImg) return;
 
-    // ถ้าไม่มีข้อมูลสปอนเซอร์ในคลาวด์ ให้ดึงค่ามาตรฐานสแตนบายไว้ก่อน
+    // กรณีคลังโฆษณาว่างเปล่า ให้เปิดข้อความโฆษณาว่างมาตรฐานดั้งเดิมขึ้นมาโชว์
     if (cloudAdsList.length === 0) {
         liveAdBanner.href = fallbackDefaultAd.url;
-        // เคลียร์ภาพพื้นหลังกรณีเป็นป้ายว่าง
-        liveAdBanner.style.backgroundImage = 'none'; 
+        liveAdImg.style.display = 'none'; // ซ่อนแท็กรูปภาพทิ้งไป
+        liveAdContent.style.display = 'block'; // เปิดข้อความมาตรฐานขึ้นมาแทน
         liveAdContent.innerHTML = `
             <h3>${fallbackDefaultAd.title}</h3>
             <p>${fallbackDefaultAd.description}</p>
@@ -649,49 +652,43 @@ function renderActiveAd() {
         return;
     }
 
-    // ดึงข้อมูลโฆษณาชิ้นปัจจุบันขึ้นมาเปิดการ์ดโชว์
     const activeAd = cloudAdsList[currentAdIndex];
     liveAdBanner.href = activeAd.url;
 
-    // ถ้าน้าใส่ลิงก์รูปภาพมาด้วย ให้เปลี่ยนพื้นหลังเป็นรูปภาพแบนเนอร์เจ้าของโฆษณานั้น ๆ ทันที
+    // 🎯 ถ้าน้ากรอกลิงก์รูปภาพของลูกค้าเข้ามาผ่านหลังบ้าน
     if (activeAd.image && activeAd.image !== "") {
-        liveAdBanner.style.backgroundImage = `url('${activeAd.image}')`;
-        liveAdBanner.style.backgroundSize = 'cover';
-        liveAdBanner.style.backgroundPosition = 'center';
-        liveAdContent.innerHTML = ''; // เคลียร์ตัวหนังสือทิ้งเพื่อโชว์รูปภาพแบนเนอร์เต็มกรอบ
+        liveAdImg.src = activeAd.image;
+        liveAdImg.style.display = 'block'; // สั่งเปิดไฟให้รูปภาพแสดงตัว
+        liveAdContent.style.display = 'none'; // สั่งซ่อนข้อความดิบเดิมทิ้งทันที งานอาร์ตลูกค้าจะได้ไม่พัง
     } else {
-        // หากไม่มีรูปภาพ ให้โชว์ตัวหนังสือหัวข้อโฆษณาที่กรอกมาให้สวยงาม
-        liveAdBanner.style.backgroundImage = 'none';
+        // หากลูกค้าเจ้านั้นไม่มีรูปภาพ ให้ถอยกลับมาโชว์หัวข้อตัวหนังสือสวย ๆ แทน
+        liveAdImg.style.display = 'none';
+        liveAdContent.style.display = 'block';
         liveAdContent.innerHTML = `
             <h3>${activeAd.title}</h3>
             <p>${activeAd.description}</p>
         `;
     }
 
-    // คำนวณขยับลำดับไปคิวถัดไป วนลูปต่อเนื่องไม่มีสิ้นสุด
     currentAdIndex = (currentAdIndex + 1) % cloudAdsList.length;
 }
 
-// หูฟังตรวจจับคลังตู้โฆษณาบน Firebase
+// ระบบดักฟีดสัญญาณจากคลาวด์ Firebase คุมเวลา 10 วิออโต้ตามเดิม
 database.ref('udg_live_advertisements').on('value', (snapshot) => {
     const data = snapshot.val();
     cloudAdsList = [];
     currentAdIndex = 0;
 
     if (data) {
-        // กวาดข้อมูลสปอนเซอร์ทั้งหมดแปลงเป็น Array ลิสต์
         Object.keys(data).forEach(key => {
             cloudAdsList.push(data[key]);
         });
     }
 
-    // สั่งรันแสดงผลโฆษณาชิ้นแรกทันที
     renderActiveAd();
 
-    // เคลียร์ตัวนับเวลาเก่าทิ้งเพื่อป้องกันลูปเดินซ้อนทับกัน
     if (adRotationInterval) clearInterval(adRotationInterval);
 
-    // ⏳ 🎯 หัวใจสำคัญ: ตั้งเวลานับถอยหลังพ่นสลับป้ายโฆษณาชิ้นถัดไปทุก 10 วินาที (10000ms) ออโต้!
     if (cloudAdsList.length > 1) {
         adRotationInterval = setInterval(() => {
             renderActiveAd();

@@ -73,14 +73,17 @@
         </div>
     </header>
 
- <section class="ad-container">
-        <!-- 🎯 ใส่ ID เพื่อระเบิดฟีดเปลี่ยนภาพและลิงก์วาร์ปโฆษณาทุก 10 วินาทีตามรูป image_f43347.png -->
+<section class="ad-container">
+        <!-- 🎯 โครงสร้างใหม่: ดึงภาพจริงมาปั่นสเกลออโต้แทนภาพพื้นหลังเพื่อป้องกันขอบขาดบนมือถือ -->
         <a href="#" target="_blank" class="ad-banner" id="live-ad-banner">
             <span class="ad-label">SPONSORED</span>
             <div class="ad-content" id="live-ad-content">
+                <!-- ข้อความมาตรฐานเดิมจะขึ้นโชว์เฉพาะตอนไม่มีป้ายสปอนเซอร์มาลงโฆษณา -->
                 <h3>ADVERTISE WITH US</h3>
                 <p>พื้นที่โฆษณาว่าง ติดต่อเพื่อโปรโมทแบรนด์หรืออีเวนต์ของคุณที่นี่</p>
             </div>
+            <!-- 📸 จุดตาย: แท็กรูปภาพที่จะคอยรับลิงก์ภาพจากระบบคลาวด์มาพ่นโชว์เต็มใบ -->
+            <img src="" alt="UDG ADVERTISEMENT" id="live-ad-img" style="display: none;">
         </a>
     </section>
 
