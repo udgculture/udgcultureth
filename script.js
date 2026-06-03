@@ -24,6 +24,7 @@ let currentRoom = 'general_1';
 let currentRoomRef = null;
 let isCooldown = false;
 
+// 🔐 รหัสลับสำหรับตรวจสิทธิ์แร็ปเปอร์ในเพจ และรหัสผ่านควบคุมโพสต์ข่าวของน้า
 const artistKeys = {
     '@Dxshane': 'shane999',
     '@JayQ': 'jayq888',
@@ -438,20 +439,17 @@ function renderModalVotingStation(currentWeekVotes, filterText = "") {
     }
 }
 
-// 🎯 🔐 LIGHTWEIGHT VERSION: ตัดระบบ IP ทิ้งถาวร! โหวตลื่นปรึ๊ด การันตีแจ้งเตือนดีดหน้าสุดทุกรอบชัวร์ 100%
 function submitTrackVote(trackId) {
     const now = new Date();
     const weekId = getWeekIdentifier(now); 
     const todayStr = now.toDateString();
 
-    // ดักล็อกสิทธิ์คนกดซ้ำผ่าน LocalStorage ระดับเบราว์เซอร์เครื่อง
     const lastVoteDate = localStorage.getItem(`last_vote_${trackId}`);
     if (lastVoteDate === todayStr) {
         showErrorAlert('VOTE LIMIT!', '❌ YOU ALREADY VOTED TODAY!<br>(น้ากดโหวตเพลงนี้ไปแล้ววันนี้ พรุ่งนี้ค่อยมาดันแต้มใหม่นะครับ BRO!)');
         return;
     }
 
-    // ยิงคะแนนตรงเข้า Firebase Realtime Database ทันที ไม่ต้องรอประมวลผลท่อ API นอก
     const trackVoteRef = database.ref(`weekly_music_votes/${weekId}/${trackId}`);
     trackVoteRef.transaction((currentVotes) => {
         return (currentVotes || 0) + 1;
@@ -552,9 +550,6 @@ function triggerPlayerFromChart(trackId) {
     }
 }
 
-// =================================================================
-// ─── ระบบปุ่มควบคุมป๊อปอัปเครื่องเล่นมินิส่งสัญญาณ YouTube CONTROLLER ───
-// =================================================================
 const playerPlayBtn = document.getElementById('player-play-btn');
 const playerTimeDisplay = document.getElementById('player-time-display');
 const discSpinningIcon = document.querySelector('.disc-spinning');
@@ -599,3 +594,143 @@ if (playerPlayBtn) {
         }
     });
 }
+
+// =================================================================
+// ─── 📰 🔥 NEW ADDITION: ระบบคลาวด์ดูดฟีดข่าวสารออโต้ + แผงแอดมินส่งข้อมูล ───
+// =================================================================
+const liveNewsGrid = document.getElementById('live-news-grid');
+const adminPostNewsBtn = document.getElementById('adminPostNewsBtn');
+
+// 🔄 สั่งหูฟังของ Firebase เปิดโหมดดักจ้องมองคลังโฟลเดอร์ข่าว ดึงข้อมูลมาสร้างการ์ดข่าวออโต้ทันที
+database.ref('udc_news_drops').on('value', (snapshot) => {
+    if (!liveNewsGrid) return;
+    liveNewsGrid.innerHTML = '';
+    
+    const allNewsData = snapshot.val();
+    
+    if (!allNewsData) {
+        liveNewsGrid.innerHTML = `<div style="padding:40px; color:#555; text-align:center; grid-column:1/-1;">📰 ยังไม่มีข่าวสารอัปเดตในระบบคลาวด์ขณะนี้ พิมพ์โพสต์เพิ่มข่าวได้ที่แผงควบคุมด้านล่างครับน้า</div>`;
+        return;
+    }
+    
+    // แปลงข้อมูลเป็นลิสต์แล้วเรียงลำดับเอาข่าวที่อัพใหม่ขึ้นก่อนเพื่อน (เรียงจาก Timestamp ล่าสุด)
+    let newsList = Object.keys(allNewsData).map(key => {
+        return { newsId: key, ...allNewsData[key] };
+    });
+    newsList.sort((a, b) => b.timestamp - a.timestamp);
+    
+    // วนลูปสาดแท็กการ์ดข่าวขึ้นหน้าเว็บหลักโดยตรง ไม่ต้องผ่านโค้ด HTML อีกต่อไป
+    newsList.forEach(news => {
+        const articleCard = document.createElement('article');
+        articleCard.className = 'news-card';
+        
+        // ถ้าเป็นแอดมินเพจ UDC เปิดดูเว็บ จะมีปุ่มกากบาทแอบซ่อนเพื่อใช้กดลบข่าวขยะทิ้งได้ทันทีหลังบ้าน
+        articleCard.innerHTML = `
+            <div class="news-img">
+                <img src="${news.image}" alt="News Image" onerror="this.src='image/ขาวใส.png'">
+            </div>
+            <div class="news-content">
+                <span class="news-tag">${news.tag}</span>
+                <h3 class="news-title">${news.title}</h3>
+                <p class="news-excerpt">${news.excerpt}</p>
+                <button type="button" style="background:transparent; border:none; color:#333; font-size:0.75rem; margin-top:15px; cursor:pointer; display:block; padding:0;" onclick="deleteNewsItemByAdmin('${news.newsId}')">// REMOVE NEWS</button>
+            </div>
+        `;
+        liveNewsGrid.appendChild(articleCard);
+    });
+});
+
+// 🚀 คำสั่งเมื่อน้าแอดมินกดปุ่ม PUBLISH NEWS ส่งข้อมูลขึ้นระบบคลาวด์[cite: 2]
+if (adminPostNewsBtn) {
+    adminPostNewsBtn.addEventListener('click', async () => {
+        const tag = document.getElementById('adminNewsTag').value;
+        const title = document.getElementById('adminNewsTitle').value.trim();
+        const img = document.getElementById('adminNewsImg').value.trim();
+        const excerpt = document.getElementById('adminNewsExcerpt').value.trim();
+        const passcode = document.getElementById('adminNewsPasscode').value.trim();
+        
+        if (!title || !excerpt || !passcode) {
+            await showErrorAlert('INPUT REQUIRED', '❌ กรุณากรอกหัวข้อ เนื้อหาข่าว และรหัสลับป้องกันระบบให้ครบถ้วนก่อนโพสต์ครับน้า!');
+            return;
+        }
+        
+        // ตรวจสอบความถูกต้องของกุญแจความปลอดภัย (ใช้รหัสผ่านของแอดมินเพจสปอตไลต์หลัก)[cite: 2]
+        if (passcode !== artistKeys['@UndergroundCultureTH']) {
+            await showErrorAlert('ACCESS DENIED', '❌ รหัสผ่านลับสำหรับโพสต์ข่าวไม่ถูกต้อง!<br>อย่ามาแอบเจาะระบบควบคุมเพจ UDC นะครับไอ้หนู!');
+            return;
+        }
+        
+        // ผ่านด่านตรวจ -> ส่งก้อนข้อมูลขึ้นไปเก็บที่ Firebase คลาวด์ทันที[cite: 2]
+        database.ref('udc_news_drops').push({
+            tag: tag,
+            title: title,
+            image: img ? img : 'image/ขาวใส.png',
+            excerpt: excerpt,
+            timestamp: Date.now()
+        }, async (error) => {
+            if (!error) {
+                // ล้างข้อมูลในช่องฟอร์มหลังโพสต์เสร็จ
+                document.getElementById('adminNewsTitle').value = '';
+                document.getElementById('adminNewsExcerpt').value = '';
+                document.getElementById('adminNewsPasscode').value = '';
+                await showErrorAlert('NEWS PUBLISHED', '🔥 พ่นข่าวสารชิ้นใหม่ขึ้นหน้าจอหลักเพจ UDC เรียบร้อยแล้วครับน้าบักหำทิว! อัปเดตไวสะใจสตรีต!');
+            } else {
+                await showErrorAlert('UPLOAD FAILED', '❌ ระบบบันทึกข่าวขัดข้อง ลองเช็กสัญญาณเน็ตดูอีกครั้งครับน้า');
+            }
+        });
+    });
+}
+
+// 🗑️ ฟังก์ชันพิเศษของน้าแอดมิน: กดสั่งลบข่าวสารจากหน้าเว็บตรง ๆ[cite: 2]
+async function deleteNewsItemByAdmin(newsId) {
+    const adminPass = prompt("กรอกรหัสลับผู้ดูแลระบบเพจ UDC เพื่อยืนยันการลบข่าวสารชิ้นนี้ถาวร:");
+    if (!adminPass) return;
+    
+    if (adminPass === artistKeys['@UndergroundCultureTH']) {
+        database.ref(`udc_news_drops/${newsId}`).remove(async (err) => {
+            if (!err) {
+                await showErrorAlert('DELETED SUCCESS', 'ลบข่าวสารชิ้นดังกล่าวออกจากระบบฐานข้อมูลคลาวด์ถาวรเรียบร้อยครับน้า!');
+            }
+        });
+    } else {
+        alert("❌ รหัสลับผู้ดูแลระบบไม่ถูกต้อง! ยกเลิกคำสั่งลบข่าวสารครับ");
+    }
+}
+// =================================================================
+// ─── 🔐 SECRET KEYBOARD TRIGGER: พิมพ์คำว่า udcadmin เพื่อเปิดแผงควบคุม ───
+// =================================================================
+let secretAdminInputCode = "";
+const targetAdminSecretWord = "udcadmin"; // รหัสผ่านบนคีย์บอร์ดที่น้าต้องพิมพ์เพื่อเปิดกล่อง
+
+document.addEventListener('keydown', (e) => {
+    // ป้องกันระบบค้างขณะแอดมินพิมพ์ข้อความในช่องพิมพ์แชทพ่นสีทั่วไป
+    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+        return;
+    }
+    
+    // บันทึกปุ่มกดภาษาอังกฤษที่พิมพ์เข้ามา
+    secretAdminInputCode += e.key.toLowerCase();
+    
+    // ล็อกความยาวตัวอักษรไม่ให้ยาวเกินไป
+    if (secretAdminInputCode.length > 20) {
+        secretAdminInputCode = secretAdminInputCode.substring(secretAdminInputCode.length - 10);
+    }
+    
+    // ตรวจสอบว่าพิมพ์คำว่า udcadmin ถูกต้องล็อกสเปกไหม
+    if (secretAdminInputCode.includes(targetAdminSecretWord)) {
+        const adminPanelBox = document.getElementById('adminNewsPanel');
+        if (adminPanelBox) {
+            // สั่งให้กล่องนีออนแดงดีดตัวโชว์ขึ้นมาหน้าเว็บทันที!
+            adminPanelBox.style.display = "block";
+            
+            // เลื่อนหน้าจอลงมาโฟกัสที่แผงควบคุมข่าวให้อัตโนมัติ
+            adminPanelBox.scrollIntoView({ behavior: 'smooth' });
+            
+            // ล้างแคชข้อความพิมพ์ดักจับ
+            secretAdminInputCode = "";
+            
+            // ดีดแจ้งเตือนหล่อ ๆ หลังบ้านแอดมิน
+            showErrorAlert('WELCOME ADMIN', '🔓 แผงควบคุม UDC NEWS DESK เปิดใช้งานเต็มระบบแล้วครับน้าบักหำทิว!');
+        }
+    }
+});

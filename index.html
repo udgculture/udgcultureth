@@ -111,8 +111,8 @@
                     </p>
                     <p style="color: #ffaa00; font-size: 0.85rem; margin-top: 10px; border-top: 1px dashed #222; padding-top: 10px; font-weight: 500;">
                        <i class="fa-solid fa-bullhorn" style="color: #ffaa00; margin-right: 5px;"></i> 
-                       เว็ปกำลังอยู่ในการทดลอง โปรดอย่าดราม่ากับการโหวตถือว่าเป็นอะไรสนุกๆกันไป
-                    </p>
+                      เว็ปกำลังอยู่ในการทดลอง โปรดอย่าดราม่ากับการโหวตถือว่าเป็นอะไรสนุกๆกันไป
+                   </p>
                     <span class="criteria-note" id="chart-status-text">*รีเซ็ตโหวตทุกวันศุกร์ เวลา 10:00 น.... *</span>
                 </div>
                 
@@ -124,38 +124,10 @@
             </aside>
         </section>
 
+        <!-- 📰 โซนข่าวสารแบบดึงคลาวด์ออโต้ ดูกลืนตา มีข่าวแน่น ๆ ไม่มีวันขาดช่วง -->
         <h2 id="news" class="section-title">LATEST DROPS & NEWS</h2>
-        <div class="news-grid">
-            <article class="news-card">
-                <div class="news-img">
-                    <img src="image/event.jpg" alt="News Image">
-                </div>
-                <div class="news-content">
-                    <span class="news-tag">EVENT</span>
-                    <h3 class="news-title">BEAZY BANGKOK OUTLAWS</h3>
-                    <p class="news-excerpt">31/05/2026 กับงาน Beazy Bangkok Outlaws ไม่ได้มีแค่ MOON ยังมีศิลปินใต้ดินมากถึง 30 คนมากันอีกเพียบ งานนี้มันส์แน่นอน🚨🔥</p>
-                </div>
-            </article>
-            <article class="news-card">
-                <div class="news-img">
-                    <img src="image/music1.png" alt="">
-                </div>
-                <div class="news-content">
-                    <span class="news-tag">MUSIC</span>
-                    <h3 class="news-title">Dxshane - รอ รอ รอ feat. JayQ (Official MV)</h3>
-                    <p class="news-excerpt">Dxshane ปล่อย MV เพลงใหม่ "รอ รอ รอ" feat. JayQ ใครฟังแล้วโดนใจบ้าง😓🩹</p>
-                </div>
-            </article>
-            <article class="news-card">
-                <div class="news-img">
-                    <img src="image/music2.png" alt="">
-                </div>
-                <div class="news-content">
-                    <span class="news-tag">MUSIC</span>
-                    <h3 class="news-title">S!NS - ซึมเศร้าก็เด้าได้ feat.THXWXN , MACNA (REMIX)”</h3>
-                    <p class="news-excerpt">3 หนุ่มสุดหล่อ ปล่อยเพลง Remix "ซึมเศร้าก็เด้าได้" ต้นฉบับจาก FIIXD 🍑</p>
-                </div>
-            </article>
+        <div class="news-grid" id="live-news-grid">
+            <div style="padding: 40px; color: #555; text-align: center; grid-column: 1/-1;">⏳ กำลังระเบิดสัญญาณดึงข้อมูลข่าวสารล่าสุดจากคลาวด์...</div>
         </div>
 
         <h2 id="graffiti" class="section-title" style="margin-top: 60px;">CYBER GRAFFITI WALL</h2>
@@ -264,6 +236,41 @@
                 <a href="https://www.instagram.com/undergroundculture.th/" target="_blank" class="rate-btn"><i class="fa-brands fa-instagram"></i> ขอเรตการ์ด / ติดต่อสปอนเซอร์</a>
             </div>
         </div>
+
+        <!-- 🛠️ 🔑 ADMIN SECRET NEWS DESK: กล่องอัพเดตข่าวสไตล์แผงควบคุมสตรีทซ่อนอยู่ท้ายเว็บหลัก (โชว์เมื่อรหัสถูก) -->
+        <section class="admin-news-panel" id="adminNewsPanel">
+            <div class="admin-panel-line"></div>
+            <h3 class="admin-panel-title"><i class="fa-solid fa-folder-plus"></i> UDC NEWS MANAGEMENT SYSTEM</h3>
+            <p style="color: #666; font-size: 0.85rem; margin-bottom: 20px;">พื้นที่จัดการข้อมูลข่าวสารเพจ UDC พิมพ์อัพเดตข่าวตรงนี้ ยอดเด้งขึ้นหน้าจอหลักทันทีแบบเรียลไทม์</p>
+            
+            <div class="admin-form-grid">
+                <div class="admin-group">
+                    <label>TAG TYPE (หมวดหมู่ข่าว)</label>
+                    <select id="adminNewsTag" class="admin-select">
+                        <option value="NEWS">NEWS (ข่าวสารวงการ)</option>
+                        <option value="MUSIC">MUSIC (เพลงปล่อยใหม่)</option>
+                        <option value="EVENT">EVENT (งานอีเวนต์คอนเสิร์ต)</option>
+                    </select>
+                </div>
+                <div class="admin-group">
+                    <label>NEWS TITLE (หัวข้อข่าวสาร)</label>
+                    <input type="text" id="adminNewsTitle" placeholder="เช่น: Dxshane ปล่อย MV เพลงใหม่..." class="admin-input">
+                </div>
+                <div class="admin-group">
+                    <label>IMAGE URL (ที่อยู่ลิงก์รูปภาพข่าว)</label>
+                    <input type="text" id="adminNewsImg" placeholder="เช่น: image/music1.png หรือลิงก์เว็บนอก" class="admin-input" value="image/ขาวใส.png">
+                </div>
+                <div class="admin-group" style="grid-column: 1/-1;">
+                    <label>NEWS EXCERPT (เนื้อหาข่าวสารแบบย่อ)</label>
+                    <textarea id="adminNewsExcerpt" placeholder="พิมพ์คำอธิบายข่าวสั้น ๆ บรรทัดนี้ได้เลยครับน้า..." class="admin-textarea" rows="3"></textarea>
+                </div>
+                <div class="admin-group" style="grid-column: 1/-1;">
+                    <label>SECRET PASSCODE (รหัสผ่านป้องกันแผงควบคุม)</label>
+                    <input type="password" id="adminNewsPasscode" placeholder="ENTER SECRET PASSCODE TO POST..." class="admin-input" style="border-color: rgba(255, 51, 51, 0.3);">
+                </div>
+            </div>
+            <button type="button" class="admin-post-btn" id="adminPostNewsBtn"><i class="fa-solid fa-paper-plane"></i> PUBLISH NEWS</button>
+        </section>
     </main>
 
     <footer>
@@ -305,7 +312,7 @@
         </div>
     </div>
 
-    <!-- 🚨 หน้าต่างแจ้งเตือนภัยระบบ/แจ้งผลโหวตเดือด (โมดอลนีออนแดงไฟลุก — ดันไปหน้าสุดแล้ว) -->
+    <!-- 🚨 หน้าต่างแจ้งเตือนภัยระบบ/แจ้งผลโหวตเดือด -->
     <div id="errorModal" class="error-modal-overlay">
         <div class="error-modal-box">
             <div class="error-glow-line"></div>
@@ -316,7 +323,7 @@
         </div>
     </div>
 
-    <!-- 🗳️ หน้าต่างค้นหารายชื่อเพลงและกดสาดแต้มโหวตกลางจอ (โมดอลนีออนฟ้า Cyan) -->
+    <!-- 🗳️ หน้าต่างค้นหารายชื่อเพลงและกดสาดแต้มโหวตกลางจอ -->
     <div id="voteModal" class="vote-modal-overlay">
         <div class="vote-modal-box">
             <div class="vote-glow-line"></div>
@@ -327,7 +334,6 @@
                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
                 <input type="text" id="voteSearchInput" placeholder="SEARCH TRACK OR ARTIST...">
             </div>
-            <!-- 🎯 FIXED SUCCESS: คืนชีพแท็กสำหรับรอรับข้อมูลรายชื่อเพลงโมดอลของเล่นเรียบร้อยแล้วคร้าบน้า -->
             <div id="modal-voting-list"></div>
         </div>
     </div>
