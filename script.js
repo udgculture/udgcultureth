@@ -27,7 +27,7 @@ let isCooldown = false;
 const artistKeys = {
     '@Dxshane': 'shane999',
     '@JayQ': 'jayq888',
-    '@UndergroundCultureTH': 'udc2026',
+    '@UndergroundCultureTH': 'udg2026',
     '@VAMPBOYZ': '0709',
 };
 
@@ -548,7 +548,8 @@ const liveNewsGrid = document.getElementById('live-news-grid');
 const liveFeaturedCard = document.getElementById('live-featured-card');
 const liveRadarGrid = document.getElementById('live-radar-grid');
 
-database.ref('udc_homepage_slots/featured_card').on('value', (snapshot) => {
+// 🔄 จุดที่ 1: แก้เป็น udg_homepage_slots เพื่อดึงข่าวเด่นตัวบนสุดให้ตรงกับหน้าแอดมินใหม่
+database.ref('udg_homepage_slots/featured_card').on('value', (snapshot) => {
     if (!liveFeaturedCard) return;
     const data = snapshot.val();
     if (!data) {
@@ -564,7 +565,7 @@ database.ref('udc_homepage_slots/featured_card').on('value', (snapshot) => {
     liveFeaturedCard.innerHTML = `
         <div class="featured-img-container"><img src="${data.image}" alt="Featured News" onerror="this.src='image/BREAKING.png'"></div>
         <div class="featured-overlay">
-            <span class="news-tag">${data.subTag}</span>
+            <span class="news-tag">${data.tag}</span>
             <h2 class="featured-title">${data.title}</h2>
             <p class="featured-excerpt">${data.excerpt}</p>
         </div>`;
@@ -573,17 +574,17 @@ database.ref('udc_homepage_slots/featured_card').on('value', (snapshot) => {
 let radarDataCard1 = null; let radarDataCard2 = null;
 function renderRadarZone() {
     if (!liveRadarGrid) return; liveRadarGrid.innerHTML = '';
-    const card1 = radarDataCard1 ? radarDataCard1 : { subTag: "DRILL", title: "รอประมวลผล", excerpt: "รอประมวลผล", image: "image/ขาวใส.png", followUrl: "#" };
-    const card2 = radarDataCard2 ? radarDataCard2 : { subTag: "รอประมวลผล", title: "รอประมวลผล", excerpt: "รอประมวลผล", image: "image/ขาวใส.png", followUrl: "#" };
+    const card1 = radarDataCard1 ? radarDataCard1 : { tag: "DRILL", title: "รอประมวลผล", excerpt: "รอประมวลผล", image: "image/ขาวใส.png", followUrl: "#" };
+    const card2 = radarDataCard2 ? radarDataCard2 : { tag: "รอประมวลผล", title: "รอประมวลผล", excerpt: "รอประมวลผล", image: "image/ขาวใส.png", followUrl: "#" };
     
     [card1, card2].forEach(rc => {
-        const rcStyle = (rc.subTag === "DRILL") ? "tag-drill" : "tag-boombap";
+        const rcStyle = (rc.tag === "DRILL") ? "tag-drill" : "tag-boombap";
         const cardBox = document.createElement('div');
         cardBox.className = 'news-card radar-card';
         cardBox.innerHTML = `
             <div class="radar-img-wrap"><img src="${rc.image}" alt="Artist Profile" class="radar-avatar" onerror="this.src='image/ขาวใส.png'"></div>
             <div class="radar-body">
-                <div class="radar-tag-wrap"><span class="radar-tag ${rcStyle}">${rc.subTag}</span></div>
+                <div class="radar-tag-wrap"><span class="radar-tag ${rcStyle}">${rc.tag}</span></div>
                 <h3 class="radar-name">${rc.title}</h3>
                 <p class="radar-bio">${rc.excerpt}</p>
                 <a href="${rc.followUrl}" target="_blank" class="radar-link">FOLLOW ARTIST &rarr;</a>
@@ -592,10 +593,12 @@ function renderRadarZone() {
     });
 }
 
-database.ref('udc_homepage_slots/radar_card_1').on('value', (snapshot) => { radarDataCard1 = snapshot.val(); renderRadarZone(); });
-database.ref('udc_homepage_slots/radar_card_2').on('value', (snapshot) => { radarDataCard2 = snapshot.val(); renderRadarZone(); });
+// 🔄 จุดที่ 2 & 3: แก้เป็น udg_homepage_slots สำหรับช่องดึงการ์ดเรดาร์ศิลปินดาวรุ่งซ้าย-ขวา
+database.ref('udg_homepage_slots/radar_card_1').on('value', (snapshot) => { radarDataCard1 = snapshot.val(); renderRadarZone(); });
+database.ref('udg_homepage_slots/radar_card_2').on('value', (snapshot) => { radarDataCard2 = snapshot.val(); renderRadarZone(); });
 
-database.ref('udc_news_drops').on('value', (snapshot) => {
+// 🔄 จุดที่ 4: แก้เป็น udg_news_drops เพื่อดึงข้อมูลข่าวสารในตารางกริดหลักด้านล่างเว็บ
+database.ref('udg_news_drops').on('value', (snapshot) => {
     if (!liveNewsGrid) return; liveNewsGrid.innerHTML = '';
     const allNewsData = snapshot.val();
     if (!allNewsData) {
@@ -620,7 +623,7 @@ database.ref('udc_news_drops').on('value', (snapshot) => {
 });
 
 async function deleteNewsItemByAdmin(newsId) {
-    const adminPass = prompt("กรอกรหัสลับผู้ดูแลระบบเพจ UDC เพื่อยืนยันการลบข่าว:");
+    const adminPass = prompt("กรอกรหัสลับผู้ดูแลระบบเพจ UDG เพื่อยืนยันการลบข่าว:");
     if (!adminPass) return;
-    if (adminPass === "udc2026") { database.ref(`udc_news_drops/${newsId}`).remove(); }
+    if (adminPass === "udg2026") { database.ref(`udg_news_drops/${newsId}`).remove(); }
 }

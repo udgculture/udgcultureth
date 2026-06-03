@@ -206,13 +206,14 @@
                 return;
             }
             
-            if (passcode !== "udc2026") {
+            // 🔒 🎯 อัปเกรดรหัสผ่านแอดมินความปลอดภัยสูงสุดเป็นคำว่า udg2026 ตามชื่อเพจสากลใหม่!
+            if (passcode !== "udg2026") {
                 alert("❌ รหัสผ่านลับไม่ถูกต้องครับน้า!");
                 return;
             }
 
             const dataPayload = {
-                subTag: subTag ? subTag : zone,
+                tag: subTag ? subTag : zone, // ส่งค่าแท็กหัวข้อหลัก
                 title: title,
                 image: img ? img : 'image/ขาวใส.png',
                 excerpt: excerpt,
@@ -223,10 +224,11 @@
                 dataPayload.followUrl = radarUrl ? radarUrl : "#";
             }
 
-            // แยกท่อน้ำส่งข้อมูลตามโซนที่น้าเลือกสับสวิตช์
+            // 🔄 ⚡ แก้ไขบั๊กตัวอักษร: สับเปลี่ยนท่อน้ำส่งเข้าฐานข้อมูลโฟลเดอร์ชื่อย่อตัว g (udg) ทั้งแผงระบบ!
             if (zone === 'NEWS') {
+                // ข่าวสารทั่วไป ยิงตรงเข้าท่อความปลอดภัยออโต้หลังบ้าน UDG
                 database.ref('udg_news_drops').push(dataPayload, (error) => {
-                    if (!error) { successAction(); }
+                    if (!error) { successAction(); } else { alert("Firebase บล็อก: " + error.message); }
                 });
             } else if (zone === 'FEATURED') {
                 database.ref('udg_homepage_slots/featured_card').set(dataPayload, (error) => {
@@ -248,7 +250,7 @@
             document.getElementById('adminNewsExcerpt').value = '';
             document.getElementById('adminNewsPasscode').value = '';
             document.getElementById('adminRadarUrl').value = '#';
-            alert("🔥 ทำการเชื่อมข้อมูลและอัปเดตฟีดระบบในโซนดังกล่าวเรียบร้อยครับน้านักพัฒนา!");
+            alert("🔥 ทำการเชื่อมข้อมูลและอัปเดตฟีดระบบในโซน UDG เรียบร้อยครับน้านักพัฒนา!");
         }
     </script>
 </body>
