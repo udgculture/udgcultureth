@@ -16,13 +16,167 @@
             background-color: #050505;
             color: #fff;
             font-family: 'Kanit', sans-serif;
-            padding: 20px;
+            padding: 30px 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            gap: 25px;
             align-items: center;
             min-height: 100vh;
         }
+        
+        /* 🔒 หน้ากากล็อกอินใหม่คัสตอมนีออนแดง */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(2, 2, 2, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s ease;
+        }
+        .login-box {
+            background: #0d0d0d;
+            border: 1px solid #ff3333;
+            box-shadow: 0 0 40px rgba(255, 51, 51, 0.15);
+            width: 90%;
+            max-width: 400px;
+            padding: 35px 25px;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-glow-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #ff3333, #ff007f);
+            box-shadow: 0 0 10px #ff3333;
+        }
+        .login-icon {
+            font-size: 2.8rem;
+            color: #ff3333;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 8px rgba(255, 51, 51, 0.4));
+        }
+        .login-box h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            color: #fff;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .login-box p {
+            color: #666;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+        .login-input-wrap {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        .login-input-wrap i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #444;
+            transition: all 0.3s ease;
+        }
+        .login-input-wrap input {
+            width: 100%;
+            background: #111;
+            border: 1px solid #222;
+            padding: 14px 15px 14px 45px;
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            border-radius: 4px;
+            outline: none;
+            letter-spacing: 3px;
+            transition: all 0.3s ease;
+        }
+        .login-input-wrap input:focus {
+            border-color: #ff3333;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);
+        }
+        .login-input-wrap input:focus + i { color: #ff3333; }
+        .login-btn-group { display: flex; gap: 12px; }
+        .login-action-btn {
+            flex: 1;
+            padding: 14px;
+            font-family: 'Space Grotesk', 'Kanit', sans-serif;
+            font-weight: 800;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+        }
+        .login-action-btn.btn-confirm {
+            background: linear-gradient(45deg, #ff3333, #ff007f);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.3);
+        }
+        .login-action-btn.btn-confirm:hover {
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.5);
+        }
+        .login-action-btn.btn-cancel { background: #151515; color: #666; border: 1px solid #222; }
+        .login-action-btn.btn-cancel:hover { background: #222; color: #fff; }
+
+        /* 🔥 🎯 แผงเมนูสับเปลี่ยนแท็บแนวสตรีท (Tabs Navigator) */
+        .tabs-container {
+            display: none; /* ซ่อนไว้ก่อนจนกว่าจะล็อกอินสำเร็จ */
+            width: 100%;
+            max-width: 600px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .tab-trigger-btn {
+            background: #0d0d0d;
+            border: 1px solid #222;
+            color: #666;
+            padding: 14px 10px;
+            font-family: 'Space Grotesk', 'Kanit', sans-serif;
+            font-weight: 800;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tab-trigger-btn i { font-size: 1.1rem; }
+        
+        /* สไตล์ปุ่มแท็บเมื่อถูกกดใช้งานเปิดแผงสีสันตามหมวดหมู่ */
+        .tab-trigger-btn[data-target="newsPanelBox"].active {
+            border-color: #ff3333; color: #ff3333; box-shadow: 0 0 15px rgba(255, 51, 51, 0.2); background: rgba(255, 51, 51, 0.02);
+        }
+        .tab-trigger-btn[data-target="musicPanelBox"].active {
+            border-color: #00ffff; color: #00ffff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.2); background: rgba(0, 255, 255, 0.02);
+        }
+        .tab-trigger-btn[data-target="artistPanelBox"].active {
+            border-color: #ffaa00; color: #ffaa00; box-shadow: 0 0 15px rgba(255, 170, 0, 0.2); background: rgba(255, 170, 0, 0.02);
+        }
+
+        /* ─── โครงสร้างหลักกล่องควบคุมหลังบ้าน ─── */
         .admin-box {
+            display: none; /* ซ่อนไว้รอการกดสับเปลี่ยนแท็บคัสตอม */
             background: #0a0a0a;
             border: 1px solid #ff3333;
             border-radius: 8px;
@@ -31,10 +185,13 @@
             max-width: 600px;
             box-shadow: 0 0 30px rgba(255, 51, 51, 0.1);
         }
+        .admin-box-glow { border-color: #ffaa00; box-shadow: 0 0 30px rgba(255, 170, 0, 0.05); }
+        .admin-box-cyan { border-color: #00ffff; box-shadow: 0 0 30px rgba(0, 255, 255, 0.05); }
+        
         h2 {
             font-family: 'Space Grotesk', sans-serif;
             color: #fff;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             margin-bottom: 5px;
             letter-spacing: 1px;
             text-shadow: 0 0 10px rgba(255,51,51,0.3);
@@ -98,13 +255,64 @@
         }
         .back-link:hover { color: #ff3333; }
         .hint-text { color: #555; font-size: 0.75rem; margin-top: 2px; }
+        
+        .artist-list-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .artist-list-table th, .artist-list-table td {
+            border: 1px solid #222;
+            padding: 10px;
+            text-align: left;
+        }
+        .artist-list-table th {
+            background: #111;
+            color: #ff3333;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .delete-artist-btn {
+            background: transparent;
+            border: none;
+            color: #ff3333;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .delete-artist-btn:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <div class="admin-box">
+    <!-- 🔒 🛡️ กล่องตรวจสอบรหัสแอดมินฉบับคัสตอมนีออนแดง -->
+    <div class="login-overlay" id="gateOverlay">
+        <div class="login-box">
+            <div class="login-glow-line"></div>
+            <i class="fa-solid fa-lock-open login-icon"></i>
+            <h3>SECURITY GATEWAY</h3>
+            <p>กรุณากรอกรหัสลับผู้ดูแลระบบเพจ UDG<br>เพื่อทำการเปิดใช้งานแผงควบคุมส่วนกลาง</p>
+            <div class="login-input-wrap">
+                <input type="password" id="gatePasscodeInput" placeholder="ENTER SECRET PASSCODE...">
+                <i class="fa-solid fa-key"></i>
+            </div>
+            <div class="login-btn-group">
+                <button type="button" class="login-action-btn btn-cancel" onclick="kickUserToHome()">CANCEL</button>
+                <button type="button" class="login-action-btn btn-confirm" onclick="checkGateLogin()">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎛️ 🎯 ปุ่มกดสลับแท็บเมนูด่วน (Tabs Bar ขจัดปัญหาหน้าจอแคบ/เลื่อนยาว) -->
+    <div class="tabs-container" id="adminTabsMenu">
+        <button type="button" class="tab-trigger-btn active" data-target="newsPanelBox"><i class="fa-solid fa-sliders"></i>📰 CONTENT</button>
+        <button type="button" class="tab-trigger-btn" data-target="musicPanelBox"><i class="fa-solid fa-music"></i>🎵 MUSIC</button>
+        <button type="button" class="tab-trigger-btn" data-target="artistPanelBox"><i class="fa-solid fa-user-shield"></i>🎤 ARTISTS</button>
+    </div>
+
+    <!-- 📰 [แท็บที่ 1] กล่องคอนเทนต์ส่วนจัดการ ข่าวเด่น ข่าวสาร และศิลปินเรดาร์ -->
+    <div class="admin-box" id="newsPanelBox">
         <h2><i class="fa-solid fa-sliders" style="color: #ff3333;"></i> UDG CENTRAL CONTROL PANEL</h2>
-        <p style="color: #555; font-size: 0.85rem;">แผงควบคุมหลักประจำเพจ UDG อัปเดตจุดไหน เลือกสับเปลี่ยนได้เลยครับน้า</p>
+        <p style="color: #555; font-size: 0.85rem;">แผงควบคุมข่าวเด่น ข่าวสารทั่วไป และพื้นที่การ์ดเรดาร์แร็ปเปอร์</p>
         
         <div class="form-group">
             <label>TARGET ZONE (เลือกตำแหน่งที่ต้องการอัปเดตข้อมูลบนเว็บ)</label>
@@ -142,17 +350,137 @@
             <input type="text" id="adminRadarUrl" placeholder="เช่น ลิงก์ IG หรือ ลิงก์ YouTube เพลงใหม่..." value="#">
         </div>
         
-        <div class="form-group">
-            <label>SECRET PASSCODE (รหัสผ่านความปลอดภัยเพจ UDG)</label>
-            <input type="password" id="adminNewsPasscode" placeholder="ENTER SECRET PASSCODE TO PUBLISH...">
-        </div>
-        
         <button type="button" class="post-btn" id="adminPostNewsBtn"><i class="fa-solid fa-paper-plane"></i> UPDATE LIVE WEBSITE</button>
-        
+        <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
+    </div>
+
+    <!-- 🗳️ 🎵 [แท็บที่ 2] แผงจัดการคลังรายชื่อเพลงโหวต UDG STATION -->
+    <div class="admin-box admin-box-cyan" id="musicPanelBox">
+        <h2><i class="fa-solid fa-music" style="color: #00ffff;"></i> UDG MUSIC TRACKS MANAGER</h2>
+        <p style="color: #555; font-size: 0.85rem;">เพิ่มหรือลบเพลงในตู้โหวต UDG STATION โดยไม่ส่งผลกระทบต่อผลโหวตสะสมเดิม</p>
+
+        <div class="form-group">
+            <label style="color: #00ffff;">TRACK TITLE (ชื่อเพลงปล่อยใหม่)</label>
+            <input type="text" id="newTrackTitle" placeholder="เช่น: รอ รอ รอ, ซึมเศร้าก็เด้าได้, เพลงใหม่">
+        </div>
+
+        <div class="form-group">
+            <label style="color: #00ffff;">ARTIST NAME (ชื่อแร็ปเปอร์เจ้าของผลงาน)</label>
+            <input type="text" id="newTrackArtist" placeholder="เช่น: Dxshane feat. JayQ, Ezchill">
+        </div>
+
+        <div class="form-group">
+            <label style="color: #00ffff;">YOUTUBE VIDEO ID (รหัสท้ายลิงก์ยูทูบสำหรับเปิดสตรีมเสียง)</label>
+            <input type="text" id="newTrackYtId" placeholder="เช่น ลิงก์คุณคือ https://youtu.be/78gSbjE71m8 รหัสคือ: 78gSbjE71m8">
+        </div>
+
+        <button type="button" class="post-btn" id="addTrackBtn" style="background: linear-gradient(45deg, #00ffff, #0088cc); box-shadow: 0 0 15px rgba(0,255,255,0.2); color: #000;"><i class="fa-solid fa-plus-circle"></i> ADD NEW MUSIC TRACK</button>
+
+        <table class="artist-list-table">
+            <thead>
+                <tr>
+                    <th>ชื่อเพลง / ศิลปิน</th>
+                    <th>YouTube ID</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody id="track-list-tbody">
+                <tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังเรียกข้อมูลรายชื่อเพลงจากตู้ UDG คลาวด์...</td></tr>
+            </tbody>
+        </table>
+        <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
+    </div>
+
+    <!-- 🎤 [แท็บที่ 3] กล่องส่วนคุมสิทธิ์เพิ่ม-ลบรหัสคีย์ลับแร็ปเปอร์ของค่าย UDG -->
+    <div class="admin-box admin-box-glow" id="artistPanelBox">
+        <h2><i class="fa-solid fa-user-shield" style="color: #ffaa00;"></i> UDG ARTIST KEYS MANAGER</h2>
+        <p style="color: #555; font-size: 0.85rem;">เพิ่มหรือลบชื่อเล่นและรหัสผ่านลับสำหรับให้ศิลปินในค่ายใช้พ่นสเปรย์แชท</p>
+
+        <div class="form-group">
+            <label style="color: #ffaa00;">ARTIST USERNAME (ชื่อระบบแร็ปเปอร์ ห้ามลืมใส่ @ นำหน้า)</label>
+            <input type="text" id="newArtistName" placeholder="เช่น: @Dxshane, @JayQ, @ชื่อศิลปิน">
+        </div>
+
+        <div class="form-group">
+            <label style="color: #ffaa00;">ARTIST PASSCODE (รหัสลับยืนยันตัวตนบนหน้าเว็บ)</label>
+            <input type="text" id="newArtistPass" placeholder="ตั้งรหัสผ่านลับให้ศิลปิน เช่น: shane999"></input>
+        </div>
+
+        <button type="button" class="post-btn" id="addArtistBtn" style="background: linear-gradient(45deg, #ffaa00, #ff5500); box-shadow: 0 0 15px rgba(255,170,0,0.2); color: #000;"><i class="fa-solid fa-user-plus"></i> REGISTER ARTIST KEY</button>
+
+        <table class="artist-list-table">
+            <thead>
+                <tr>
+                    <th>แร็ปเปอร์</th>
+                    <th>รหัสผ่าน</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody id="artist-list-tbody">
+                <tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังโหลดคลังรายชื่อศิลปินอินดี้...</td></tr>
+            </tbody>
+        </table>
+
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
     <script>
+    const MASTER_ADMIN_PASS = "udg2026"; // รหัสกุญแจตรวจสอบหลักประจำเพจ UDG
+
+        function checkGateLogin() {
+            const userInput = document.getElementById("gatePasscodeInput").value.trim();
+            if (userInput === MASTER_ADMIN_PASS) {
+                sessionStorage.setItem("udg_admin_authenticated", "true"); // ✨ ลบเศษขยะ[cite: 1] ออกเกลี้ยงแล้วครับน้า
+                unlockCentralPanel();
+            } else {
+                alert("❌ ACCESS DENIED:\nรหัสผ่านลับผู้ดูแลระบบไม่ถูกต้อง! โปรดระบุใหม่อีกครั้งครับน้า");
+                document.getElementById("gatePasscodeInput").value = "";
+                document.getElementById("gatePasscodeInput").focus();
+            }
+        }
+
+        function unlockCentralPanel() {
+            document.getElementById("gateOverlay").style.display = "none";
+            document.getElementById("adminTabsMenu").style.display = "grid"; // แสดงแถบเมนูด่วน
+            switchTabMenu("newsPanelBox"); // ตั้งค่าเริ่มต้นให้กางหน้าต่าง CONTENT ข่าวขึ้นมาแสดงก่อน
+        }
+
+        function kickUserToHome() {
+            window.location.href = "index.html"; // ✨ ลบเศษขยะ[cite: 1] ท้ายบรรทัดนี้ออกสะอาดกริบแล้วครับน้า
+        }
+
+        // 🎛️ ⚡ ENGINE: กลไกควบคุมการสลับแท็บแบบนุ่มนวลฉับไว
+        function switchTabMenu(targetId) {
+            // สั่งยุบซ่อนหน้าต่างกล่องควบคุมทั้งหมด
+            document.querySelectorAll(".admin-box").forEach(box => {
+                box.style.display = "none";
+            });
+            // ปลดไฟสถานะปุ่มกดแท็บเมนูทั้งหมด
+            document.querySelectorAll(".tab-trigger-btn").forEach(btn => {
+                btn.classList.remove("active");
+            });
+            
+            // เปิดหน้าต่างตามแท็บที่แอดมินเลือกจิ้ม พร้อมส่องไฟนีออนที่ปุ่ม
+            document.getElementById(targetId).style.display = "block";
+            document.querySelector(`.tab-trigger-btn[data-target="${targetId}"]`).classList.add("active");
+        }
+
+        // ดักจับฟังก์ชันคลิกบนแถบแท็บเมนู
+        document.querySelectorAll(".tab-trigger-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const target = btn.getAttribute("data-target");
+                switchTabMenu(target);
+            });
+        });
+
+        if (sessionStorage.getItem("udg_admin_authenticated") === "true") {
+            unlockCentralPanel();
+        }
+
+        document.getElementById("gatePasscodeInput").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") { checkGateLogin(); }
+        });
+
         const firebaseConfig = {
           apiKey: "AIzaSyClMPrhjK_XLaY2PBAEuP7hvxK4faFdLJk",
           authDomain: "udg-caht.firebaseapp.com",
@@ -199,21 +527,14 @@
             const img = document.getElementById('adminNewsImg').value.trim();
             const excerpt = document.getElementById('adminNewsExcerpt').value.trim();
             const radarUrl = document.getElementById('adminRadarUrl').value.trim();
-            const passcode = document.getElementById('adminNewsPasscode').value.trim();
             
-            if (!title || !excerpt || !passcode) {
-                alert("❌ กรุณากรอกข้อมูลและรหัสลับป้องกันระบบให้ครบถ้วนก่อนครับน้า!");
-                return;
-            }
-            
-            // 🔒 🎯 อัปเกรดรหัสผ่านแอดมินความปลอดภัยสูงสุดเป็นคำว่า udg2026 ตามชื่อเพจสากลใหม่!
-            if (passcode !== "udg2026") {
-                alert("❌ รหัสผ่านลับไม่ถูกต้องครับน้า!");
+            if (!title || !excerpt) {
+                alert("❌ กรุณากรอกข้อมูลให้ครบถ้วนก่อนกดอัปเดตครับน้า!");
                 return;
             }
 
             const dataPayload = {
-                tag: subTag ? subTag : zone, // ส่งค่าแท็กหัวข้อหลัก
+                tag: subTag ? subTag : zone,
                 title: title,
                 image: img ? img : 'image/ขาวใส.png',
                 excerpt: excerpt,
@@ -224,11 +545,9 @@
                 dataPayload.followUrl = radarUrl ? radarUrl : "#";
             }
 
-            // 🔄 ⚡ แก้ไขบั๊กตัวอักษร: สับเปลี่ยนท่อน้ำส่งเข้าฐานข้อมูลโฟลเดอร์ชื่อย่อตัว g (udg) ทั้งแผงระบบ!
             if (zone === 'NEWS') {
-                // ข่าวสารทั่วไป ยิงตรงเข้าท่อความปลอดภัยออโต้หลังบ้าน UDG
                 database.ref('udg_news_drops').push(dataPayload, (error) => {
-                    if (!error) { successAction(); } else { alert("Firebase บล็อก: " + error.message); }
+                    if (!error) { successAction(); }
                 });
             } else if (zone === 'FEATURED') {
                 database.ref('udg_homepage_slots/featured_card').set(dataPayload, (error) => {
@@ -248,9 +567,125 @@
         function successAction() {
             document.getElementById('adminNewsTitle').value = '';
             document.getElementById('adminNewsExcerpt').value = '';
-            document.getElementById('adminNewsPasscode').value = '';
             document.getElementById('adminRadarUrl').value = '#';
-            alert("🔥 ทำการเชื่อมข้อมูลและอัปเดตฟีดระบบในโซน UDG เรียบร้อยครับน้านักพัฒนา!");
+            alert("🔥 อัปเดตข้อมูลขึ้นหน้าจอหลักเพจ UDG เรียบร้อยโดยไม่ต้องพิมพ์รหัสซ้ำแล้วครับน้า!");
+        }
+
+        // =================================================================
+        // ─── 🗳️ 🎵 ENGINE: คุมลิสต์คลังตู้เพลงคลาวด์ออโต้ ───
+        // =================================================================
+        const trackTbody = document.getElementById('track-list-tbody');
+
+        const fallbackStaticTracks = {
+            "track_01": { title: "รอ รอ รอ", artist: "Dxshane feat. JayQ", ytId: "78gSbjE71m8", isStatic: true }, 
+            "track_02": { title: "ซึมเศร้าก็เด้าได้ (Remix)", artist: "S!NS feat. THXWXN, MACNA", ytId: "_H7sCARrYJU", isStatic: true }, 
+            "track_03": { title: "หนุ่มบ้านนอก (Remix)", artist: "Aniydy, JayQ", ytId: "L2OSHr5UikU", isStatic: true },
+            "track_04": { title: "Miss คิด", artist: "Ezchill", ytId: "L2OSHr5UikU", isStatic: true },
+            "track_05": { title: "U CAN'T SEE ME", artist: "YOUNGGU X P6ICK", ytId: "KHyw-tyxrE4", isStatic: true },
+            "track_06": { title: "พิษภัย II", artist: "FIIXD, 1MILL, 4BANG, KING KRAZY & SUNNYBONE", ytId: "YmqfFYvpIwc", isStatic: true },
+            "track_07": { title: "NOBODY", artist: "N4 x wh0dafvckis19", ytId: "LDfk_7RJctc", isStatic: true }
+        };
+
+        database.ref('udg_music_tracks').on('value', (snapshot) => {
+            trackTbody.innerHTML = '';
+            const cloudTracks = snapshot.val();
+            let combinedTracks = {};
+            if (!cloudTracks) { combinedTracks = fallbackStaticTracks; } 
+            else { combinedTracks = { ...fallbackStaticTracks, ...cloudTracks }; }
+
+            Object.keys(combinedTracks).forEach(key => {
+                const track = combinedTracks[key];
+                const tr = document.createElement('tr');
+                let actionButton = `<button class="delete-artist-btn" onclick="removeTrackFromCloud('${key}')">// REMOVE</button>`;
+                if (track.isStatic) {
+                    actionButton = `<span style="color: #444; font-size: 0.8rem; font-family: monospace;">// SYSTEM PROTECTED</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td><strong style="color:#fff;">${track.title}</strong><br><span style="color:#555; font-size:0.75rem;">${track.artist}</span></td>
+                    <td style="font-family:monospace; color:#00ffff;">${track.ytId}</td>
+                    <td>${actionButton}</td>
+                `;
+                trackTbody.appendChild(tr);
+            });
+        });
+
+        document.getElementById('addTrackBtn').addEventListener('click', () => {
+            const title = document.getElementById('newTrackTitle').value.trim();
+            const artist = document.getElementById('newTrackArtist').value.trim();
+            const ytId = document.getElementById('newTrackYtId').value.trim();
+
+            if (!title || !artist || !ytId) {
+                alert("❌ กรุณากรอกรายละเอียดช่องเพลงให้ครบถ้วนก่อนสาดขึ้นคลาวด์ครับน้า!");
+                return;
+            }
+
+            database.ref('udg_music_tracks').push({
+                id: "cloud_track_" + Date.now(),
+                title: title,
+                artist: artist,
+                ytId: ytId
+            }, (error) => {
+                if (!error) {
+                    document.getElementById('newTrackTitle').value = '';
+                    document.getElementById('newTrackArtist').value = '';
+                    document.getElementById('newTrackYtId').value = '';
+                    alert(`🔥 อัปโหลดเพลง "${title}" เข้าตู้ UDG VOTING STATION เรียบร้อยโดยไม่แตะต้องแต้มโหวตเดิมครับ!`);
+                }
+            });
+        });
+
+        function removeTrackFromCloud(trackKey) {
+            if (confirm("แจ้งเตือนแอดมิน: คุณต้องการถอดลบเพลงนี้ออกจากระบบค้นหาโหวตใช่หรือไม่? (ตัวคะแนน PTS บน Firebase จะยังคงบันทึกไว้ในสัปดาห์นั้น ไม่สูญหาย)")) {
+                database.ref(`udg_music_tracks/${trackKey}`).remove();
+            }
+        }
+
+        // =================================================================
+        // ─── จัดการรายชื่อศิลปินออโต้คลาวด์[cite: 1] ───
+        // =================================================================
+        const tbody = document.getElementById('artist-list-tbody');
+        database.ref('udg_artist_credentials').on('value', (snapshot) => {
+            tbody.innerHTML = '';
+            const list = snapshot.val();
+            if (!list) {
+                tbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center;">🎤 ยังไม่มีรายชื่อแร็ปเปอร์ในฐานข้อมูล</td></tr>`;
+                return;
+            }
+            Object.keys(list).forEach(key => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:bold; color:#ffaa00;">${key}</td>
+                    <td style="font-family:monospace; color:#aaa;">${list[key]}</td>
+                    <td><button class="delete-artist-btn" onclick="removeArtistFromCloud('${key}')">// REMOVE</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+
+        document.getElementById('addArtistBtn').addEventListener('click', () => {
+            let artistName = document.getElementById('newArtistName').value.trim();
+            const artistPass = document.getElementById('newArtistPass').value.trim();
+
+            if (!artistName || !artistPass) {
+                alert("❌ กรุณากรอกชื่อศิลปินและรหัสคีย์ประจำตัวให้ครบถ้วนก่อน!");
+                return;
+            }
+            if (!artistName.startsWith('@')) { artistName = '@' + artistName; }
+
+            database.ref(`udg_artist_credentials/${artistName}`).set(artistPass, (error) => {
+                if (!error) {
+                    document.getElementById('newArtistName').value = '';
+                    document.getElementById('newArtistPass').value = '';
+                    alert(`🔥 สาดคีย์ลับแร็ปเปอร์ ${artistName} ขึ้นระบบสำเร็จโดยไม่ต้องใส่รหัสแอดมินซ้ำซ้อนแล้วครับ!`);
+                }
+            });
+        });
+
+        function removeArtistFromCloud(artistKey) {
+            if (confirm(`คุณต้องการถอนรากถอนโคนลบสิทธิ์แร็ปเปอร์ ${artistKey} ใช่หรือไม่?`)) {
+                database.ref(`udg_artist_credentials/${artistKey}`).remove();
+            }
         }
     </script>
 </body>

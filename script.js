@@ -24,13 +24,6 @@ let currentRoom = 'general_1';
 let currentRoomRef = null;
 let isCooldown = false;
 
-const artistKeys = {
-    '@Dxshane': 'shane999',
-    '@JayQ': 'jayq888',
-    '@UndergroundCultureTH': 'udg2026',
-    '@VAMPBOYZ': '0709',
-};
-
 const rudeWords = [
     "ควย", "เย็ด", "มึง", "กู", "สัส", "เหี้ย", "ระยำ", "ชาติตระกูล", "หี", "แตด", "ปิ๊", 
     "ควาย", "เฮี้ย", "ดกทอง", "ดอกทอง", "ส้นตีน", "ไอ้ควาย", "อีเหี้ย", "ค.วย", "เ-ย",
@@ -57,7 +50,6 @@ function showErrorAlert(title, message) {
         alert(title + "\n" + message.replace(/<br>/g, '\n').replace(/<[^>]*>/g, ''));
         return Promise.resolve();
     }
-
     errorModalTitle.innerText = title;
     errorModalMessage.innerHTML = message;
     errorModal.classList.add('active');
@@ -94,22 +86,18 @@ function requestArtistPasscode(artistName) {
             modalPasscode.removeEventListener('keypress', handleKeyPress);
             artistModal.classList.remove('active');
         }
-
         function handleSubmit() {
             const val = modalPasscode.value.trim();
             cleanup();
             resolve(val);
         }
-
         function handleCancel() {
             cleanup();
             resolve(null);
         }
-
         function handleKeyPress(e) {
             if (e.key === 'Enter') { handleSubmit(); }
         }
-
         modalSubmitBtn.addEventListener('click', handleSubmit);
         modalCancelBtn.addEventListener('click', handleCancel);
         modalPasscode.addEventListener('keypress', handleKeyPress);
@@ -137,9 +125,7 @@ async function sprayGraffiti() {
         return;
     }
 
-    if (!username.startsWith('@')) {
-        username = '@' + username;
-    }
+    if (!username.startsWith('@')) { username = '@' + username; }
 
     if (currentRoom === 'general_1') {
         rudeWords.forEach(word => {
@@ -152,7 +138,12 @@ async function sprayGraffiti() {
     let isArtist = false;
     let artistEmoji = ""; 
     
-    const matchedArtist = Object.keys(artistKeys).find(key => key.toLowerCase() === username.toLowerCase());
+    // ดึงคีย์ข้อมูลแร็ปเปอร์ความปลอดภัยสูงแบบเรียลไทม์ตรงจากคลาวด์ออโต้
+    const artistSnapshot = await database.ref('udg_artist_credentials').once('value');
+    const cloudArtistKeys = artistSnapshot.val() ? artistSnapshot.val() : {};
+    cloudArtistKeys['@UndergroundCultureTH'] = 'udg2026';
+
+    const matchedArtist = Object.keys(cloudArtistKeys).find(key => key.toLowerCase() === username.toLowerCase());
     
     if (matchedArtist) {
         username = matchedArtist; 
@@ -161,23 +152,22 @@ async function sprayGraffiti() {
         const hasVerified = localStorage.getItem(`verified_${username}`);
         const sessionDuration = 30 * 60 * 1000; 
 
-        if (hasVerified === artistKeys[username] && verifiedTime && (currentTime - verifiedTime < sessionDuration)) {
+        if (hasVerified === cloudArtistKeys[username] && verifiedTime && (currentTime - verifiedTime < sessionDuration)) {
             isArtist = true;
         } else {
             const userPasscode = await requestArtistPasscode(username);
             if (userPasscode === null) return; 
 
-            if (userPasscode === artistKeys[username]) {
+            if (userPasscode === cloudArtistKeys[username]) {
                 isArtist = true;
                 localStorage.setItem(`verified_${username}`, userPasscode);
                 localStorage.setItem(`verified_time_${username}`, currentTime);
-                await showErrorAlert('VERIFIED SUCCESS', 'ยืนยันตัวตนสำเร็จ! ระบบจะจำเครื่องนี้ไว้ แร็ปรัวได้ 30 นาทีไม่ต้องกรอกรหัสซ้ำครับ 🔥');
+                await showErrorAlert('VERIFIED SUCCESS', 'ยืนยันตัวตนศิลปินสำเร็จ! ระบบจะจำเครื่องนี้ไว้ แร็ปรัวได้ 30 นาทีไม่ต้องกรอกรหัสซ้ำครับ 🔥');
             } else {
                 await showErrorAlert('SECURITY ALERT', '❌ รหัสลับไม่ถูกต้อง!<br>อย่ามาแอบอ้างชื่อศิลปินแถวนี้ไอ้หนู!');
                 return; 
             }
         }
-
         if (isArtist) {
             const verifiedEmojis = ['✅', '✅'];
             artistEmoji = verifiedEmojis[Math.floor(Math.random() * verifiedEmojis.length)] + " ";
@@ -213,14 +203,12 @@ function listenToRoom(roomName) {
         currentRoomRef.off();
         database.ref(`graffiti_rooms/${currentRoom}`).off();
     }
-    
     graffitiWall.innerHTML = '';
     currentRoomRef = database.ref(`graffiti_rooms/${roomName}`);
 
     currentRoomRef.limitToLast(50).on('child_added', (snapshot) => {
         const messageId = snapshot.key;
         const data = snapshot.val();
-        
         const oneDayInMs = 24 * 60 * 60 * 1000; 
         if (data.timestamp && (Date.now() - data.timestamp > oneDayInMs)) {
             database.ref(`graffiti_rooms/${roomName}/${messageId}`).remove();
@@ -269,7 +257,6 @@ function listenToRoom(roomName) {
             </div>
             <button class="respect-btn" onclick="addRespect('${messageId}')">🔥 <span class="count">${respectCount}</span></button>
         `;
-        
         graffitiWall.appendChild(newMsg);
         graffitiWall.scrollTop = graffitiWall.scrollHeight; 
     });
@@ -301,11 +288,8 @@ document.querySelectorAll('.room-btn').forEach(btn => {
 });
 
 listenToRoom(currentRoom);
-
 graffitiBtn.addEventListener('click', sprayGraffiti);
-graffitiInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') sprayGraffiti();
-});
+graffitiInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') sprayGraffiti(); });
 
 document.querySelectorAll('.emoji-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -324,13 +308,11 @@ database.ref('.info/connected').on('value', (snapshot) => {
         myConnectionsRef.set(true);
     }
 });
-
 onlineCountRef.on('value', (snapshot) => {
     const currentOnline = snapshot.numChildren();
     countElement.innerText = currentOnline > 0 ? currentOnline : 1;
 });
 
-// ⚡ ลื่นหัวแตก: สั่งเคลียร์เอฟเฟกต์หน้ากากโหลดดำให้สลายหายตัวทันที
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         const loader = document.getElementById('web-loader');
@@ -339,17 +321,9 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // =================================================================
-// ─── ระบบจัดอันดับและสถานีโหวตโมดอล (VOTE SYSTEM) ───
+// ─── 🗳️ 🎵 DYNAMIC LIVE MUSIC CHART ENGINE (แต้มโหวตเก่าไม่หาย) ───
 // =================================================================
-const musicTracksData = {
-    "track_01": { id: "track_01", title: "รอ รอ รอ", artist: "Dxshane feat. JayQ", ytId: "78gSbjE71m8" }, 
-    "track_02": { id: "track_02", title: "ซึมเศร้าก็เด้าได้ (Remix)", artist: "S!NS feat. THXWXN, MACNA", ytId: "_H7sCARrYJU" }, 
-    "track_03": { id: "track_03", title: "หนุ่มบ้านนอก (Remix)", artist: "Aniydy, JayQ", ytId: "L2OSHr5UikU" },
-    "track_04": { id: "track_04", title: "Miss คิด", artist: "Ezchill", ytId: "L2OSHr5UikU" },
-    "track_05": { id: "track_05", title: "U CAN'T SEE ME", artist: "YOUNGGU X P6ICK", ytId: "KHyw-tyxrE4" },
-    "track_06": { id: "track_06", title: "พิษภัย II", artist: "FIIXD, 1MILL, 4BANG, KING KRAZY & SUNNYBONE", ytId: "YmqfFYvpIwc" },
-    "track_07": { id: "track_07", title: "NOBODY", artist: "N4 x wh0dafvckis19", ytId: "LDfk_7RJctc" }
-};
+let musicTracksData = {}; 
 
 const liveChartDisplay = document.getElementById('live-chart-display');
 const modalVotingList = document.getElementById('modal-voting-list');
@@ -358,6 +332,17 @@ const voteSearchInput = document.getElementById('voteSearchInput');
 let globalCurrentWeekVotes = {};
 let ytPlayer = null; 
 let updateTimerInterval = null;
+
+// รายชื่อเพลงตั้งต้นเซฟตี้หลักของระบบ สล็อตคีย์ดั้งเดิมห้ามแก้
+const fallbackStaticTracks = {
+    "track_01": { id: "track_01", title: "รอ รอ รอ", artist: "Dxshane feat. JayQ", ytId: "78gSbjE71m8" }, 
+    "track_02": { id: "track_02", title: "ซึมเศร้าก็เด้าได้ (Remix)", artist: "S!NS feat. THXWXN, MACNA", ytId: "_H7sCARrYJU" }, 
+    "track_03": { id: "track_03", title: "หนุ่มบ้านนอก (Remix)", artist: "Aniydy, JayQ", ytId: "L2OSHr5UikU" },
+    "track_04": { id: "track_04", title: "Miss คิด", artist: "Ezchill", ytId: "L2OSHr5UikU" },
+    "track_05": { id: "track_05", title: "U CAN'T SEE ME", artist: "YOUNGGU X P6ICK", ytId: "KHyw-tyxrE4" },
+    "track_06": { id: "track_06", title: "พิษภัย II", artist: "FIIXD, 1MILL, 4BANG, KING KRAZY & SUNNYBONE", ytId: "YmqfFYvpIwc" },
+    "track_07": { id: "track_07", title: "NOBODY", artist: "N4 x wh0dafvckis19", ytId: "LDfk_7RJctc" }
+};
 
 const tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
@@ -431,45 +416,56 @@ function submitTrackVote(trackId) {
     trackVoteRef.transaction((currentVotes) => { return (currentVotes || 0) + 1; }, (error, committed) => {
         if (committed) {
             localStorage.setItem(`last_vote_${trackId}`, todayStr);
-            showErrorAlert('VOTE SUCCESS', '🔥 คะแนนถูกส่งเข้าระบบประจำสัปดาห์เรียบร้อยแล้ว ขอบคุณที่ช่วยดันชาร์ต UDC ครับ BRO!');
+            showErrorAlert('VOTE SUCCESS', '🔥 คะแนนถูกส่งเข้าระบบประจำสัปดาห์เรียบร้อยแล้ว ขอบคุณที่ช่วยดันชาร์ต UDG ครับ BRO!');
         }
     });
 }
 
-database.ref('weekly_music_votes').on('value', (snapshot) => {
-    const allWeeksData = snapshot.val() ? snapshot.val() : {};
-    const now = new Date();
-    const currentWeekId = getWeekIdentifier(now);          
-    const currentWeekVotes = allWeeksData[currentWeekId] ? allWeeksData[currentWeekId] : {};
-    globalCurrentWeekVotes = currentWeekVotes;
-    
-    if (voteSearchInput) { renderModalVotingStation(currentWeekVotes, voteSearchInput.value); } 
-    else { renderModalVotingStation(currentWeekVotes, ""); }
+function setupCombinedMusicEngine() {
+    database.ref('udg_music_tracks').on('value', (trackSnapshot) => {
+        const cloudTracks = trackSnapshot.val();
+        if (!cloudTracks) { musicTracksData = fallbackStaticTracks; } 
+        else { musicTracksData = { ...fallbackStaticTracks, ...cloudTracks }; }
 
-    let sortedList = Object.keys(musicTracksData).map(key => {
-        const track = musicTracksData[key];
-        return { ...track, votes: currentWeekVotes[track.id] ? currentWeekVotes[track.id] : 0 };
-    });
-    sortedList.sort((a, b) => b.votes - a.votes);
-    
-    if (liveChartDisplay) {
-        liveChartDisplay.innerHTML = '';
-        sortedList.slice(0, 5).forEach((track, index) => {
-            const rankNum = String(index + 1).padStart(2, '0');
-            const chartItem = document.createElement('div');
-            chartItem.className = 'chart-item';
-            chartItem.innerHTML = `
-                <span class="chart-num">${rankNum}</span>
-                <div class="track-info">
-                    <h4>${track.title}</h4>
-                    <p>${track.artist} <span style="color: #444; font-size:0.75rem; margin-left:5px;">[🔥 ${track.votes} PTS]</span></p>
-                </div>
-                <i class="fa-solid fa-play-circle chart-play" onclick="triggerPlayerFromChart('${track.id}')"></i>
-            `;
-            liveChartDisplay.appendChild(chartItem);
+        database.ref('weekly_music_votes').once('value', (voteSnapshot) => {
+            const allWeeksData = voteSnapshot.val() ? voteSnapshot.val() : {};
+            const now = new Date();
+            const currentWeekId = getWeekIdentifier(now);          
+            const currentWeekVotes = allWeeksData[currentWeekId] ? allWeeksData[currentWeekId] : {};
+            globalCurrentWeekVotes = currentWeekVotes;
+            
+            if (voteSearchInput) { renderModalVotingStation(currentWeekVotes, voteSearchInput.value); } 
+            else { renderModalVotingStation(currentWeekVotes, ""); }
+
+            let sortedList = Object.keys(musicTracksData).map(key => {
+                const track = musicTracksData[key];
+                return { ...track, votes: currentWeekVotes[track.id] ? currentWeekVotes[track.id] : 0 };
+            });
+            sortedList.sort((a, b) => b.votes - a.votes);
+            
+            if (liveChartDisplay) {
+                liveChartDisplay.innerHTML = '';
+                sortedList.slice(0, 5).forEach((track, index) => {
+                    const rankNum = String(index + 1).padStart(2, '0');
+                    const chartItem = document.createElement('div');
+                    chartItem.className = 'chart-item';
+                    chartItem.innerHTML = `
+                        <span class="chart-num">${rankNum}</span>
+                        <div class="track-info">
+                            <h4>${track.title}</h4>
+                            <p>${track.artist} <span style="color: #444; font-size:0.75rem; margin-left:5px;">[🔥 ${track.votes} PTS]</span></p>
+                        </div>
+                        <i class="fa-solid fa-play-circle chart-play" onclick="triggerPlayerFromChart('${track.id}')"></i>
+                    `;
+                    liveChartDisplay.appendChild(chartItem);
+                });
+            }
         });
-    }
-});
+    });
+}
+
+setupCombinedMusicEngine();
+database.ref('weekly_music_votes').on('value', () => { setupCombinedMusicEngine(); });
 
 if (voteSearchInput) {
     voteSearchInput.addEventListener('input', (e) => { renderModalVotingStation(globalCurrentWeekVotes, e.target.value); });
@@ -500,9 +496,6 @@ function triggerPlayerFromChart(trackId) {
     }
 }
 
-// =================================================================
-// ─── ระบบปุ่มควบคุมป๊อปอัปเครื่องเล่นมินิ YouTube CONTROLLER ───
-// =================================================================
 const playerPlayBtn = document.getElementById('player-play-btn');
 const playerTimeDisplay = document.getElementById('player-time-display');
 const discSpinningIcon = document.querySelector('.disc-spinning');
@@ -542,13 +535,12 @@ if (playerPlayBtn) {
 }
 
 // =================================================================
-// ─── 📰 🔥 CENTRAL APP FEED: ระบบคลาวด์ดูดฟีดอัตโนมัติ สลัดโค้ดแอดมินเก่าทิ้งถาวร ───
+// ─── 📰 🔥 CENTRAL APP FEED: ระบบคลาวด์ดูดฟีดอัตโนมัติ UDG FULL OPTION ───
 // =================================================================
 const liveNewsGrid = document.getElementById('live-news-grid');
 const liveFeaturedCard = document.getElementById('live-featured-card');
 const liveRadarGrid = document.getElementById('live-radar-grid');
 
-// 🔄 จุดที่ 1: แก้เป็น udg_homepage_slots เพื่อดึงข่าวเด่นตัวบนสุดให้ตรงกับหน้าแอดมินใหม่
 database.ref('udg_homepage_slots/featured_card').on('value', (snapshot) => {
     if (!liveFeaturedCard) return;
     const data = snapshot.val();
@@ -593,16 +585,14 @@ function renderRadarZone() {
     });
 }
 
-// 🔄 จุดที่ 2 & 3: แก้เป็น udg_homepage_slots สำหรับช่องดึงการ์ดเรดาร์ศิลปินดาวรุ่งซ้าย-ขวา
 database.ref('udg_homepage_slots/radar_card_1').on('value', (snapshot) => { radarDataCard1 = snapshot.val(); renderRadarZone(); });
 database.ref('udg_homepage_slots/radar_card_2').on('value', (snapshot) => { radarDataCard2 = snapshot.val(); renderRadarZone(); });
 
-// 🔄 จุดที่ 4: แก้เป็น udg_news_drops เพื่อดึงข้อมูลข่าวสารในตารางกริดหลักด้านล่างเว็บ
 database.ref('udg_news_drops').on('value', (snapshot) => {
     if (!liveNewsGrid) return; liveNewsGrid.innerHTML = '';
     const allNewsData = snapshot.val();
     if (!allNewsData) {
-        liveNewsGrid.innerHTML = `<div style="padding:40px; color:#555; text-align:center; grid-column:1/-1;">📰 ยังไม่มีข่าวสารอัปเดตเพิ่มเติมในระบบขณะนี้ พิมพ์เพิ่มข่าวได้ที่หน้าแอดมินลับแยกครับน้า</div>`;
+        liveNewsGrid.innerHTML = `<div style="padding:40px; color:#444; text-align:center; grid-column:1/-1; font-size:0.95rem; font-weight:300; letter-spacing:0.5px;">📰 NO CONTENT CURRENTLY AVAILABLE. SPECIAL UPDATES COMING SOON.</div>`;
         return;
     }
     let newsList = Object.keys(allNewsData).map(key => { return { newsId: key, ...allNewsData[key] }; });
