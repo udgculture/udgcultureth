@@ -698,3 +698,54 @@ database.ref('udg_live_advertisements').on('value', (snapshot) => {
         }, 10000);
     }
 });
+
+// =================================================================
+// ─── 🤝 💛 DYNAMIC SPONSOR & LABEL PARTNERS TICKER ENGINE (ฉบับอินฟินิตี้) ───
+// =================================================================
+const sponsorTickerTrack = document.querySelector('.sponsor-ticker-track');
+
+const fallbackDefaultLogos = [
+    { name: "UDG Default 1", image: "image/ขาวใส.png" },
+    { name: "UDG Default 2", image: "image/ขาวใส.png" },
+    { name: "UDG Default 3", image: "image/ขาวใส.png" },
+    { name: "UDG Default 4", image: "image/ขาวใส.png" },
+    { name: "UDG Default 5", image: "image/ขาวใส.png" }
+];
+
+function renderSponsorTickerItems(logosArray) {
+    if (!sponsorTickerTrack) return;
+    sponsorTickerTrack.innerHTML = '';
+
+    // 🎯 หัวใจสำคัญของอินฟินิตี้: ถ้ารายชื่อโลโก้มีน้อยไป รางจะสั้นแล้วเกิดช่องว่างค้างหน้าจอ
+    // เราจะสั่งคูณจำนวนกองทัพโลโก้ซ้ำเติมเข้าไปให้ยาวพิกัดอย่างน้อย 3 ชุด เพื่อให้รางเลื่อนวิ่งชนรอบกันแบบไม่มีสะดุด
+    let infiniteLogosList = [];
+    if (logosArray.length > 0) {
+        infiniteLogosList = [...logosArray, ...logosArray, ...logosArray, ...logosArray];
+    } else {
+        infiniteLogosList = [...fallbackDefaultLogos, ...fallbackDefaultLogos, ...fallbackDefaultLogos];
+    }
+
+    infiniteLogosList.forEach(partner => {
+        const logoDiv = document.createElement('div');
+        logoDiv.className = 'sponsor-logo-item';
+        logoDiv.innerHTML = `<img src="${partner.image}" alt="${partner.name}" title="${partner.name}" onerror="this.src='image/ขาวใส.png'">`;
+        sponsorTickerTrack.appendChild(logoDiv);
+    });
+}
+
+// สั่งหูฟังส่องดูคลังข้อมูลถังโลโก้สปอนเซอร์ส่วนกลางแบบ Realtime
+database.ref('udg_culture_partners_logos').on('value', (snapshot) => {
+    const data = snapshot.val();
+    let currentLogosList = [];
+
+    if (!data) {
+        currentLogosList = fallbackDefaultLogos;
+    } else {
+        Object.keys(data).forEach(key => {
+            currentLogosList.push(data[key]);
+        });
+    }
+
+    // เนรมิตแถบลูปขบวนพาเหรดโลโก้พาร์ทเนอร์อินฟินิตี้ไหลลื่น
+    renderSponsorTickerItems(currentLogosList);
+});

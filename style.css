@@ -2064,67 +2064,68 @@ footer {
 .player-divider {
     color: #222;
 }
-/* =========================================
-   SPONSOR & LABEL PARTNERS TICKER STYLE (IMAGE 1:1)
-========================================= */
+/* =================================================================
+   🤝 🔄 SPONSOR TICKER FULL INFINITE LOOP STYLE (ฉบับไหลลื่นไร้รอยต่อ)
+================================================================= */
 .sponsor-ticker-container {
     background: #090909;
     border: 1px solid #151515;
-    padding: 15px 0; /* ลด padding ลงเล็กน้อยเพื่อให้กระชับพอดีกับรูป */
+    padding: 20px 0;
     overflow: hidden;
     position: relative;
     border-radius: 6px;
-    margin-bottom: 20px;
+    width: 100%;
 }
 
-/* ท่อรางเลื่อนสำหรับปล่อยให้ข้อมูลไหล */
+/* 🎯 ท่อรางเลื่อน: บังคับให้เป็น flex แนวนอน ห้ามตกบรรทัด และห้ามขยายกล่องแม่ */
 .sponsor-ticker-track {
     display: flex;
-    width: max-content;
-    gap: 80px; /* เพิ่มระยะห่างระหว่างโลโก้ให้ดูโปร่ง สบายตา */
     align-items: center;
-    animation: scrollSponsors 25s linear infinite; /* ปรับเวลา 25s ให้ไหลสมูทสบายตาขึ้น */
+    width: max-content; /* บังคับให้รางกางตัวยาวตามจำนวนโลโก้ที่โคลนมา */
+    gap: 60px; /* ระยะห่างระหว่างโลโก้กำลังสวยงามตา */
+    animation: scrollSponsorsInfinite 20s linear infinite; /* วิ่งวนลูปแบบต่อเนื่องด้วยความเร็วคงที่ */
 }
 
-/* กล่องครอบโลโก้ชิ้นไอเทม */
 .sponsor-logo-item {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0; /* 🎯 สำคัญมาก: บังคับห้ามปุ่มรูปภาพหดตัวเด็ดขาดเมื่อจอแคบ */
 }
 
-/* 🎯 จัดการตัวรูปภาพโลโก้ด้านใน ล็อกขนาดสัดส่วน 1:1 */
 .sponsor-logo-item img {
-    width: 60px;       /* ล็อกความกว้าง */
-    height: 60px;      /* ล็อกความสูงให้เท่ากันเพื่อเป็นสี่เหลี่ยมจัตุรัส 1:1 */
-    object-fit: contain; /* บังคับให้รูปทรงโลโก้แสดงครบถ้วน ไม่บดบัง ไม่เบี้ยว และไม่โดนครอปตัด */
-    
-    /* 🎨 สไตล์ดิบสตรีม: ปรับรูปภาพทั้งหมดให้กลายเป็นสีขาวดำ และมืดลง 60% เพื่อไม่ให้แย่งความเด่นของเว็บ */
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
     filter: grayscale(100%) opacity(0.3);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
 }
 
-/* 🔥 เอฟเฟกต์เดือด: เมื่อเอาเมาส์ชี้ที่โลโก้แบรนด์ไหน แบรนด์นั้นจะคืนสีสันจริง สว่างวาบ และเรืองแสง */
 .sponsor-logo-item img:hover {
     filter: grayscale(0%) opacity(1) drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));
-    transform: scale(1.1); /* ขยายใหญ่ขึ้น 10% ให้ดูมีมิติโต้ตอบ */
+    transform: scale(1.1);
 }
 
-/* แอนิเมชันสไลด์วนลูปถาวร */
-@keyframes scrollSponsors {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-}
-
-/* 📱 ออปติไมล์สำหรับหน้าจอมือถือ (จอเล็ก) */
+/* 📱 ปรับแต่งระยะขอบจอมือถือเล็กน้อยให้สมส่วน */
 @media (max-width: 768px) {
     .sponsor-logo-item img {
-        width: 45px;  /* ย่อขนาดโลโก้ลงเล็กน้อยบนจอมือถือเพื่อให้ดูน่ารักพอดีจอ */
+        width: 45px;
         height: 45px;
     }
     .sponsor-ticker-track {
-        gap: 50px;    /* ลดช่องไฟระหว่างรูปบนมือถือ */
+        gap: 40px;
+    }
+}
+
+/* 🎬 🎯 ตัวคำนวณแอนิเมชันอินฟินิตี้: สไลด์จากขวาไปซ้ายจรดจุดกึ่งกลางของรางพอดี */
+@keyframes scrollSponsorsInfinite {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        /* วิ่งไปจนถึงครึ่งทาง (ซึ่งเป็นจุดรอยต่อของชุดที่โคลนพอดี) แล้วจะวาร์ปกลับมา 0 แบบเนียนตา */
+        transform: translateX(calc(-50% - 30px)); 
     }
 }
 /* =========================================
