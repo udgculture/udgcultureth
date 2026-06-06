@@ -2513,7 +2513,7 @@ footer {
 }
 
 /* =================================================================
-   🔐 UDG IDENTITY AUTHENTICATION MODAL & BUTTON STYLE 
+   🔐 UDG IDENTITY AUTHENTICATION MODAL & BUTTON STYLE (FIXED VER)
 ================================================================= */
 .auth-trigger-btn {
     background: transparent;
@@ -2577,6 +2577,12 @@ footer {
     box-shadow: 0 0 15px rgba(59, 89, 152, 0.4);
 }
 
+/* 🎯 จุดตาย: เปิดสวิตช์สถานะให้กล่องป๊อปอัปสว่างและกดคลิกปุ่มด้านในได้จริงเมื่อสคริปต์เรียกหา */
+.vote-modal-overlay.active {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
 /* ปรับตำแหน่งปุ่มล็อกอินบนหน้าจอมือถือ */
 @media (max-width: 768px) {
     .auth-corner-zone {
@@ -2591,6 +2597,7 @@ footer {
         padding: 10px;
     }
 }
+
 /* =================================================================
    📸 USER PROFILE AVATAR ON TOP NAV & GRAFFITI WALL STYLE
 ================================================================= */
@@ -2634,5 +2641,5 @@ footer {
     align-items: center;
     flex-grow: 1;
     flex-wrap: wrap;
-    gap: 8px; /* ขยับช่องไฟให้พอดีสายตา */
+    gap: 8px;
 }
