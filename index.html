@@ -61,14 +61,23 @@
     <!-- โลโก้แบรนด์ -->
     <header>
    <div class="header-container" style="position: relative; width: 100%;">
-            <!-- 🔑 ปุ่มล็อกอินเรืองแสงมุมบนขวา (อัปเกรดเวอร์ชันรองรับรูปภาพโปรไฟล์) -->
-            <div class="auth-corner-zone" style="position: absolute; top: -20px; right: 0; z-index: 100;">
-                <button type="button" id="openAuthModalBtn" class="auth-trigger-btn">
-                    <div id="authBtnContent" style="display: flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-right-to-bracket"></i> 
-                        <span class="auth-btn-text">LOGIN</span>
+       <!-- 🔑 ปุ่มล็อกอิน / กล่องสไลด์เมนูสำหรับผู้ใช้ที่ล็อกอินแล้ว -->
+            <div class="auth-corner-zone" style="position: absolute; top: -20px; right: 0; z-index: 1000;">
+                <div class="auth-wrapper" style="position: relative; display: inline-block;">
+                    <button type="button" id="openAuthModalBtn" class="auth-trigger-btn">
+                        <div id="authBtnContent" style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-right-to-bracket"></i> 
+                            <span class="auth-btn-text">LOGIN</span>
+                        </div>
+                    </button>
+                    
+                    <!-- 🚪 กล่อง Dropdown ซ่อนปุ่ม SIGN OUT (จะแสดงตอนล็อกอินเสร็จแล้วกดจิ้มที่รูปโปรไฟล์) -->
+                    <div id="userDropdownMenu" class="user-dropdown-menu">
+                        <button type="button" id="signOutBtn" class="sign-out-action-btn">
+                            <i class="fa-solid fa-right-from-bracket"></i> SIGN OUT
+                        </button>
                     </div>
-                </button>
+                </div>
             </div>
 
             <img src="image/ขาวใส.png" alt="Underground Culture TH Logo" class="brand-logo">

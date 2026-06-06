@@ -803,15 +803,36 @@ const loginFacebookBtn = document.getElementById('loginFacebookBtn');
 const userProfileDisplay = document.getElementById('userProfileDisplay');
 const authUserName = document.getElementById('authUserName');
 
+// 🎯 ดักดึงปุ่มชุดใหม่ประจำบอร์ดควบคุม
+const userDropdownMenu = document.getElementById('userDropdownMenu');
+const signOutBtn = document.getElementById('signOutBtn');
+
+// คำสั่งจัดการปุ่มล็อกอินหลัก (ปรับฟังก์ชันให้ฉลาดขึ้น: ถ้ายังไม่ล็อกอินให้เปิดป๊อปอัป ค้าล็อกอินแล้วให้สับสวิตช์ Dropdown)
 if (openAuthModalBtn && authProviderModal && closeAuthModalBtn) {
-    openAuthModalBtn.addEventListener('click', () => {
-        authProviderModal.classList.add('active'); 
+    openAuthModalBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const currentUser = firebase.auth().currentUser;
+        if (currentUser) {
+            // ถ้าล็อกอินอยู่แล้ว สั่งให้กล่องปุ่ม SIGN OUT เด้งสไลด์ลงมา
+            if (userDropdownMenu) userDropdownMenu.classList.toggle('active');
+        } else {
+            // ถ้ายังไม่ได้ล็อกอิน ให้เปิดไฟป๊อปอัปเลือกค่ายเหมือนเดิม
+            authProviderModal.classList.add('active'); 
+        }
     });
     closeAuthModalBtn.addEventListener('click', () => {
         authProviderModal.classList.remove('active'); 
     });
 }
 
+// คลิกพื้นที่ว่างอื่น ๆ บนหน้าจอเพื่อสั่งหดกล่องเมนู Dropdown ลงไปซ่อนอัตโนมัติ
+document.addEventListener('click', () => {
+    if (userDropdownMenu && userDropdownMenu.classList.contains('active')) {
+        userDropdownMenu.classList.remove('active');
+    }
+});
+
+// 🎯 เมื่อผู้ใช้งานทำการยืนยันตัวตนสำเร็จ
 function handleAuthSuccess(userObj) {
     if (!userObj) return;
     
@@ -833,11 +854,11 @@ function handleAuthSuccess(userObj) {
         }
         openAuthModalBtn.innerHTML = displayContent;
         openAuthModalBtn.style.borderColor = "#00ffff";
-        openAuthModalBtn.style.padding = "4px 12px 4px 6px"; 
+        openAuthModalBtn.style.padding = "4px 12px 4px 6px";
     }
 
     if (graffitiName && (graffitiName.value === "" || graffitiName.value === "@")) {
-        graffitiName.value = displayName.replace(/\s+/g, ''); 
+        graffitiName.value = displayName.replace(/\s+/g, '');
     }
 
     setTimeout(() => {
@@ -845,6 +866,37 @@ function handleAuthSuccess(userObj) {
     }, 1200);
 }
 
+// 🚪 💥 ฟังก์ชันสั่งงานออกจากระบบ (SIGN OUT) คืนสภาพปุ่มเดิมล้างบอร์ดสะอาดหมดจด
+if (signOutBtn) {
+    signOutBtn.addEventListener('click', async () => {
+        try {
+            await firebase.auth().signOut();
+            
+            // สั่งปรับสภาพดีไซน์ปุ่มขวาบนให้ถอยกลับไปขึ้นคำว่า LOGIN เหมือนเดิมตอนเข้าเว็บ
+            if (openAuthModalBtn) {
+                openAuthModalBtn.innerHTML = `
+                    <div id="authBtnContent" style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-right-to-bracket"></i> 
+                        <span class="auth-btn-text">LOGIN</span>
+                    </div>`;
+                openAuthModalBtn.style.borderColor = "var(--accent-color)";
+                openAuthModalBtn.style.color = "var(--accent-color)";
+                openAuthModalBtn.style.padding = "8px 16px";
+            }
+            
+            // ล้างฟีดข้อมูลสเปรย์ชื่อเล่นและซ่อนกล่องประวัติหลังบ้าน
+            if (graffitiName) graffitiName.value = "";
+            if (userProfileDisplay) userProfileDisplay.style.display = "none";
+            if (userDropdownMenu) userDropdownMenu.classList.remove('active');
+            
+            await showErrorAlert("SIGNED OUT", "ออกจากระบบ Underground Culture เรียบร้อยแล้วครับ BRO! 🩹");
+        } catch (error) {
+            showErrorAlert("SIGN OUT ERROR", `เกิดข้อผิดพลาด: ${error.message}`);
+        }
+    });
+}
+
+// ระบบดักสตรีมเชื่อมต่อ Google SDK
 if (loginGoogleBtn) {
     loginGoogleBtn.addEventListener('click', async () => {
         try {
@@ -864,6 +916,7 @@ if (loginGoogleBtn) {
     });
 }
 
+// ระบบดักสตรีมเชื่อมต่อ Facebook SDK
 if (loginFacebookBtn) {
     loginFacebookBtn.addEventListener('click', async () => {
         try {
@@ -883,6 +936,7 @@ if (loginFacebookBtn) {
     });
 }
 
+// ระบบจดจำสถานะผู้ใช้งานหลังรีเฟรชหน้าจอออโต้
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         handleAuthSuccess(user);
