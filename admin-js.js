@@ -366,36 +366,35 @@ function removeRewardFromWheelCloud(key) {
         database.ref(`udg_lucky_wheel_rewards/${key}`).remove();
     }
 }
-
 // =================================================================
-// ─── 🔍 🎰 ADMINDESK: ENGINE สแกนประวัติและระบบเคลมตัดสิทธิ์คูปอง ───
+// ─── 🔍 🎰 ADMINDESK: ENGINE สแกนประวัติและระบบเคลมตัดสิทธิ์สมบูรณ์แบบ ───
 // =================================================================
 const adminSearchInput = document.getElementById('adminUserRewardSearchInput');
 const adminUserRewardsTbody = document.getElementById('admin-user-rewards-tbody');
-let globalAllUsersRewardsCache = []; // ถังพักข้อมูลประวัติรวมเพื่อความรวดเร็วในการค้นหา
+let globalAllUsersRewardsCache = []; // ถังพักความจำด่วนสำหรับระบบเสิร์ชค้นหา
 
-// ดักฟังการสแกนประวัติข้ามโต๊ะฐานข้อมูลคลาวด์ มัดรวมข้อมูลดิบส่งมาจำแนกหลังบ้าน
+// 🎯 สัญญาณดาวเทียมหลัก: ส่องกวาดถังคลาวด์ประวัติรางวัล (มี s หลัง user เสมอให้ตรงกันร้อยเปอร์เซ็นต์)
 database.ref('users_rewards_vault').on('value', (snapshot) => {
     if (!adminUserRewardsTbody) return;
     const allVaultData = snapshot.val();
+    
+    // เคลียร์ถังแคชความจำเดิมทิ้งทันทีที่มีการเปลี่ยนแปลงบนคลาวด์ ป้องกันดาต้าเก่าค้างบอร์ด
     globalAllUsersRewardsCache = [];
 
     if (!allVaultData) {
-        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#555; text-align:center; padding: 20px;">📦 ระบบเชื่อมต่อสำเร็จ: แต่ตอนนี้ยังไม่มีประวัติการกดสุ่มของสมาชิกท่านใดในฐานข้อมูลเลยครับน้า</td></tr>`;
+        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#555; text-align:center; padding: 20px;">📦 ระบบเชื่อมต่อสำเร็จ: ตอนนี้ไม่มีตั๋วคูปองค้างเคลมบนฐานข้อมูลแล้วครับน้า</td></tr>`;
         return;
     }
 
     try {
-        // กวาดลูปเจาะถังชั้นที่ 1 (UID ผู้ใช้) -> ถังชั้นที่ 2 (คีย์ไอเท็มรางวัล)
+        // กวาดสายสัญญาณเจาะกล่องแกะข้อมูลทีละบัญชีสมาชิก
         Object.keys(allVaultData).forEach(uid => {
             const userItems = allVaultData[uid];
-            
             if (userItems && typeof userItems === 'object') {
                 Object.keys(userItems).forEach(itemKey => {
                     const info = userItems[itemKey];
-                    
                     if (info) {
-                        // 🎯 พ่วงเก็บค่าคีย์หลัก (uid และ itemKey) เอาไว้ใช้สั่งลบข้อมูลรายชิ้นบนคลาวด์
+                        // 🎯 ซ่อมแซมจุดตาย: ฝังค่า userUid และ couponKey (itemKey) เข้าถังความจำให้สคริปต์สแกนหยิบไปลบรายชิ้นได้ถูกต้อง
                         globalAllUsersRewardsCache.push({
                             userUid: uid,
                             couponKey: itemKey,
@@ -409,24 +408,27 @@ database.ref('users_rewards_vault').on('value', (snapshot) => {
             }
         });
 
-        // สั่งจัดเรียงประวัติตามเวลาล่าสุดขึ้นก่อน
+        // จัดคิวเรียงลำดับประวัติล่าสุดขึ้นก่อนเสมอ
         globalAllUsersRewardsCache.sort((a, b) => b.timestamp - a.timestamp);
-        renderFilteredUserRewards(""); // ประเดิมพ่นตารางแบบไม่กรอกคำค้นหา
+        
+        // สั่งวาดแผงตารางเรียลไทม์ (ถ้าแอดมินพิมพ์ช่องเสิร์ชกรองคำค้างไว้ ให้คงคำค้นหาเดิมค้างไว้ด้วย)
+        const currentSearchQuery = adminSearchInput ? adminSearchInput.value : "";
+        renderFilteredUserRewards(currentSearchQuery);
         
     } catch (error) {
-        console.error("สคริปต์สแกนประวัติเจอจุดสะดุดน้าบักหำทิว: ", error);
-        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#ff3333; text-align:center; padding: 20px;">❌ เกิดข้อผิดพลาดในการแกะข้อมูล: ${error.message}</td></tr>`;
+        console.error("สคริปต์สแกนประวัติสะดุด: ", error);
+        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#ff3333; text-align:center; padding: 20px;">❌ เกิดข้อผิดพลาดในการกวาดข้อมูล: ${error.message}</td></tr>`;
     }
 });
 
-// ฟังก์ชันกรองประวัติตามตัวอักษรที่แอดมินพิมพ์ช่องค้นหา (รองรับเสิร์ช ชื่อ, รางวัล, รหัส CODE)
+// ฟังก์ชันสั่งสลักโครงตารางประวัติผู้ใช้งานพ่วงรหัส CODE ลับและปุ่มเคลมสิทธิ์
 function renderFilteredUserRewards(filterText) {
     if (!adminUserRewardsTbody) return;
     adminUserRewardsTbody.innerHTML = '';
     const query = filterText.toLowerCase().trim();
 
     if (globalAllUsersRewardsCache.length === 0) {
-        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#555; text-align:center; padding: 20px;">📦 ไม่มีข้อมูลประวัติรางวัลสมาชิกบนระบบคลาวด์ขณะนี้</td></tr>`;
+        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#555; text-align:center; padding: 20px;">📦 ไม่มีประวัติข้อมูลตั๋วคูปองสแตนบายในระบบคลาวด์ขณะนี้</td></tr>`;
         return;
     }
 
@@ -441,7 +443,7 @@ function renderFilteredUserRewards(filterText) {
     });
 
     if (filteredList.length === 0) {
-        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#ff007f; text-align:center; padding: 15px;">❌ ไม่พบรายชื่อบัญชี รางวัล หรือรหัสตั๋ว CODE ที่ตรงกับ "[ ${filterText} ]" ครับน้า</td></tr>`;
+        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#ff007f; text-align:center; padding: 15px;">❌ ไม่พบข้อมูลไอดีหรือตั๋วรหัสที่ตรงกับ "[ ${filterText} ]" ครับน้า</td></tr>`;
         return;
     }
 
@@ -471,20 +473,25 @@ function renderFilteredUserRewards(filterText) {
     });
 }
 
-// 🎯 ฟังก์ชันเด็ดขาดประจำค่าย: สั่งทำลายล้างข้อมูลรายใบเมื่อเคลมของเสร็จ ป้องกันฐานข้อมูลบวมร้อยเปอร์เซ็นต์
+// 🎯 ฟังก์ชันสั่งระเบิดข้อมูลทำลายตั๋วคูปองออกจากฐานข้อมูลรายใบเมื่อเคลมของเสร็จสิ้น
 function markCouponAsUsedInCloud(userUid, couponKey, ticketId) {
-    if (confirm(`🚨 ยืนยันการตัดสิทธิ์ตั๋วรหัส [ ${ticketId} ] ใช่หรือไม่?\n(ระบบจะลบคูปองใบนี้ออกจากตู้เซฟหน้าบ้านของลูกค้า และลบออกจากตารางแอดมินถาวรทันทีเพื่อประหยัดพื้นที่คลาวด์ครับน้า)`)) {
+    if (!userUid || !couponKey) {
+        alert("❌ ข้อผิดพลาดทางระบบ: หาค่าพาธ ID คูปองใบนี้บนคลาวด์ไม่เจอครับน้า");
+        return;
+    }
+    
+    if (confirm(`🚨 ยืนยันการเคลมตัดสิทธิ์ตั๋วรหัส [ ${ticketId} ] ใช่หรือไม่?\n(ตั๋วใบนี้จะอันตรธานหายไปจากตู้เซฟผู้ใช้หน้าบ้านและหน้าระบบแอดมินพร้อมกันออโต้ทันทีครับน้า)`)) {
         database.ref(`users_rewards_vault/${userUid}/${couponKey}`).remove()
             .then(() => {
-                alert(`🔥 เคลียร์สิทธิ์ตั๋วรหัส ${ticketId} ออกจากคลาวด์สองฝั่งเรียบร้อยครับน้าบักหำทิว!`);
+                alert(`🔥 ระบบทำการทำลายสิทธิ์ตั๋วรหัส ${ticketId} ออกจากชั้นบรรยากาศคลาวด์เรียบร้อยครับน้าบักหำทิว!`);
             })
             .catch((error) => {
-                alert(`❌ เกิดข้อผิดพลาดในการลบข้อมูล: ${error.message}`);
+                alert(`❌ เกิดข้อผิดพลาดทางเทคนิคในการลบข้อมูล: ${error.message}`);
             });
     }
 }
 
-// ผูกตัวดักฟังแรงกดแป้นพิมพ์เวลาน้าแอดมินพิมพ์ค้นหาชื่อบัญชี
+// ผูกตัวดักฟังช่องพิมพ์กล่องค้นหาข้อมูลแผงหลังบ้าน
 if (adminSearchInput) {
     adminSearchInput.addEventListener('input', (e) => {
         renderFilteredUserRewards(e.target.value);
