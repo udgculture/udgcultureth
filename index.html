@@ -58,7 +58,17 @@
 
     <!-- โลโก้แบรนด์ -->
     <header>
-        <div class="header-container">
+   <div class="header-container" style="position: relative; width: 100%;">
+            <!-- 🔑 ปุ่มล็อกอินเรืองแสงมุมบนขวา (อัปเกรดเวอร์ชันรองรับรูปภาพโปรไฟล์) -->
+            <div class="auth-corner-zone" style="position: absolute; top: -20px; right: 0; z-index: 100;">
+                <button type="button" id="openAuthModalBtn" class="auth-trigger-btn">
+                    <div id="authBtnContent" style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-right-to-bracket"></i> 
+                        <span class="auth-btn-text">LOGIN</span>
+                    </div>
+                </button>
+            </div>
+
             <img src="image/ขาวใส.png" alt="Underground Culture TH Logo" class="brand-logo">
             <div class="brand-text">
                 <h1 class="logo">Underground <span>Culture</span> TH</h1>
@@ -270,7 +280,27 @@
             <div id="modal-voting-list"></div>
         </div>
     </div>
-
+<div id="authProviderModal" class="vote-modal-overlay">
+        <div class="vote-modal-box" style="max-width: 380px; text-align: center;">
+            <div class="vote-glow-line" style="background: linear-gradient(90deg, #00ffff, #3b5998);"></div>
+            <div class="vote-modal-close" id="closeAuthModalBtn">&times;</div>
+            <h3><i class="fa-solid fa-shield-halved" style="color: var(--accent-color);"></i> MEMBER PORTAL</h3>
+            <p style="color: #666; font-size: 0.85rem; margin-bottom: 25px;">เลือกช่องทางยืนยันตัวตนเพื่อเข้าสู่ระบบ Underground Culture</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button type="button" id="loginGoogleBtn" class="provider-btn btn-google">
+                    <i class="fa-brands fa-google"></i> CONTINUE WITH GOOGLE
+                </button>
+                <button type="button" id="loginFacebookBtn" class="provider-btn btn-facebook">
+                    <i class="fa-brands fa-facebook"></i> CONTINUE WITH FACEBOOK
+                </button>
+            </div>
+            <div id="userProfileDisplay" style="display: none; margin-top: 15px; padding: 10px; background: #111; border-radius: 4px; border: 1px dashed #333;">
+                <p style="color: #39ff14; font-size: 0.8rem; margin: 0;"><i class="fa-solid fa-circle-check"></i> เข้าสู่ระบบแล้วในชื่อ:</p>
+                <strong id="authUserName" style="color: #fff; font-size: 0.95rem;">-</strong>
+            </div>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>

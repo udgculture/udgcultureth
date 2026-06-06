@@ -2511,3 +2511,128 @@ footer {
         width: 100%;
     }
 }
+
+/* =================================================================
+   🔐 UDG IDENTITY AUTHENTICATION MODAL & BUTTON STYLE 
+================================================================= */
+.auth-trigger-btn {
+    background: transparent;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    padding: 8px 16px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auth-trigger-btn:hover {
+    background: var(--accent-color);
+    color: #000;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+/* ปุ่มเลือกเซ็ต Provider */
+.provider-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+    color: #fff;
+}
+
+.provider-btn.btn-google {
+    background: #df4a32;
+    box-shadow: 0 0 10px rgba(223, 74, 50, 0.2);
+}
+.provider-btn.btn-google:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 0 15px rgba(223, 74, 50, 0.4);
+}
+
+.provider-btn.btn-facebook {
+    background: #3b5998;
+    box-shadow: 0 0 10px rgba(59, 89, 152, 0.2);
+}
+.provider-btn.btn-facebook:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 0 15px rgba(59, 89, 152, 0.4);
+}
+
+/* ปรับตำแหน่งปุ่มล็อกอินบนหน้าจอมือถือ */
+@media (max-width: 768px) {
+    .auth-corner-zone {
+        position: static !important;
+        margin-bottom: 10px;
+        text-align: center;
+        width: 100%;
+    }
+    .auth-trigger-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 10px;
+    }
+}
+/* =================================================================
+   📸 USER PROFILE AVATAR ON TOP NAV & GRAFFITI WALL STYLE
+================================================================= */
+/* รูปภาพโปรไฟล์มุมบนขวาแทนปุ่มล็อกอิน */
+.user-nav-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-color);
+    object-fit: cover;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+    transition: transform 0.3s ease;
+}
+.auth-trigger-btn:hover .user-nav-avatar {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px var(--accent-color);
+}
+
+/* กล่องครอบรูปโปรไฟล์บนกำแพงแชท */
+.msg-avatar-wrap {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #222;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.msg-avatar-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ปรับระยะกล่องแชทข้อความรองรับรูปภาพด้านหน้า */
+.msg-content {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    flex-wrap: wrap;
+    gap: 8px; /* ขยับช่องไฟให้พอดีสายตา */
+}

@@ -138,64 +138,69 @@ async function sprayGraffiti() {
     let isArtist = false;
     let artistEmoji = ""; 
     
-    // ดึงคีย์ข้อมูลแร็ปเปอร์ความปลอดภัยสูงแบบเรียลไทม์ตรงจากคลาวด์ออโต้
-    const artistSnapshot = await database.ref('udg_artist_credentials').once('value');
-    const cloudArtistKeys = artistSnapshot.val() ? artistSnapshot.val() : {};
-    cloudArtistKeys['@UndergroundCultureTH'] = 'udg2026';
+    // ดึงคีย์ข้อมูลแร็ปเปอร์ความปลอดภัยสูงแบบเรียลไทม์ตรงจากคลาวด์ออโต้[cite: 5]
+    const artistSnapshot = await database.ref('udg_artist_credentials').once('value'); //[cite: 5]
+    const cloudArtistKeys = artistSnapshot.val() ? artistSnapshot.val() : {}; //[cite: 5]
+    cloudArtistKeys['@UndergroundCultureTH'] = 'udg2026'; //[cite: 5]
 
-    const matchedArtist = Object.keys(cloudArtistKeys).find(key => key.toLowerCase() === username.toLowerCase());
+    const matchedArtist = Object.keys(cloudArtistKeys).find(key => key.toLowerCase() === username.toLowerCase()); //[cite: 5]
     
     if (matchedArtist) {
-        username = matchedArtist; 
-        const currentTime = Date.now();
-        const verifiedTime = localStorage.getItem(`verified_time_${username}`);
-        const hasVerified = localStorage.getItem(`verified_${username}`);
-        const sessionDuration = 30 * 60 * 1000; 
+        username = matchedArtist; //[cite: 5]
+        const currentTime = Date.now(); //[cite: 5]
+        const verifiedTime = localStorage.getItem(`verified_time_${username}`); //[cite: 5]
+        const hasVerified = localStorage.getItem(`verified_${username}`); //[cite: 5]
+        const sessionDuration = 30 * 60 * 1000; //[cite: 5]
 
-        if (hasVerified === cloudArtistKeys[username] && verifiedTime && (currentTime - verifiedTime < sessionDuration)) {
-            isArtist = true;
+        if (hasVerified === cloudArtistKeys[username] && verifiedTime && (currentTime - verifiedTime < sessionDuration)) { //[cite: 5]
+            isArtist = true; //[cite: 5]
         } else {
-            const userPasscode = await requestArtistPasscode(username);
-            if (userPasscode === null) return; 
+            const userPasscode = await requestArtistPasscode(username); //[cite: 5]
+            if (userPasscode === null) return; //[cite: 5]
 
-            if (userPasscode === cloudArtistKeys[username]) {
-                isArtist = true;
-                localStorage.setItem(`verified_${username}`, userPasscode);
-                localStorage.setItem(`verified_time_${username}`, currentTime);
-                await showErrorAlert('VERIFIED SUCCESS', 'ยืนยันตัวตนศิลปินสำเร็จ! ระบบจะจำเครื่องนี้ไว้ แร็ปรัวได้ 30 นาทีไม่ต้องกรอกรหัสซ้ำครับ 🔥');
+            if (userPasscode === cloudArtistKeys[username]) { //[cite: 5]
+                isArtist = true; //[cite: 5]
+                localStorage.setItem(`verified_${username}`, userPasscode); //[cite: 5]
+                localStorage.setItem(`verified_time_${username}`, currentTime); //[cite: 5]
+                await showErrorAlert('VERIFIED SUCCESS', 'ยืนยันตัวตนศิลปินสำเร็จ! ระบบจะจำเครื่องนี้ไว้ แร็ปรัวได้ 30 นาทีไม่ต้องกรอกรหัสซ้ำครับ 🔥'); //[cite: 5]
             } else {
-                await showErrorAlert('SECURITY ALERT', '❌ รหัสลับไม่ถูกต้อง!<br>อย่ามาแอบอ้างชื่อศิลปินแถวนี้ไอ้หนู!');
-                return; 
+                await showErrorAlert('SECURITY ALERT', '❌ รหัสลับไม่ถูกต้อง!<br>อย่ามาแอบอ้างชื่อศิลปินแถวนี้ไอ้หนู!'); //[cite: 5]
+                return; //[cite: 5]
             }
         }
-        if (isArtist) {
-            const verifiedEmojis = ['✅', '✅'];
-            artistEmoji = verifiedEmojis[Math.floor(Math.random() * verifiedEmojis.length)] + " ";
+        if (isArtist) { //[cite: 5]
+            const verifiedEmojis = ['✅', '✅']; //[cite: 5]
+            artistEmoji = verifiedEmojis[Math.floor(Math.random() * verifiedEmojis.length)] + " "; //[cite: 5]
         }
     }
 
-    localStorage.setItem('savedGraffitiName', username);
-    const sprayColors = ['#00ffff', '#ff007f', '#39ff14', '#fff000', '#e0e0e0', '#00e5ff'];
-    const randomColor = sprayColors[Math.floor(Math.random() * sprayColors.length)];
+    localStorage.setItem('savedGraffitiName', username); //[cite: 5]
+    const sprayColors = ['#00ffff', '#ff007f', '#39ff14', '#fff000', '#e0e0e0', '#00e5ff']; //[cite: 5]
+    const randomColor = sprayColors[Math.floor(Math.random() * sprayColors.length)]; //[cite: 5]
 
-    database.ref(`graffiti_rooms/${currentRoom}`).push({
-        username: username,
-        text: text,
-        color: randomColor,
-        role: isArtist ? 'artist' : 'user',
-        emoji: artistEmoji, 
-        timestamp: Date.now()
+    // 📸 ตรวจสอบเช็กสถานะการดึงรูปโปรไฟล์ของ Social Media ปัจจุบันที่ล็อกอินไว้
+    const currentUser = firebase.auth().currentUser;
+    const userPhotoUrl = currentUser ? currentUser.photoURL : "";
+
+    database.ref(`graffiti_rooms/${currentRoom}`).push({ //[cite: 5]
+        username: username, //[cite: 5]
+        text: text, //[cite: 5]
+        color: randomColor, //[cite: 5]
+        role: isArtist ? 'artist' : 'user', //[cite: 5]
+        emoji: artistEmoji, //[cite: 5]
+        userAvatar: userPhotoUrl, // 👈 สาดพิกัดรูปโปรไฟล์ลงกล่องฐานข้อมูลคลาวด์ออโต้
+        timestamp: Date.now() //[cite: 5]
     });
 
-    graffitiInput.value = '';
-    isCooldown = true;
-    graffitiBtn.style.opacity = '0.5';
-    graffitiBtn.innerText = 'WAIT...';
+    graffitiInput.value = ''; //[cite: 5]
+    isCooldown = true; //[cite: 5]
+    graffitiBtn.style.opacity = '0.5'; //[cite: 5]
+    graffitiBtn.innerText = 'WAIT...'; //[cite: 5]
     setTimeout(() => {
-        isCooldown = false;
-        graffitiBtn.style.opacity = '1';
-        graffitiBtn.innerText = 'SPRAY';
-    }, 4000);
+        isCooldown = false; //[cite: 5]
+        graffitiBtn.style.opacity = '1'; //[cite: 5]
+        graffitiBtn.innerText = 'SPRAY'; //[cite: 5]
+    }, 4000); //[cite: 5]
 }
 
 function listenToRoom(roomName) {
@@ -243,8 +248,15 @@ function listenToRoom(roomName) {
             verifiedCheck = `<i class="fa-solid fa-check-circle verified-tick"></i>`;
         }
         
+      // 📸 ดักคีย์หากล่องรูปภาพ: ถ้าคนพิมพ์ไม่ได้ล็อกอิน ให้เอาไอคอนหัวกะโหลกหรือไอคอน User สไตล์สตรีทมาแสดงผลสแตนบายแทน
+        let avatarTag = `<span class="msg-avatar-wrap"><i class="fa-solid fa-skull" style="font-size:0.75rem; color:#444;"></i></span>`;
+        if (data.userAvatar && data.userAvatar !== "") {
+            avatarTag = `<span class="msg-avatar-wrap"><img src="${data.userAvatar}" alt="Profile"></span>`;
+        }
+
         newMsg.innerHTML = `
             <div class="msg-content">
+                ${avatarTag}
                 <span class="msg-user-wrap">
                     <span class="verified-emoji" style="font-size: 0.9rem;">${displayEmoji}</span>
                     <strong class="msg-username" ${nameStyle}>${data.username}</strong>
@@ -830,3 +842,123 @@ database.ref('udg_upcoming_gigs').on('value', (snapshot) => {
         `;
         liveGigListContainer.appendChild(gigItemDiv);
     });
+
+    // =================================================================
+// ─── 🔐 MEMBER LOGIN MODAL ENGINE (GOOGLE & FACEBOOK CONNECT) ───
+// =================================================================
+const authProviderModal = document.getElementById('authProviderModal');
+const openAuthModalBtn = document.getElementById('openAuthModalBtn');
+const closeAuthModalBtn = document.getElementById('closeAuthModalBtn');
+const loginGoogleBtn = document.getElementById('loginGoogleBtn');
+const loginFacebookBtn = document.getElementById('loginFacebookBtn');
+const userProfileDisplay = document.getElementById('userProfileDisplay');
+const authUserName = document.getElementById('authUserName');
+
+// คำสั่ง เปิดหน้าต่าง Pop-up เลือกช่องทางล็อกอิน
+if (openAuthModalBtn && authProviderModal && closeAuthModalBtn) {
+    openAuthModalBtn.addEventListener('click', () => {
+        authProviderModal.classList.add('active');
+    });
+    closeAuthModalBtn.addEventListener('click', () => {
+        authProviderModal.classList.remove('active');
+    });
+}
+
+// 💥 ฟังก์ชันสั่งล็อกอินผ่านค่าย GOOGLE
+if (loginGoogleBtn) {
+    loginGoogleBtn.addEventListener('click', () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(provider)
+            .then((result) => {
+                const user = result.user;
+                handleAuthSuccess(user.displayName);
+            })
+            .catch((error) => {
+                showErrorAlert("GOOGLE AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
+            });
+    });
+}
+
+// 💥 ฟังก์ชันสั่งล็อกอินผ่านค่าย FACEBOOK
+if (loginFacebookBtn) {
+    loginFacebookBtn.addEventListener('click', () => {
+        const provider = new firebase.auth.FacebookAuthProvider();
+        firebase.auth().signInWithPopup(provider)
+            .then((result) => {
+                const user = result.user;
+                handleAuthSuccess(user.displayName);
+            })
+            .catch((error) => {
+                showErrorAlert("FACEBOOK AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
+            });
+    });
+}
+
+// เมื่อยืนยันตัวตนสำเร็จ ให้แปลงโครงสร้างปุ่มล็อกอินเป็นรูปโปรไฟล์วงกลมเรืองแสงสไตลบารมีแบรนด์ UDG
+function handleAuthSuccess(userObj) {
+    const displayName = userObj.displayName;
+    const photoURL = userObj.photoURL;
+
+    if (authUserName && userProfileDisplay) {
+        authUserName.innerText = displayName;
+        userProfileDisplay.style.display = "block";
+    }
+    
+    if (openAuthModalBtn) {
+        // 📸 ดักแปลงปุ่มเป็นรูปภาพโปรไฟล์วงกลมพรีเมียม
+        let displayContent = `<i class="fa-solid fa-user-check" style="color:#39ff14;"></i> <span class="auth-btn-text">${displayName.toUpperCase()}</span>`;
+        if (photoURL && photoURL !== "") {
+            displayContent = `
+                <img src="${photoURL}" class="user-nav-avatar" alt="${displayName}">
+                <span class="auth-btn-text" style="color:#00ffff; font-size:0.8rem;">${displayName.toUpperCase()}</span>
+            `;
+        }
+        openAuthModalBtn.innerHTML = displayContent;
+        openAuthModalBtn.style.borderColor = "#00ffff";
+        openAuthModalBtn.style.padding = "4px 12px 4px 6px"; // บีบช่องไฟให้รูปพอดีบอร์ดตัวหนังสือ
+    }
+
+    // สั่งเติมชื่อใส่บอร์ดกล่องสเปรย์ชื่อเล่นให้ผู้ใช้งานออโต้ทันที ไม่ต้องพิมพ์ซ้ำ
+    if (graffitiName && (graffitiName.value === "" || graffitiName.value === "@")) {
+        graffitiName.value = displayName.replace(/\s+/g, ''); // ลบช่องว่างออกเพื่อให้ตรงสเปก @ชื่อเล่น
+    }
+
+    setTimeout(() => {
+        if (authProviderModal) authProviderModal.classList.remove('active');
+    }, 1500);
+}
+
+// ระบบดักสตรีมเชื่อมต่อ Google SDK
+if (loginGoogleBtn) {
+    loginGoogleBtn.addEventListener('click', () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(provider)
+            .then((result) => {
+                handleAuthSuccess(result.user);
+            })
+            .catch((error) => {
+                showErrorAlert("GOOGLE AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
+            });
+    });
+}
+
+// ระบบดักสตรีมเชื่อมต่อ Facebook SDK
+if (loginFacebookBtn) {
+    loginFacebookBtn.addEventListener('click', () => {
+        const provider = new firebase.auth.FacebookAuthProvider();
+        firebase.auth().signInWithPopup(provider)
+            .then((result) => {
+                handleAuthSuccess(result.user);
+            })
+            .catch((error) => {
+                showErrorAlert("FACEBOOK AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
+            });
+    });
+}
+
+// ระบบจดจำสถานะผู้ใช้งานหลังรีเฟรชหน้าจอออโต้
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        handleAuthSuccess(user);
+    }
+});
