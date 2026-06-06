@@ -846,28 +846,40 @@ function handleAuthSuccess(userObj) {
 }
 
 if (loginGoogleBtn) {
-    loginGoogleBtn.addEventListener('click', () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithPopup(provider)
-            .then((result) => {
-                handleAuthSuccess(result.user); 
-            })
-            .catch((error) => {
+    loginGoogleBtn.addEventListener('click', async () => {
+        try {
+            await firebase.auth().signOut();
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            const result = await firebase.auth().signInWithPopup(provider);
+            handleAuthSuccess(result.user);
+        } catch (error) {
+            if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                firebase.auth().signInWithRedirect(provider);
+            } else {
                 showErrorAlert("GOOGLE AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
-            });
+            }
+        }
     });
 }
 
 if (loginFacebookBtn) {
-    loginFacebookBtn.addEventListener('click', () => {
-        const provider = new firebase.auth.FacebookAuthProvider();
-        firebase.auth().signInWithPopup(provider)
-            .then((result) => {
-                handleAuthSuccess(result.user); 
-            })
-            .catch((error) => {
+    loginFacebookBtn.addEventListener('click', async () => {
+        try {
+            await firebase.auth().signOut();
+            const provider = new firebase.auth.FacebookAuthProvider();
+            provider.setCustomParameters({ auth_type: 'rerequest' });
+            const result = await firebase.auth().signInWithPopup(provider);
+            handleAuthSuccess(result.user);
+        } catch (error) {
+            if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+                const provider = new firebase.auth.FacebookAuthProvider();
+                firebase.auth().signInWithRedirect(provider);
+            } else {
                 showErrorAlert("FACEBOOK AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
-            });
+            }
+        }
     });
 }
 
@@ -877,3 +889,12 @@ firebase.auth().onAuthStateChanged((user) => {
     }
 });
 
+firebase.auth().getRedirectResult()
+    .then((result) => {
+        if (result && result.user) {
+            handleAuthSuccess(result.user);
+        }
+    })
+    .catch((error) => {
+        console.error("Redirect Auth Error:", error);
+    });
