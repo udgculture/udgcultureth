@@ -31,7 +31,7 @@
         </div>
     </div>
 
-    <!-- 🎛️ 🎯 เมนูสับเปลี่ยนแท็บด่วนหลังบ้านรุ่น 7 ปุ่มควบคุมครอบจักรวาล -->
+    <!-- 🎛️ 🎯 เมนูสับเปลี่ยนแท็บด่วนหลังบ้านรุ่น 8 ปุ่มควบคุมครอบจักรวาล -->
     <div class="tabs-container" id="adminTabsMenu" style="display: none;">
         <button type="button" class="tab-trigger-btn active" data-target="newsPanelBox"><i class="fa-solid fa-sliders"></i>📰 CONTENT</button>
         <button type="button" class="tab-trigger-btn" data-target="musicPanelBox"><i class="fa-solid fa-music"></i>🎵 MUSIC</button>
@@ -40,6 +40,7 @@
         <button type="button" class="tab-trigger-btn" data-target="archivePanelBox" style="border-color:#cc00ff; color:#cc00ff;"><i class="fa-solid fa-box-archive"></i>🗳️ ARCHIVE</button>
         <button type="button" class="tab-trigger-btn" data-target="logoPanelBox" style="border-color:#fff000; color:#fff000;"><i class="fa-solid fa-handshake"></i>🤝 LOGOS</button>
         <button type="button" class="tab-trigger-btn" data-target="gigPanelBox" style="border-color:#00ffaa; color:#00ffaa;"><i class="fa-solid fa-calendar-days"></i>📅 GIGS</button>
+        <button type="button" class="tab-trigger-btn" data-target="wheelPanelBox" style="border-color:#ff007f; color:#ff007f;"><i class="fa-solid fa-ferry"></i>🎡 WHEEL</button>
     </div>
 
     <!-- 📰 [แท็บที่ 1] CONTENT ข่าวสาร -->
@@ -128,7 +129,7 @@
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <!-- 🤝 [แท็บที่ 6] LOGOS โลโก้พาร์ทเนอร์วิ่งด้านล่าง -->
+    <!-- 🤝 [แท็บที่ 6] LOGOS โลโก้พาร์ทเนอร์ -->
     <div class="admin-box admin-box-yellow" id="logoPanelBox">
         <h2><i class="fa-solid fa-handshake" style="color: #fff000;"></i> UDG CULTURE PARTNERS LOGOS</h2>
         <p style="color: #555; font-size: 0.85rem;">เพิ่มหรือถอดถอนรูปภาพโลโก้สปอนเซอร์/ค่ายเพลงพันธมิตร หมุนเวียนแถบสไลด์แนวนอนด้านล่าง</p>
@@ -146,11 +147,10 @@
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <!-- 📅🤝 [แท็บที่ 7 ซ่อมแซมเสร็จสิ้น] แผงสำหรับกดแอด คอนเสิร์ต / อีเวนต์ใต้ดิน (UPCOMING GIGS) -->
+    <!-- 📅 [แท็บที่ 7] GIGS ตารางงานคอนเสิร์ต -->
     <div class="admin-box" id="gigPanelBox" style="border-color: #00ffaa; box-shadow: 0 0 30px rgba(0, 255, 170, 0.05);">
         <h2><i class="fa-solid fa-calendar-days" style="color: #00ffaa;"></i> UDG GIGS & EVENTS DESK</h2>
         <p style="color: #555; font-size: 0.85rem;">เพิ่ม ลบ คอนเสิร์ต ปาร์ตี้ใต้ดิน หรืออีเวนต์ใหญ่ประจำค่าย พร้อมสับสีปุ่มสถานะและพ่นภาพโปสเตอร์</p>
-
         <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin-top: 20px;">
             <div class="admin-group" style="display: flex; flex-direction: column; gap: 8px;">
                 <label style="color: #00ffaa;">DAY (วันที่เลข)</label>
@@ -161,51 +161,96 @@
                 <input type="text" id="newGigMonth" placeholder="เช่น: MAY, JUN, DEC">
             </div>
         </div>
-
         <div class="form-group">
             <label style="color: #00ffaa;">EVENT TITLE (ชื่อคอนเสิร์ต/ชื่องานปาร์ตี้)</label>
             <input type="text" id="newGigTitle" placeholder="เช่น: BANGKOK OUTLAWS 2026">
         </div>
-
         <div class="form-group">
-            <label style="color: #00ffaa;">GIG POSTER IMAGE URL (ลิงก์รูปภาพโปสเตอร์งาน แนะนำสัดส่วน 1:1)</label>
-            <input type="text" id="newGigImg" placeholder="เอาลิงก์ตรงรูปโปสเตอร์งานที่ลงท้ายด้วย .png / .jpg มาวางที่นี่...">
+            <label style="color: #00ffaa;">GIG POSTER IMAGE URL (ลิงก์โปสเตอร์งาน)</label>
+            <input type="text" id="newGigImg" placeholder="ลิงก์รูปภาพโปสเตอร์ .png / .jpg ...">
         </div>
-
         <div class="form-group">
-            <label style="color: #00ffaa;">LOCATION VENUE (ชื่อสถานที่จัดงานและจังหวัด)</label>
+            <label style="color: #00ffaa;">LOCATION VENUE (ชื่อสถานที่จัดงาน)</label>
             <input type="text" id="newGigLocation" placeholder="เช่น: BEAZY® Bangkok - สาทร ซอย 11, BKK">
         </div>
-
         <div class="form-group">
-            <label style="color: #00ffaa;">TICKET STATUS & STYLE (เลือกสถานะปุ่มและโทนสีตรงหน้าบ้าน)</label>
+            <label style="color: #00ffaa;">TICKET STATUS & STYLE</label>
             <select id="newGigStatus">
-                <option value="btn-comingsoon">⚪ COMING SOON (ป้ายสีฟ้าโปร่งแสง - ยังไม่เปิดขายบัตร)</option>
-                <option value="btn-ticket">🟢 BUY TICKET (ป้ายสีฟ้านีออนเรืองแสง - เปิดขายบัตรด่วน)</option>
-                <option value="btn-ended">🔴 EVENT ENDED (ป้ายสีแดงไฟดับ - งานจบลงแล้วเดือด ๆ)</option>
+                <option value="btn-comingsoon">⚪ COMING SOON (ป้ายสีฟ้าโปร่งแสง)</option>
+                <option value="btn-ticket">🟢 BUY TICKET (ป้ายสีฟ้านีออนเรืองแสง)</option>
+                <option value="btn-ended">🔴 EVENT ENDED (ป้ายสีแดงไฟดับ)</option>
             </select>
         </div>
-
         <div class="form-group">
-            <label style="color: #00ffaa;">TARGET BUTTON LINK URL (ลิงก์วาร์ปปลายทางไปหน้าซื้อบัตร หรือเพจจอง)</label>
+            <label style="color: #00ffaa;">TARGET BUTTON LINK URL</label>
             <input type="text" id="newGigUrl" value="#">
         </div>
-
         <button type="button" class="post-btn" id="addGigBtn" style="background: linear-gradient(45deg, #00ffaa, #00bbff); color: #000; box-shadow: 0 0 15px rgba(0,255,170,0.2);"><i class="fa-solid fa-calendar-plus"></i> PUBLISH LIVE EVENT GIG</button>
-
         <table class="artist-list-table">
+            <thead><tr><th>รอบงาน / ชื่อคอนเสิร์ต</th><th>สถานะปุ่ม</th><th>จัดการ</th></tr></thead>
+            <tbody id="gig-list-tbody"><tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังโหลด...</td></tr></tbody>
+        </table>
+        <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
+    </div>
+
+<div class="admin-box" id="wheelPanelBox" style="border-color: #ff007f; box-shadow: 0 0 30px rgba(255, 0, 127, 0.05);">
+        <h2><i class="fa-solid fa-ferry" style="color: #ff007f;"></i> UDG LUCKY WHEEL DESK</h2>
+        <p style="color: #555; font-size: 0.85rem;">เพิ่ม ลบ ของรางวัล/คูปองลดราคา พร้อมล็อก % เรทโอกาสดร็อป และส่องประวัติการสุ่มของสมาชิก</p>
+
+        <div style="background: #0f0f0f; padding: 15px; border-radius: 6px; border: 1px solid #1a1a1a; margin-top: 15px;">
+            <h3 style="font-size: 0.95rem; color: #ff007f; margin-bottom: 10px;"><i class="fa-solid fa-plus"></i> ADD REWARD ITEM</h3>
+            <div class="form-group" style="margin-top: 0;">
+                <label style="color: #ff007f;">REWARD NAME (ชื่อของรางวัล / รหัสคูปองส่วนลด)</label>
+                <input type="text" id="newWheelName" placeholder="เช่น: DISCOUNT10% หรือ เสื้อยืดค่าย UDG ฟรี">
+            </div>
+            <div class="form-group">
+                <label style="color: #ff007f;">WIN RATE CHANCE (%)</label>
+                <input type="number" id="newWheelRate" placeholder="เช่น: 10 (หมายถึงโอกาสดร็อป 10%)" min="0" max="100">
+            </div>
+            <button type="button" class="post-btn" id="addWheelItemBtn" style="background: linear-gradient(45deg, #ff007f, #ffaa00); color: #000; margin-top: 15px; padding: 12px;"><i class="fa-solid fa-square-plus"></i> PUBLISH REWARD</button>
+        </div>
+
+        <table class="artist-list-table" style="margin-top: 25px;">
             <thead>
                 <tr>
-                    <th>รอบงาน / ชื่อคอนเสิร์ต</th>
-                    <th>สถานะปุ่ม</th>
+                    <th>ของรางวัลบนวงล้อ</th>
+                    <th>ล็อกเรทดร็อป</th>
                     <th>จัดการ</th>
                 </tr>
             </thead>
-            <tbody id="gig-list-tbody">
-                <tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังค้นหาเอกสารสารบบผังคอนเสิร์ตค่าย UDG...</td></tr>
+            <tbody id="wheel-list-tbody">
+                <tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังดึงถังรายการของรางวัล...</td></tr>
             </tbody>
         </table>
-        <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
+
+        <div style="margin-top: 40px; background: #0f0f0f; padding: 20px; border-radius: 6px; border: 1px solid #ff007f; box-shadow: 0 0 15px rgba(255, 0, 127, 0.05);">
+            <h3 style="font-family: 'Space Grotesk', sans-serif; color: #fff; font-size: 1.1rem; margin-bottom: 5px;">
+                <i class="fa-solid fa-magnifying-glass-chart" style="color: #39ff14;"></i> USER REWARDS SEARCH DESK
+            </h3>
+            <p style="color: #555; font-size: 0.8rem; margin-bottom: 15px;">พิมพ์ค้นหาชื่อบัญชี (Display Name) ของสมาชิกเพื่อตรวจสอบรายการคูปองหรือของรางวัลทั้งหมดที่เขาหมุนได้</p>
+            
+            <div class="form-group" style="margin-top: 0; position: relative;">
+                <input type="text" id="adminUserRewardSearchInput" placeholder="SEARCH USER DISPLAY NAME... (พิมพ์ชื่อบัญชีเพื่อกรองข้อมูล)" style="border-color: #333; padding-left: 40px;">
+                <i class="fa-solid fa-user" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #444; font-size: 0.9rem;"></i>
+            </div>
+
+            <div style="max-height: 400px; overflow-y: auto; margin-top: 15px; border: 1px solid #222; border-radius: 4px;">
+                <table class="artist-list-table" style="margin-top: 0; font-size: 0.85rem;">
+                    <thead style="position: sticky; top: 0; z-index: 10;">
+                        <tr>
+                            <th style="background: #111; color: #39ff14;">ชื่อบัญชี (User)</th>
+                            <th style="background: #111; color: #39ff14;">ของรางวัลที่ได้รับ</th>
+                            <th style="background: #111; color: #39ff14;">วันที่ได้รับสิทธิ์</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-user-rewards-tbody">
+                        <tr><td colspan="3" style="color:#555; text-align:center; padding: 20px;">⏳ กำลังกวาดสายสัญญาณสแกนประวัติรางวัลสมาชิกทั้งหมดหลังบ้าน...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-link" style="margin-top: 30px;">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
     <script src="admin-js.js"></script>

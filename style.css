@@ -2690,3 +2690,221 @@ footer {
     0% { opacity: 0; transform: translateY(-5px); }
     100% { opacity: 1; transform: translateY(0); }
 }
+
+/* =================================================================
+   🎡 UDG CYBER LUCKY WHEEL & REWARDS VAULT SYSTEM STYLE (style.css)
+================================================================= */
+
+/* 1. กล่องนอกครอบแผงวงล้อและตู้เซฟประวัติ บังคับความสูงขนานเท่ากัน 50/50 */
+.wheel-system-flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    align-items: stretch;
+    background: #080808;
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid #111;
+    margin-bottom: 30px;
+}
+
+/* 2. กล่องเฟรมฝั่งซ้าย (ตัวควบคุมวงล้อ) */
+.wheel-left-panel {
+    flex: 1;
+    min-width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background: #030303;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid #151515;
+}
+
+.wheel-canvas-wrapper {
+    position: relative;
+    width: 340px;
+    height: 340px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 🎨 ระบบตาราง Grid จัดระเบียบกล่องโชว์พูลรายชื่อของรางวัลใต้ล้อ ไม่ให้ทะลุขอบเฟรม */
+.wheel-pool-section {
+    margin-top: 25px;
+    width: 100%;
+    border-top: 1px dashed #1a1a1a;
+    padding-top: 15px;
+}
+
+.wheel-pool-title {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #ff007f;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+/* บังคับคัดของรางวัลเรียงแถวหน้ากระดาน Grid สลับบล็อกสวยงาม */
+.wheel-rewards-grid-box {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)) !important;
+    gap: 8px !important;
+    max-height: 110px !important;
+    overflow-y: auto !important;
+    padding-right: 4px !important;
+}
+
+/* ตกแต่งแถบสกรอลบาร์ด้านในพูลของรางวัลให้มินิมอล */
+.wheel-rewards-grid-box::-webkit-scrollbar { width: 3px; }
+.wheel-rewards-grid-box::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
+
+/* สไตล์ป้ายแท็กไอเทมโชว์ของรางวัลหล่อๆ */
+.wheel-badge-item {
+    background: rgba(0, 255, 255, 0.02) !important;
+    border: 1px solid #1a1a1a !important;
+    color: #ccc !important;
+    padding: 6px 10px !important;
+    font-size: 0.78rem !important;
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+    font-family: monospace !important;
+    display: inline-block !important;
+    box-shadow: inset 0 0 5px rgba(0, 255, 255, 0.01) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.wheel-badge-item span {
+    color: #fff !important;
+    font-weight: bold !important;
+}
+
+/* 🗄️ 3. กล่องเฟรมฝั่งขวา (ตู้เซฟเก็บประวัติคูปองส่วนตัวของสมาชิก) */
+.rewards-vault-right-panel {
+    flex: 1;
+    min-width: 320px;
+    background: #111;
+    padding: 25px;
+    border-radius: 6px;
+    border: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+.vault-header h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #00ffff;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
+}
+
+.vault-header p {
+    color: #555;
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+/* ท่อลิสต์สไลด์แสดงประวัติส่วนบุคคลดึงขนานเท่าวงล้อพอดี */
+#myCouponsList {
+    flex-grow: 1;
+    min-height: 300px;
+    max-height: 380px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 5px;
+    margin-bottom: 15px;
+}
+
+/* ปลอกแร็ปแต่งแถบเลื่อนตู้เซฟ */
+#myCouponsList::-webkit-scrollbar { width: 4px; }
+#myCouponsList::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
+#myCouponsList::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
+
+/* ตกแต่งความสวยงามของแถบคูปองแต่ละใบในตู้เซฟ */
+.vault-coupon-card {
+    background: #070707 !important;
+    border: 1px solid #1c1c1c !important;
+    border-left: 3px solid #00ffff !important;
+    padding: 12px !important;
+    border-radius: 4px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+    animation: couponAppear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+}
+
+.coupon-info-title {
+    color: #fff !important;
+    font-family: monospace !important;
+    font-size: 0.92rem !important;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+}
+
+/* ตัวรหัสตั๋วลับ CODE สีเหลืองนีออนสว่างวาบจำเพาะตัว */
+.coupon-secret-code-badge {
+    display: block !important;
+    margin-top: 5px !important;
+    font-family: monospace !important;
+    color: #fff000 !important;
+    font-size: 0.8rem !important;
+    font-weight: bold !important;
+    background: rgba(255, 240, 0, 0.04) !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+    border: 1px solid rgba(255, 240, 0, 0.12) !important;
+    width: fit-content !important;
+}
+
+.coupon-timestamp {
+    color: #444 !important;
+    font-size: 0.68rem !important;
+    display: block !important;
+    margin-top: 5px !important;
+}
+
+.coupon-status-ready {
+    color: #39ff14 !important;
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    background: rgba(57, 255, 20, 0.04) !important;
+    padding: 3px 8px !important;
+    border-radius: 3px !important;
+    border: 1px solid rgba(57, 255, 20, 0.15) !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* 🚪 ล็อกระดับชั้นเลเยอร์ปุ่มออกจากระบบ SIGN OUT เมนูย่อยขวาบนให้อยู่เหนือหน้าต่างค้นหาเพลงถาวร */
+.user-dropdown-menu {
+    z-index: 2400 !important; /* ดันทะลุมิติมาอยู่แถวหน้าสุด ไม่โดนทับแน่นอนคร้าบน้า */
+}
+
+@keyframes couponAppear {
+    0% { opacity: 0; transform: translateY(5px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* 📱 RESPONSIVE: จัดระเบียบวงล้อเวลาเปิดบนหน้าจอมือถืออัตโนมัติ */
+@media (max-width: 768px) {
+    .wheel-system-flex-container { padding: 15px; gap: 20px; }
+    .wheel-left-panel, .rewards-vault-right-panel { min-width: 100%; }
+    .wheel-canvas-wrapper { width: 290px; height: 290px; }
+    #luckyWheelCanvas { width: 290px !important; height: 290px !important; }
+    #myCouponsList { min-height: 250px; }
+}

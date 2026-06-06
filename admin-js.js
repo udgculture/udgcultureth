@@ -1,7 +1,7 @@
 /* =================================================================
    🚨 UDG CENTRAL CONTROL DESK - MAIN MOTOR ENGINE (admin-js.js)
 ================================================================= */
-const MASTER_ADMIN_PASS = "udg2026"; 
+const MASTER_ADMIN_PASS = "udg2026";
 
 // 🔐 ระบบยืนยันรหัสความปลอดภัยเข้าหน้าแอดมินส่วนกลาง
 function checkGateLogin() {
@@ -18,8 +18,8 @@ function checkGateLogin() {
 
 function unlockCentralPanel() {
     document.getElementById("gateOverlay").style.display = "none";
-    document.getElementById("adminTabsMenu").style.display = "grid"; 
-    switchTabMenu("newsPanelBox"); 
+    document.getElementById("adminTabsMenu").style.display = "grid";
+    switchTabMenu("newsPanelBox");
 }
 
 function kickUserToHome() { window.location.href = "index.html"; }
@@ -73,7 +73,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// 📰 [ระบบแท็บที่ 1] โพสต์อัปเดตฟีดข่าวและเรดาร์ศิลปิน
+// 📰 [ระบบแท็บที่ 1] CONTENT ข่าวสาร
 function toggleRadarLinkField() {
     const targetZone = document.getElementById('adminNewsTag').value;
     const radarUrlGroup = document.getElementById('radarUrlGroup');
@@ -108,10 +108,10 @@ document.getElementById('adminPostNewsBtn').addEventListener('click', () => {
 });
 
 function successAction() { 
-    document.getElementById('adminNewsTitle').value = ''; 
-    document.getElementById('adminNewsExcerpt').value = ''; 
-    alert("🔥 อัปเดตข้อมูลขึ้นหน้าเว็บหลักเรียบร้อยครับน้า!"); 
-    updateLivePreview(); 
+    document.getElementById('adminNewsTitle').value = '';
+    document.getElementById('adminNewsExcerpt').value = '';
+    alert("🔥 อัปเดตข้อมูลขึ้นหน้าเว็บหลักเรียบร้อยครับน้า!");
+    updateLivePreview();
 }
 
 // 🎵 [ระบบแท็บที่ 2] จัดการตู้เซ็ตเพลงโหวตประจำสัปดาห์
@@ -205,7 +205,7 @@ document.getElementById('archiveWeeklyBtn').addEventListener('click', async () =
 });
 function deleteArchiveLog(weekKey) { if (confirm(`คุณต้องการลบแฟ้มบันทึกประวัติรอบสัปดาห์ ${weekKey} ใช่หรือไม่?`)) database.ref(`udg_votes_archive_logs/${weekKey}`).remove(); }
 
-// 🤝 [ระบบแท็บที่ 6] แอดรูปโลโก้แบรนด์สปอนเซอร์วิ่งแถวล่างสุดแบบอินฟินิตี้
+// 🤝 [ระบบแท็บที่ 6] แอดรูปโลโก้แบรนด์สปอนเซอร์วิ่งแถวล่าง
 const logoTbody = document.getElementById('logo-list-tbody');
 database.ref('udg_culture_partners_logos').on('value', (snapshot) => {
     logoTbody.innerHTML = ''; const logos = snapshot.val();
@@ -225,27 +225,21 @@ document.getElementById('addPartnerLogoBtn').addEventListener('click', () => {
     });
 });
 function removePartnerLogo(key) { if (confirm("คุณต้องการถอดถอนโลโก้พาร์ทเนอร์เจ้านี้ใช่หรือไม่?")) database.ref(`udg_culture_partners_logos/${key}`).remove(); }
-// =================================================================
-// ─── 📅🤝 [ระบบแท็บที่ 7 อัปเกรดสมบูรณ์] ENGINE: จัดการและอัปเดตสถานะคอนเสิร์ตพ่วงโปสเตอร์ ───
-// =================================================================
-const gigTbody = document.getElementById('gig-list-tbody');
 
-// หูฟัง Realtime คอยดึงรายชื่ออีเวนต์พร้อมสร้าง Dropdown คาตารางหลังบ้าน
+// 📅🤝 [ระบบแท็บที่ 7] ENGINE: จัดการและอัปเดตสถานะคอนเสิร์ตพ่วงโปสเตอร์
+const gigTbody = document.getElementById('gig-list-tbody');
 database.ref('udg_upcoming_gigs').on('value', (snapshot) => {
     if (!gigTbody) return;
     gigTbody.innerHTML = '';
     const gigs = snapshot.val();
-    
     if (!gigs) {
         gigTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center;">📅 บอร์ดตารางงานว่างเปล่า สาดอีเวนต์ปาร์ตี้ชุดใหม่บรรทัดบนได้เลยครับน้า!</td></tr>`;
         return;
     }
-
     Object.keys(gigs).forEach(key => {
         const gig = gigs[key];
         const tr = document.createElement('tr');
         const selectId = `status-select-${key}`;
-        
         tr.innerHTML = `
             <td>
                 <span style="color:#00ffaa; font-weight:bold; font-family:monospace;">[${gig.day} ${gig.month}]</span><br>
@@ -266,11 +260,9 @@ database.ref('udg_upcoming_gigs').on('value', (snapshot) => {
     });
 });
 
-// ฟังก์ชันสั่งสับเปลี่ยนสถานะไฟหน้าบ้านแบบนาทีต่อนาทีอัปเดตขึ้น Firebase
 function updateGigStatusLive(gigKey) {
     const selectElement = document.getElementById(`status-select-${gigKey}`);
     if (!selectElement) return;
-    
     const newStatus = selectElement.value;
     database.ref(`udg_upcoming_gigs/${gigKey}`).update({
         status: newStatus
@@ -283,26 +275,23 @@ function updateGigStatusLive(gigKey) {
     });
 }
 
-// 🎯 ฟังก์ชันหลักตัวเดียวเด่น ๆ: สาดข้อมูลคอนเสิร์ตพ่วงลิงก์รูปภาพโปสเตอร์ยิงขึ้นระบบคลาวด์ (เหลือตัวนี้ตัวเดียวพอครับ!)
 document.getElementById('addGigBtn').addEventListener('click', () => {
     const day = document.getElementById('newGigDay').value.trim();
     const month = document.getElementById('newGigMonth').value.trim();
     const title = document.getElementById('newGigTitle').value.trim();
-    const imgUrl = document.getElementById('newGigImg').value.trim(); 
+    const imgUrl = document.getElementById('newGigImg').value.trim();
     const location = document.getElementById('newGigLocation').value.trim();
     const status = document.getElementById('newGigStatus').value;
     const url = document.getElementById('newGigUrl').value.trim();
-
     if (!day || !month || !title || !location) {
         alert("❌ กรุณากรอกรายละเอียด วัน เดือน ชื่องานคอนเสิร์ต และสถานที่จัดงานให้ครบถ้วนก่อนครับน้า!");
         return;
     }
-
     database.ref('udg_upcoming_gigs').push({
         day: day,
         month: month.toUpperCase(),
         title: title,
-        image: imgUrl ? imgUrl : "image/ขาวใส.png", 
+        image: imgUrl ? imgUrl : "image/ขาวใส.png",
         location: location,
         status: status,
         url: url ? url : "#",
@@ -312,16 +301,180 @@ document.getElementById('addGigBtn').addEventListener('click', () => {
             document.getElementById('newGigDay').value = '';
             document.getElementById('newGigMonth').value = '';
             document.getElementById('newGigTitle').value = '';
-            document.getElementById('newGigImg').value = ''; 
+            document.getElementById('newGigImg').value = '';
             document.getElementById('newGigLocation').value = '';
             document.getElementById('newGigUrl').value = '#';
             alert(`🔥 อัปเดตงานคอนเสิร์ตพร้อมโปสเตอร์ "${title}" ขึ้นตารางงานเรียบร้อยคร้าบน้าบักหำทิว!`);
         }
     });
 });
+function removeGigFromCloud(key) { if (confirm("แจ้งเตือนแอดมิน: คุณต้องการลบรายการอีเวนต์คอนเสิร์ตเจ้านี้ออกจากระบบหน้าจอหลักใช่หรือไม่?")) { database.ref(`udg_upcoming_gigs/${key}`).remove(); } }
 
-function removeGigFromCloud(key) {
-    if (confirm("แจ้งเตือนแอดมิน: คุณต้องการลบรายการอีเวนต์คอนเสิร์ตเจ้านี้ออกจากระบบหน้าจอหลักใช่หรือไม่?")) {
-        database.ref(`udg_upcoming_gigs/${key}`).remove();
+// 🎡 [ระบบแท็บที่ 8 ใหม่แกะกล่อง] ENGINE: จัดการล็อกเปอร์เซ็นต์เรทโอกาสดร็อปไอเทมวงล้อส่วนกลาง
+const wheelTbody = document.getElementById('wheel-list-tbody');
+
+database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
+    if (!wheelTbody) return;
+    wheelTbody.innerHTML = '';
+    const items = snapshot.val();
+    if (!items) {
+        wheelTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center;">🎡 บอร์ดตารางวงล้อยังว่างเปล่า สาดของรางวัลลดราคาชิ้นใหม่บรรทัดบนได้เลยคร้าบน้าบักหำทิว!</td></tr>`;
+        return;
     }
+    let totalRateChecked = 0;
+    Object.keys(items).forEach(key => {
+        const item = items[key];
+        totalRateChecked += parseFloat(item.rateWeight || 0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="color:#fff; font-weight:bold;">🎯 ${item.name}</td>
+            <td style="color:#ff007f; font-family:monospace; font-weight:bold;">🔥 ล็อกเรทดร็อปไว้ที่: ${item.rateWeight}%</td>
+            <td>
+                <button class="delete-artist-btn" onclick="removeRewardFromWheelCloud('${key}')" style="color:#ff3333;">// REMOVE</button>
+            </td>
+        `;
+        wheelTbody.appendChild(tr);
+    });
+    const alertTr = document.createElement('tr');
+    const rateColor = totalRateChecked === 100 ? '#39ff14' : '#ffaa00';
+    alertTr.innerHTML = `<td colspan="3" style="color:${rateColor}; font-size:0.78rem; text-align:center; font-weight:bold; background:rgba(0,0,0,0.4);">📊 สรุปผลรวมค่าโอกาสดร็อปบนคลาวด์ตอนนี้เท่ากับ: ${totalRateChecked}% ${totalRateChecked === 100 ? '(ล็อกเรทน้ำหนักกระจายแต้มสมบูรณ์แบบ)' : '(แจ้งเตือน: แนะนำให้ปรับรวมกันให้ได้ครบ 100% พอดีเป๊ะนะคร้าบน้า)'}</td>`;
+    wheelTbody.appendChild(alertTr);
+});
+
+document.getElementById('addWheelItemBtn').addEventListener('click', () => {
+    const name = document.getElementById('newWheelName').value.trim();
+    const rate = document.getElementById('newWheelRate').value.trim();
+    if (!name || !rate) {
+        alert("❌ แจ้งเตือนแอดมิน: กรุณากรอกชื่อของรางวัล/รหัสคูปอง และระบุเลขเปอร์เซ็นต์เรทให้ครบถ้วนก่อนคร้าบน้า!");
+        return;
+    }
+    database.ref('udg_lucky_wheel_rewards').push({
+        name: name,
+        rateWeight: parseFloat(rate),
+        timestamp: Date.now()
+    }, (error) => {
+        if (!error) {
+            document.getElementById('newWheelName').value = '';
+            document.getElementById('newWheelRate').value = '';
+            alert(`🔥 สาดของรางวัล "${name}" เข้าสู่ช่องวงล้อหน้าบ้านเรียบร้อยคร้าบน้าบักหำทิว!`);
+        }
+    });
+});
+
+function removeRewardFromWheelCloud(key) {
+    if (confirm("แจ้งเตือนแอดมิน UDG: คุณต้องการลบรางวัลไอเท็มชิ้นนี้ออกจากช่องสุ่มบนวงล้อหน้าบ้านใช่หรือไม่?")) {
+        database.ref(`udg_lucky_wheel_rewards/${key}`).remove();
+    }
+}
+
+// =================================================================
+// ─── 🔍 🎰 ADMINDESK: ENGINE สแกนประวัติแจกของและค้นหาชื่อบัญชีสมาชิก ───
+// =================================================================
+const adminSearchInput = document.getElementById('adminUserRewardSearchInput');
+const adminUserRewardsTbody = document.getElementById('admin-user-rewards-tbody');
+let globalAllUsersRewardsCache = []; // ถังพักข้อมูลประวัติรวมเพื่อความรวดเร็วในการค้นหา
+
+// ดักฟังการสแกนประวัติข้ามโต๊ะฐานข้อมูลคลาวด์ มัดรวมข้อมูลดิบส่งมาจำแนกหลังบ้าน
+database.ref('users_rewards_vault').on('value', (snapshot) => {
+    if (!adminUserRewardsTbody) return;
+    const allVaultData = snapshot.val();
+    globalAllUsersRewardsCache = [];
+
+    if (!allVaultData) {
+        adminUserRewardsTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center; padding: 20px;">📦 ยังไม่มีประวัติการได้ของรางวัลจากวงล้อของสมาชิกท่านใดเลยครับน้า</td></tr>`;
+        return;
+    }
+
+    // กวาดลูปเจาะถังชั้นที่ 1 (UID ผู้ใช้) -> ถังชั้นที่ 2 (คีย์ไอเท็มรางวัล)
+    Object.keys(allVaultData).forEach(uid => {
+        const userItems = allVaultData[uid];
+        Object.keys(userItems).forEach(itemKey => {
+            const info = userItems[itemKey];
+            globalAllUsersRewardsCache.push({
+                accountName: info.userName || "ANONYMOUS USER", // ชื่อบัญชีล็อกอินจริงของสมาชิก
+                rewardName: info.rewardName || "UNKNOWN REWARD",
+                timestamp: info.wonTimestamp || Date.now()
+            });
+        });
+    });
+
+    // สั่งจัดเรียงประวัติตามเวลาล่าสุดขึ้นก่อน
+    globalAllUsersRewardsCache.sort((a, b) => b.timestamp - a.timestamp);
+    renderFilteredUserRewards(""); // ประเดิมพ่นตารางแบบไม่กรอกคำค้นหา
+});
+
+// ฟังก์ชันกรองประวัติตามตัวอักษรที่แอดมินพิมพ์ช่องค้นหา (เวอร์ชันขยายคอลัมน์รองรับการเสิร์ชเช็ครหัสตั๋วลับ CODE)
+function renderFilteredUserRewards(filterText) {
+    if (!adminUserRewardsTbody) return;
+    adminUserRewardsTbody.innerHTML = '';
+    const query = filterText.toLowerCase().trim();
+
+    // ขยายความสามารถให้ช่องเสิร์ช สามารถพิมพ์รหัสตั๋วสุ่ม (เช่น UDG-X) เพื่อค้นหาประวัติได้ด้วย
+    const filteredList = globalAllUsersRewardsCache.filter(item => {
+        const ticketStr = item.ticketId ? item.ticketId.toLowerCase() : "";
+        return item.accountName.toLowerCase().includes(query) || 
+               item.rewardName.toLowerCase().includes(query) ||
+               ticketStr.includes(query);
+    });
+
+    if (filteredList.length === 0) {
+        adminUserRewardsTbody.innerHTML = `<tr><td colspan="3" style="color:#ff007f; text-align:center; padding: 15px;">❌ ไม่พบรายชื่อบัญชี รางวัล หรือรหัสตั๋ว CODE ที่ตรงกับ "[ ${filterText} ]" ครับน้า</td></tr>`;
+        return;
+    }
+
+    filteredList.forEach(item => {
+        const tr = document.createElement('tr');
+        const dateStr = new Date(item.timestamp).toLocaleString('th-TH', { 
+            month: 'short', day: 'numeric', 
+            hour: '2-digit', minute: '2-digit' 
+        });
+        
+        const currentTicketId = item.ticketId ? item.ticketId : "NO-ID";
+        
+        tr.innerHTML = `
+            <td style="color:#fff; font-weight:bold;"><i class="fa-solid fa-circle-user" style="color:#ffaa00; font-size:0.8rem; margin-right:5px;"></i> ${item.accountName}</td>
+            <td>
+                <span style="color:#00ffff; font-family:monospace; font-weight:bold; display:block;">[ ${item.rewardName} ]</span>
+                <!-- 🎯 พ่นรหัสตั๋วลับโชว์คาตาหลังบ้านแอดมินเพื่อใช้กดตรวจสอบความถูกต้อง -->
+                <span style="color:#fff000; font-family:monospace; font-size:0.75rem; font-weight:bold; background:rgba(255,240,0,0.05); padding:1px 4px; border-radius:2px; border:1px solid rgba(255,240,0,0.1); margin-top:3px; display:inline-block;">CODE: ${currentTicketId}</span>
+            </td>
+            <td style="color:#555; font-size:0.75rem; font-family:monospace;">${dateStr}</td>
+        `;
+        adminUserRewardsTbody.appendChild(tr);
+    });
+}
+
+// หูฟังตัวเดิมกวาดลูปเพิ่มการพักข้อมูลตัวแปร ticketId ลงแคชหลังบ้าน
+database.ref('users_rewards_vault').on('value', (snapshot) => {
+    if (!adminUserRewardsTbody) return;
+    const allVaultData = snapshot.val();
+    globalAllUsersRewardsCache = [];
+
+    if (!allVaultData) {
+        adminUserRewardsTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center; padding: 20px;">📦 ยังไม่มีประวัติการได้ของรางวัลจากวงล้อของสมาชิกท่านใดเลยครับน้า</td></tr>`;
+        return;
+    }
+
+    Object.keys(allVaultData).forEach(uid => {
+        const userItems = allVaultData[uid];
+        Object.keys(userItems).forEach(itemKey => {
+            const info = userItems[itemKey];
+            globalAllUsersRewardsCache.push({
+                accountName: info.userName || "ANONYMOUS USER", 
+                rewardName: info.rewardName || "UNKNOWN REWARD",
+                ticketId: info.ticketId || "", // เก็บประวัติรหัสลับตั๋วเข้าแคชหลังบ้าน
+                timestamp: info.wonTimestamp || Date.now()
+            });
+        });
+    });
+
+    globalAllUsersRewardsCache.sort((a, b) => b.timestamp - a.timestamp);
+    renderFilteredUserRewards(""); 
+});
+
+// ผูกตัวดักฟังแรงกดแป้นพิมพ์เวลาน้าแอดมินพิมพ์ค้นหาชื่อบัญชี
+if (adminSearchInput) {
+    adminSearchInput.addEventListener('input', (e) => {
+        renderFilteredUserRewards(e.target.value);
+    });
 }

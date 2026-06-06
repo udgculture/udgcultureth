@@ -793,7 +793,7 @@ database.ref('udg_upcoming_gigs').on('value', (snapshot) => {
 });
 
 // =================================================================
-// ─── 🔐 MEMBER LOGIN MODAL ENGINE (GOOGLE & FACEBOOK CONNECT) ───
+// ─── 🔐 MEMBER LOGIN & 🎡 CYBER LUCKY WHEEL ENGINE (FULL SPEC) ───
 // =================================================================
 const authProviderModal = document.getElementById('authProviderModal');
 const openAuthModalBtn = document.getElementById('openAuthModalBtn');
@@ -802,106 +802,192 @@ const loginGoogleBtn = document.getElementById('loginGoogleBtn');
 const loginFacebookBtn = document.getElementById('loginFacebookBtn');
 const userProfileDisplay = document.getElementById('userProfileDisplay');
 const authUserName = document.getElementById('authUserName');
+
 const userDropdownMenu = document.getElementById('userDropdownMenu');
 const signOutBtn = document.getElementById('signOutBtn');
 
-// 🎯 1. กลไกคำสั่ง คลิกเพื่อเปิด-ปิด หน้าต่าง Pop-up สับตัวเลือกค่ายล็อกอิน
-if (openAuthModalBtn && authProviderModal && closeAuthModalBtn) {
-    openAuthModalBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const currentUser = firebase.auth().currentUser;
-        if (currentUser) {
-            if (userDropdownMenu) userDropdownMenu.classList.toggle('active');
-        } else {
-            authProviderModal.classList.add('active'); 
-        }
+const luckyWheelCanvas = document.getElementById('luckyWheelCanvas');
+const spinWheelBtn = document.getElementById('spinWheelBtn');
+const myCouponsList = document.getElementById('myCouponsList');
+const userVisibleRewardsPool = document.getElementById('userVisibleRewardsPool');
+
+let wheelItemsList = []; 
+let isWheelSpinning = false;
+
+// 🎨 1. ฟังก์ชันสั่งเขียนลายเส้นและระบายเฉดสีเรนเดอร์วงล้อลง Canvas แบบ Dynamic ตามระบบคลาวด์
+function drawLuckyWheelGraph(itemsArray) {
+    if (!luckyWheelCanvas) return;
+    const ctx = luckyWheelCanvas.getContext('2d');
+    const len = itemsArray.length;
+    const center = luckyWheelCanvas.width / 2;
+    ctx.clearRect(0, 0, luckyWheelCanvas.width, luckyWheelCanvas.height);
+
+    if (len === 0) {
+        ctx.style.transform = 'none';
+        ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(center, center, center - 10, 0, 2 * Math.PI); ctx.fill();
+        ctx.fillStyle = "#444"; ctx.font = "13px Kanit"; ctx.textAlign = "center"; ctx.fillText("⏳ รอแอดมินสาดรางวัลเข้าคลาวด์...", center, center + 5);
+        return;
+    }
+
+    const arcAngle = (2 * Math.PI) / len;
+    const neonColors = ['#0f0f0f', '#161616', '#0a0a0a', '#1c1c1c']; 
+
+    itemsArray.forEach((item, i) => {
+        const angle = i * arcAngle;
+        ctx.fillStyle = neonColors[i % neonColors.length];
+        ctx.beginPath(); ctx.moveTo(center, center);
+        ctx.arc(center, center, center - 5, angle, angle + arcAngle); ctx.lineTo(center, center); ctx.fill();
+        ctx.strokeStyle = "rgba(0, 255, 255, 0.15)"; ctx.lineWidth = 1; ctx.stroke();
+
+        ctx.save(); ctx.translate(center, center); ctx.rotate(angle + arcAngle / 2);
+        ctx.fillStyle = i % 2 === 0 ? "#00ffff" : "#ffffff";
+        ctx.font = "bold 11px 'Space Grotesk', 'Kanit'"; ctx.textAlign = "right";
+        
+        let textDisplay = item.name.length > 15 ? item.name.substring(0, 13) + ".." : item.name;
+        ctx.fillText(textDisplay, center - 25, 4); ctx.restore();
     });
-    closeAuthModalBtn.addEventListener('click', () => {
-        authProviderModal.classList.remove('active'); 
+
+    ctx.fillStyle = "#00ffff"; ctx.beginPath(); ctx.arc(center, center, 14, 0, 2 * Math.PI); ctx.fill();
+    ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
+}
+
+// 🎨 2. ฟังก์ชันพ่นป้ายแท็กนีออนโชว์รายการของที่มีสิทธิ์ให้ลุ้นรอบวงล้อ (เพิ่มความดูดีสะใจ!)
+// 🎨 2. ฟังก์ชันพ่นป้ายแท็กนีออนโชว์รายการของที่มีให้ลุ้นรอบวงล้อ (ฉบับซ่อนเรทเปอร์เซ็นต์ ไม่ให้ผู้ใช้เห็น)
+function renderVisibleRewardsPoolList(itemsArray) {
+    if (!userVisibleRewardsPool) return;
+    userVisibleRewardsPool.innerHTML = '';
+    
+    if (itemsArray.length === 0) {
+        userVisibleRewardsPool.innerHTML = `<span style="color:#444; font-size:0.8rem;">⏳ ไม่มีตั๋วคูปองสแตนบายในระบบคลาวด์ขณะนี้</span>`;
+        return;
+    }
+    
+    itemsArray.forEach(item => {
+        const badge = document.createElement('span');
+        badge.style.cssText = "background: rgba(0, 255, 255, 0.03); border: 1px solid #222; color: #ccc; padding: 4px 10px; font-size: 0.78rem; border-radius: 4px; font-weight: 500; font-family: monospace; display: inline-block; box-shadow: inset 0 0 5px rgba(0,255,255,0.01);";
+        // 🎯 ตัด item.rateWeight ออกเรียบร้อย โชว์แค่ชื่อรางวัลเท่ๆ ครับน้า
+        badge.innerHTML = `🎁 <span style="color:#fff; font-weight:bold;">${item.name}</span>`;
+        userVisibleRewardsPool.appendChild(badge);
     });
 }
 
-document.addEventListener('click', () => {
-    if (userDropdownMenu && userDropdownMenu.classList.contains('active')) {
-        userDropdownMenu.classList.remove('active');
+// 📡 3. ดาวเทียมคอยส่องดูถังรายการของรางวัลจาก Firebase มาปั่นหน้าล้อและลิสต์ของรางวัลแบบเรียลไทม์
+database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
+    const data = snapshot.val(); wheelItemsList = [];
+    if (data) {
+        Object.keys(data).forEach(k => { wheelItemsList.push({ id: k, ...data[k] }); });
     }
+    drawLuckyWheelGraph(wheelItemsList);
+    renderVisibleRewardsPoolList(wheelItemsList);
 });
 
-// 🎯 2. เมื่อกดยืนยันตัวตนสำเร็จผ่านตัวใดตัวหนึ่งสำเร็จให้แปรสภาพรูปและปุ่มมุมขวาบนเว็บ
-function handleAuthSuccess(userObj) {
-    if (!userObj) return;
-    
-    const displayName = userObj.displayName || "ANONYMOUS";
-    const photoURL = userObj.photoURL || "";
+// 📡 4. ส่องกล้องประวัติเจาะตู้เซฟส่วนตัวคลังคูปอง (เวอร์ชันเพิ่มระบบแสดงรหัสตั๋วลับเพื่อยืนยันตัวตน)
+function listenToMySavedCouponsVault(uid) {
+    if (!myCouponsList) return;
+    database.ref(`users_rewards_vault/${uid}`).on('value', (snapshot) => {
+        myCouponsList.innerHTML = '';
+        const coupons = snapshot.val();
+        if (!coupons) {
+            myCouponsList.innerHTML = `
+                <div style="color:#333; text-align:center; padding-top:60px; font-size:0.85rem;">
+                    🎁 ตู้เซฟของคุณยังว่างเปล่า<br>กดสาดวงล้อฝั่งซ้ายเพื่อประเดิมรับรางวัลชิ้นแรกค่าย UDG ได้เลยคร้าบน้า BRO!
+                </div>`;
+            return;
+        }
+        Object.keys(coupons).forEach(k => {
+            const item = coupons[k];
+            const dateObj = new Date(item.wonTimestamp);
+            const dateStr = dateObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+            const timeStr = dateObj.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + " น.";
+            
+            // ดักดึงรหัสตั๋วลับจำเพาะตัว (ถ้ารุ่นเก่าไม่มีให้ขึ้นคำว่า NO-ID)
+            const ticketIdDisplay = item.ticketId ? item.ticketId : "NO-ID";
 
-    if (authUserName && userProfileDisplay) {
-        authUserName.innerText = displayName;
-        userProfileDisplay.style.display = "block";
-    }
-    
-    if (openAuthModalBtn) {
-        let displayContent = `<i class="fa-solid fa-user-check" style="color:#39ff14;"></i> <span class="auth-btn-text">${displayName.toUpperCase()}</span>`;
-        if (photoURL && photoURL !== "") {
-            displayContent = `
-                <img src="${photoURL}" class="user-nav-avatar" alt="${displayName}">
-                <span class="auth-btn-text" style="color:#00ffff; font-size:0.8rem;">${displayName.toUpperCase()}</span>
+            const div = document.createElement('div');
+            div.style.cssText = "background:#070707; border:1px solid #222; border-left:3px solid #00ffff; padding:12px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-bottom:8px;";
+            div.innerHTML = `
+                <div>
+                    <strong style="color:#fff; font-family:monospace; font-size:0.92rem; text-shadow:0 0 5px rgba(255,255,255,0.1);">🎫 ${item.rewardName}</strong>
+                    <!-- 🎯 ไฮไลท์รหัสตั๋วลับสีเหลืองนีออนเพื่อให้ลูกค้าใช้แคปมาเคลมสิทธิ์ -->
+                    <span style="display:block; margin-top:4px; font-family:monospace; color:#fff000; font-size:0.8rem; font-weight:bold; background:rgba(255,240,0,0.05); padding:2px 6px; border-radius:3px; border:1px solid rgba(255,240,0,0.1); width:fit-content;">CODE: ${ticketIdDisplay}</span>
+                    <span style="color:#444; font-size:0.68rem; display:block; margin-top:5px;"><i class="fa-solid fa-clock"></i> ได้รับเมื่อ: ${dateStr} - ${timeStr}</span>
+                </div>
+                <span style="color:#39ff14; font-size:0.68rem; font-weight:800; background:rgba(57,255,20,0.04); padding:3px 8px; border-radius:3px; border:1px solid rgba(57,255,20,0.15); letter-spacing:0.5px;">READY</span>
             `;
-        }
-        openAuthModalBtn.innerHTML = displayContent;
-        openAuthModalBtn.style.borderColor = "#00ffff";
-        openAuthModalBtn.style.padding = "4px 12px 4px 6px"; 
-    }
-
-    if (graffitiName && (graffitiName.value === "" || graffitiName.value === "@")) {
-        graffitiName.value = displayName.replace(/\s+/g, ''); 
-    }
-
-    setTimeout(() => {
-        if (authProviderModal) authProviderModal.classList.remove('active');
-    }, 1200);
-}
-
-// 🚪 3. ฟังก์ชันสั่งงานออกจากระบบ (SIGN OUT) คืนสภาพปุ่มเดิมล้างบอร์ดสะอาดหมดจด
-if (signOutBtn) {
-    signOutBtn.addEventListener('click', async () => {
-        try {
-            await firebase.auth().signOut();
-            
-            if (openAuthModalBtn) {
-                openAuthModalBtn.innerHTML = `
-                    <div id="authBtnContent" style="display: flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-right-to-bracket"></i> 
-                        <span class="auth-btn-text">LOGIN</span>
-                    </div>`;
-                openAuthModalBtn.style.borderColor = "var(--accent-color)";
-                openAuthModalBtn.style.color = "var(--accent-color)";
-                openAuthModalBtn.style.padding = "8px 16px";
-            }
-            
-            if (graffitiName) graffitiName.value = "";
-            if (userProfileDisplay) userProfileDisplay.style.display = "none";
-            if (userDropdownMenu) userDropdownMenu.classList.remove('active');
-            
-            await showErrorAlert("SIGNED OUT", "ออกจากระบบ Underground Culture เรียบร้อยแล้วครับ BRO! 🩹");
-        } catch (error) {
-            showErrorAlert("SIGN OUT ERROR", `เกิดข้อผิดพลาด: ${error.message}`);
-        }
+            myCouponsList.appendChild(div);
+        });
+        myCouponsList.scrollTop = myCouponsList.scrollHeight;
     });
 }
 
-// 💥 4. ระบบดักฟังปุ่มคลิกล็อกอินผ่านค่าย GOOGLE (จัดระเบียบตัดระบบขัดขากันเองออก)
+// 🎰 9. มอเตอร์หลักส่งคำสั่งสุ่มวงล้อพ่วงการสร้าง "รหัสตั๋วลับผูกคู่ไอดีบัญชี" ส่งเข้าคลาวด์
+if (spinWheelBtn) {
+    spinWheelBtn.addEventListener('click', async () => {
+        const currentUser = firebase.auth().currentUser;
+        
+        if (!currentUser) {
+            showErrorAlert("ACCESS DENIED", "❌ YOU MUST LOGIN FIRST!<br>(น้าต้องเข้าสู่ระบบล็อกอินด้านบนสุดเว็บก่อน จึงจะได้รับสิทธิ์กดสุ่มรับคูปองส่วนลดประจำวันครับ BRO!)");
+            return;
+        }
+        if (isWheelSpinning) return;
+        if (wheelItemsList.length === 0) { alert("❌ วงล้อระบบคลาวด์ยังว่างเปล่า รอแอดมินสาดรางวัลก่อนครับน้า"); return; }
+
+        const uid = currentUser.uid;
+        const displayName = currentUser.displayName || "ANONYMOUS USER"; 
+        const todayKey = new Date().toDateString(); 
+
+        const checkSnapshot = await database.ref(`users_wheel_cooldown/${uid}/${todayKey}`).once('value');
+        if (checkSnapshot.exists()) {
+            showErrorAlert("DAILY LIMIT REACHED", "❌ LIMIT 1 SPIN PER DAY!<br>(น้ากดสุ่มรางวัลประจำวันนี้ไปเรียบร้อยแล้ว จำกัดหมุนได้ 1 ครั้งต่อวัน พรุ่งนี้แวะมาลุ้นแต้มลดราคาชุดใหม่นะคร้าบน้า BRO!)");
+            return;
+        }
+
+        isWheelSpinning = true;
+        spinWheelBtn.style.opacity = '0.5'; spinWheelBtn.innerText = "SPINNING...";
+
+        const targetIndex = calculateWeightedRewardIndex();
+        const targetRewardItem = wheelItemsList[targetIndex];
+
+        const arcAngle = 360 / wheelItemsList.length;
+        const stopAngleDeg = 270 - (targetIndex * arcAngle) - (arcAngle / 2); 
+        const totalRotationDeg = 1800 + stopAngleDeg; 
+
+        luckyWheelCanvas.style.transform = `rotate(${totalRotationDeg}deg)`;
+
+        setTimeout(async () => {
+            database.ref(`users_wheel_cooldown/${uid}/${todayKey}`).set({ spun: true, timestamp: Date.now() });
+
+            // 🎯 เจนรหัสตั๋วลับสตรีทไซเบอร์สุ่ม 5 หลักขึ้นมาป้องกันการปลอมแปลง (เช่น UDG-A8F23)
+            const randomSecretCode = "UDG-" + Math.random().toString(36).substring(2, 7).toUpperCase();
+
+            // สาดคูปองบันทึกชื่อพ่วงรหัสตั๋วลับเฉพาะตัวส่งขึ้นระบบคลาวด์
+            database.ref(`users_rewards_vault/${uid}`).push({
+                rewardName: targetRewardItem.name,
+                userName: displayName, 
+                ticketId: randomSecretCode, // ส่งรหัสลับเข้าคลาวด์ไปพร้อมกัน
+                wonTimestamp: Date.now()
+            });
+
+            await showErrorAlert("🏆 CONGRATULATIONS!", `ยินดีด้วยคร้าบน้า! น้านำโชคสุ่มได้รับรางวัล:<br><strong style="color:#00ffff; font-size:1.3rem;">[ ${targetRewardItem.name} ]</strong><br><br>รหัสยืนยันตัวตนตั๋วของคุณคือ: <strong style="color:#fff000; font-family:monospace; font-size:1.1rem;">${randomSecretCode}</strong><br>ระบบบันทึกเข้าตู้เซฟฝั่งขวาจอเรียบร้อยแล้วครับ BRO! 🔥`);
+
+            isWheelSpinning = false;
+            luckyWheelCanvas.style.transition = 'none';
+            luckyWheelCanvas.style.transform = `rotate(${stopAngleDeg % 360}deg)`;
+            setTimeout(() => { luckyWheelCanvas.style.transition = 'transform 4s cubic-bezier(0.1, 0.8, 0.1, 1)'; }, 50);
+            spinWheelBtn.style.opacity = '1'; spinWheelBtn.innerText = "SPIN NOW";
+
+        }, 4000);
+    });
+}
+// 💥 10. ระบบยิงป๊อปอัปดักรับผลล็อกอิน Google Sign-in
 if (loginGoogleBtn) {
     loginGoogleBtn.addEventListener('click', () => {
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
-        
         firebase.auth().signInWithPopup(provider)
-            .then((result) => {
-                handleAuthSuccess(result.user); 
-            })
+            .then((result) => { handleAuthSuccess(result.user); })
             .catch((error) => {
                 if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-                    const provider = new firebase.auth.GoogleAuthProvider();
                     firebase.auth().signInWithRedirect(provider);
                 } else {
                     showErrorAlert("GOOGLE AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
@@ -910,18 +996,14 @@ if (loginGoogleBtn) {
     });
 }
 
-// 💥 5. ระบบดักฟังปุ่มคลิกล็อกอินผ่านค่าย FACEBOOK (จัดระเบียบตัดระบบขัดขากันเองออก)
+// 💥 11. ระบบยิงป๊อปอัปดักรับผลล็อกอิน Facebook Sign-in
 if (loginFacebookBtn) {
     loginFacebookBtn.addEventListener('click', () => {
         const provider = new firebase.auth.FacebookAuthProvider();
-        
         firebase.auth().signInWithPopup(provider)
-            .then((result) => {
-                handleAuthSuccess(result.user); 
-            })
+            .then((result) => { handleAuthSuccess(result.user); })
             .catch((error) => {
                 if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-                    const provider = new firebase.auth.FacebookAuthProvider();
                     firebase.auth().signInWithRedirect(provider);
                 } else {
                     showErrorAlert("FACEBOOK AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
@@ -930,19 +1012,16 @@ if (loginFacebookBtn) {
     });
 }
 
-// 🎯 6. ระบบจดจำสถานะผู้ใช้งานหลังรีเฟรชหน้าจอ (Auto-Login)
+// 🎯 12. จดจำเซสชันAuto-Login และรับค่ากรณีไหลกลับมาจากช่องทางเปลี่ยนหน้ามือถือ Redirect
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         handleAuthSuccess(user);
+        listenToMySavedCouponsVault(user.uid);
+    } else {
+        if (myCouponsList) myCouponsList.innerHTML = `<div style="color:#333; text-align:center; padding-top:60px; font-size:0.85rem;">⏳ กรุณาล็อกอินเพื่อเปิดใช้งานตู้เซฟประวัติส่วนตัวของคุณ...</div>`;
     }
 });
 
 firebase.auth().getRedirectResult()
-    .then((result) => {
-        if (result && result.user) {
-            handleAuthSuccess(result.user);
-        }
-    })
-    .catch((error) => {
-        console.error("Redirect Auth Error:", error);
-    });
+    .then((result) => { if (result && result.user) handleAuthSuccess(result.user); })
+    .catch((error) => { console.error("Redirect Auth Error:", error); });

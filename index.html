@@ -62,7 +62,7 @@
     <header>
    <div class="header-container" style="position: relative; width: 100%;">
        <!-- 🔑 ปุ่มล็อกอิน / กล่องสไลด์เมนูสำหรับผู้ใช้ที่ล็อกอินแล้ว -->
-            <div class="auth-corner-zone" style="position: absolute; top: -20px; right: 0; z-index: 1000;">
+           <div class="auth-corner-zone" style="position: absolute; top: -20px; right: 0; z-index: 1000;">
                 <div class="auth-wrapper" style="position: relative; display: inline-block;">
                     <button type="button" id="openAuthModalBtn" class="auth-trigger-btn">
                         <div id="authBtnContent" style="display: flex; align-items: center; gap: 8px;">
@@ -71,9 +71,8 @@
                         </div>
                     </button>
                     
-                    <!-- 🚪 กล่อง Dropdown ซ่อนปุ่ม SIGN OUT (จะแสดงตอนล็อกอินเสร็จแล้วกดจิ้มที่รูปโปรไฟล์) -->
-                    <div id="userDropdownMenu" class="user-dropdown-menu">
-                        <button type="button" id="signOutBtn" class="sign-out-action-btn">
+                    <div id="userDropdownMenu" class="user-dropdown-menu" style="display: none; position: absolute; top: calc(100% + 8px); right: 0; background: #0d0d0d; border: 1px solid #ff3333; box-shadow: 0 5px 15px rgba(255, 51, 51, 0.2); border-radius: 4px; padding: 4px; min-width: 130px; z-index: 2100;">
+                        <button type="button" id="signOutBtn" style="width: 100%; background: transparent; border: none; color: #ff3333; padding: 10px 12px; font-family: 'Space Grotesk', 'Kanit', sans-serif; font-weight: 800; font-size: 0.8rem; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 8px; letter-spacing: 1px;">
                             <i class="fa-solid fa-right-from-bracket"></i> SIGN OUT
                         </button>
                     </div>
@@ -148,7 +147,46 @@
         <div class="news-grid" id="live-news-grid">
             <div style="padding: 40px; color: #555; text-align: center; grid-column: 1/-1;">⏳ กำลังระเบิดสัญญาณดึงข้อมูลข่าวสารล่าสุดจากคลาวด์...</div>
         </div>
+<h2 id="luckywheel" class="section-title" style="margin-top: 60px;">UDG LUCKY WHEEL</h2>
+    <div class="wheel-system-flex-container">
+        
+        <div class="wheel-left-panel">
+            <div class="wheel-canvas-wrapper">
+                <div id="wheelPointer"></div>
+                <canvas id="luckyWheelCanvas" width="340" height="340"></canvas>
+            </div>
+            <div style="margin-top: 22px; width: 100%; text-align: center;">
+                <button type="button" id="spinWheelBtn" class="graffiti-btn" style="width: 220px; padding: 12px 0; font-weight: 800;">SPIN NOW</button>
+            </div>
+            
+            <div class="wheel-pool-section">
+                <span class="wheel-pool-title">
+                    <i class="fa-solid fa-boxes-stacked"></i> // CURRENT REWARD POOL (รายการรางวัลในวงล้อ):
+                </span>
+                <div id="userVisibleRewardsPool" class="wheel-rewards-grid-box">
+                    <span style="color: #444; font-size: 0.8rem; grid-column: 1/-1; text-align: center;">Document Scanning...</span>
+                </div>
+            </div>
+        </div>
 
+        <div class="rewards-vault-right-panel">
+            <div class="vault-header">
+                <h3><i class="fa-solid fa-vault"></i> MY REWARDS VAULT</h3>
+                <p>ตู้เซฟเก็บประวัติคูปองส่วนลดส่วนตัวของคุณ (ใช้สำหรับนำรหัส CODE ไปยืนยันเคลมของรางวัลกับค่าย UDG)</p>
+            </div>
+            
+            <div id="myCouponsList">
+                <p style="color: #444; text-align: center; margin-top: 120px; font-size: 0.85rem;">⏳ กรุณาล็อกอินเพื่อเปิดใช้งานตู้เซฟประวัติส่วนตัวของคุณ...</p>
+            </div>
+            
+            <div style="border-top: 1px solid #1a1a1a; padding-top: 12px; text-align: center;">
+                <span style="font-size: 0.72rem; color: #444; font-family: sans-serif; letter-spacing: 0.5px;">* จำกัดสิทธิ์หมุนวงล้อนำโชคได้ 1 ครั้งต่อวันต่อบัญชีสมาชิกเท่านั้น *</span>
+            </div>
+        </div>
+
+    </div>
+
+    </div>
         <!-- 💬 โซนกำแพงแชทสเปรย์ไซเบอร์ -->
         <h2 id="graffiti" class="section-title" style="margin-top: 60px;">CYBER GRAFFITI WALL</h2>
         <div class="graffiti-container">

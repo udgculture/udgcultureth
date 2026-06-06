@@ -157,7 +157,7 @@ body {
     width: 100%;
     max-width: 650px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)) !important;
     gap: 6px;
     margin-top: 10px;
 }
@@ -187,6 +187,8 @@ body {
 .tab-trigger-btn[data-target="adPanelBox"].active { border-color: #39ff14; color: #39ff14; box-shadow: 0 0 12px rgba(57, 255, 20, 0.15); background: rgba(57, 255, 20, 0.02); }
 .tab-trigger-btn[data-target="archivePanelBox"].active { border-color: #cc00ff; color: #cc00ff; box-shadow: 0 0 12px rgba(204, 0, 255, 0.15); background: rgba(204, 0, 255, 0.02); }
 .tab-trigger-btn[data-target="logoPanelBox"].active { border-color: #fff000; color: #fff000; box-shadow: 0 0 12px rgba(255, 240, 0, 0.15); background: rgba(255, 240, 0, 0.02); }
+.tab-trigger-btn[data-target="gigPanelBox"].active { border-color: #00ffaa; color: #00ffaa; box-shadow: 0 0 12px rgba(0, 255, 170, 0.15); background: rgba(0, 255, 170, 0.02); }
+.tab-trigger-btn[data-target="wheelPanelBox"].active { border-color: #ff007f !important; color: #ff007f !important; box-shadow: 0 0 12px rgba(255, 0, 127, 0.15) !important; background: rgba(255, 0, 127, 0.02) !important; }
 
 /* โครงสร้างหลักกล่องควบคุมแต่ละส่วน */
 .admin-box {
@@ -279,7 +281,7 @@ select:focus, input:focus, textarea:focus {
 
 .back-link:hover { color: #ff3333; }
 
-/* รายการตารางข้อมูลพ่นสรุปในหลังบ้าน */
+/* รายการตารางข้อมูล */
 .artist-list-table {
     width: 100%;
     margin-top: 20px;
@@ -309,7 +311,7 @@ select:focus, input:focus, textarea:focus {
 
 .delete-artist-btn:hover { text-decoration: underline; }
 
-/* 🎨 🔥 สไตล์พรีวิวการ์ดจำลองข่าวด้านล่างจอ */
+/* รายการพรีวิว */
 .preview-zone-wrapper {
     background: #111;
     border: 1px dashed #ff3333;
@@ -369,7 +371,6 @@ select:focus, input:focus, textarea:focus {
     line-height: 1.4; 
 }
 
-/* แผงโลโก้พาร์ทเนอร์สไลด์แนวนอนจำลอง */
 .logo-preview-box {
     display: flex;
     gap: 15px;
@@ -399,22 +400,4 @@ select:focus, input:focus, textarea:focus {
     height: 100%;
     object-fit: contain;
     filter: grayscale(100%) opacity(0.5);
-}
-/* ค้นหาคลาส .tabs-container ในไฟล์เดิม แล้วแก้จำนวน minmax ให้หดรับ 7 ปุ่มพอดี */
-.tabs-container {
-    display: none;
-    width: 100%;
-    max-width: 650px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* ย่อ min-width เหลือ 80px เพื่อรับแท็บที่ 7 */
-    gap: 6px;
-    margin-top: 10px;
-}
-
-/* 🎯 เพิ่มสีไฟนีออนของปุ่มแท็บ GIGS ไว้ล่างสุดของไฟล์ */
-.tab-trigger-btn[data-target="gigPanelBox"].active { 
-    border-color: #00ffaa; 
-    color: #00ffaa; 
-    box-shadow: 0 0 12px rgba(0, 255, 170, 0.15); 
-    background: rgba(0, 255, 170, 0.02); 
 }
