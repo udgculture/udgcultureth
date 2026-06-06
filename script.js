@@ -330,7 +330,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // =================================================================
-// ─── 🗳️ 🎵 NEW CENTRAL WEEKLY SET CHART ENGINE ───
+// ─── 🗳️ 🎵 CENTRAL WEEKLY SET CHART ENGINE ───
 // =================================================================
 const liveChartDisplay = document.getElementById('live-chart-display');
 const modalVotingList = document.getElementById('modal-voting-list');
@@ -391,7 +391,7 @@ function renderModalVotingStation(currentWeekVotes, filterText = "") {
         
         const voteRow = document.createElement('div');
         voteRow.className = 'vote-station-item';
-        voteRow.style.marginBottom = '10px';
+        voteRow.style.removeAttribute = 'margin-bottom'; // ดึงระเบียบจาก CSS
         voteRow.innerHTML = `
             <div class="track-info">
                 <h4 style="color: #fff; font-size: 0.95rem; margin:0;">${track.title}</h4>
@@ -610,7 +610,7 @@ database.ref('udg_news_drops').on('value', (snapshot) => {
                 <span class="news-tag">${news.tag}</span>
                 <h3 class="news-title">${news.title}</h3>
                 <p class="news-excerpt">${news.excerpt}</p>
-                <button type="button" style="background:transparent; border:none; color:#1a1a1a; font-size:0.75rem; margin-top:15px; cursor:pointer; display:block; padding:0;" onclick="deleteNewsItemByAdmin('${news.newsId}')">REMOVE NEWS</button>
+                <button type="button" style="background:transparent; border:none; color:#ff3333; font-size:0.75rem; margin-top:15px; cursor:pointer; display:block; padding:0;" onclick="deleteNewsItemByAdmin('${news.newsId}')">REMOVE NEWS</button>
             </div>`;
         liveNewsGrid.appendChild(articleCard);
     });
@@ -795,24 +795,6 @@ database.ref('udg_upcoming_gigs').on('value', (snapshot) => {
 // =================================================================
 // ─── 🔐 MEMBER LOGIN & 🎡 CYBER LUCKY WHEEL ENGINE (FULL SPEC) ───
 // =================================================================
-const authProviderModal = document.getElementById('authProviderModal');
-const openAuthModalBtn = document.getElementById('openAuthModalBtn');
-const closeAuthModalBtn = document.getElementById('closeAuthModalBtn');
-const loginGoogleBtn = document.getElementById('loginGoogleBtn');
-const loginFacebookBtn = document.getElementById('loginFacebookBtn');
-const userProfileDisplay = document.getElementById('userProfileDisplay');
-const authUserName = document.getElementById('authUserName');
-
-const userDropdownMenu = document.getElementById('userDropdownMenu');
-const signOutBtn = document.getElementById('signOutBtn');
-
-const luckyWheelCanvas = document.getElementById('luckyWheelCanvas');
-const spinWheelBtn = document.getElementById('spinWheelBtn');
-const myCouponsList = document.getElementById('myCouponsList');
-const userVisibleRewardsPool = document.getElementById('userVisibleRewardsPool');
-
-let wheelItemsList = []; 
-let isWheelSpinning = false;
 
 // 🎨 1. ฟังก์ชันสั่งเขียนลายเส้นและระบายเฉดสีเรนเดอร์วงล้อลง Canvas แบบ Dynamic ตามระบบคลาวด์
 function drawLuckyWheelGraph(itemsArray) {
@@ -823,7 +805,7 @@ function drawLuckyWheelGraph(itemsArray) {
     ctx.clearRect(0, 0, luckyWheelCanvas.width, luckyWheelCanvas.height);
 
     if (len === 0) {
-        ctx.style.transform = 'none';
+        luckyWheelCanvas.style.transform = 'none';
         ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(center, center, center - 10, 0, 2 * Math.PI); ctx.fill();
         ctx.fillStyle = "#444"; ctx.font = "13px Kanit"; ctx.textAlign = "center"; ctx.fillText("⏳ รอแอดมินสาดรางวัลเข้าคลาวด์...", center, center + 5);
         return;
@@ -851,22 +833,20 @@ function drawLuckyWheelGraph(itemsArray) {
     ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
 }
 
-// 🎨 2. ฟังก์ชันพ่นป้ายแท็กนีออนโชว์รายการของที่มีสิทธิ์ให้ลุ้นรอบวงล้อ (เพิ่มความดูดีสะใจ!)
 // 🎨 2. ฟังก์ชันพ่นป้ายแท็กนีออนโชว์รายการของที่มีให้ลุ้นรอบวงล้อ (ฉบับซ่อนเรทเปอร์เซ็นต์ ไม่ให้ผู้ใช้เห็น)
 function renderVisibleRewardsPoolList(itemsArray) {
     if (!userVisibleRewardsPool) return;
     userVisibleRewardsPool.innerHTML = '';
     
     if (itemsArray.length === 0) {
-        userVisibleRewardsPool.innerHTML = `<span style="color:#444; font-size:0.8rem;">⏳ ไม่มีตั๋วคูปองสแตนบายในระบบคลาวด์ขณะนี้</span>`;
+        userVisibleRewardsPool.innerHTML = `<span style="color:#444; font-size:0.8rem; grid-column:1/-1; text-align:center;">⏳ ไม่มีตั๋วคูปองสแตนบายในระบบคลาวด์ขณะนี้</span>`;
         return;
     }
     
     itemsArray.forEach(item => {
         const badge = document.createElement('span');
-        badge.style.cssText = "background: rgba(0, 255, 255, 0.03); border: 1px solid #222; color: #ccc; padding: 4px 10px; font-size: 0.78rem; border-radius: 4px; font-weight: 500; font-family: monospace; display: inline-block; box-shadow: inset 0 0 5px rgba(0,255,255,0.01);";
-        // 🎯 ตัด item.rateWeight ออกเรียบร้อย โชว์แค่ชื่อรางวัลเท่ๆ ครับน้า
-        badge.innerHTML = `🎁 <span style="color:#fff; font-weight:bold;">${item.name}</span>`;
+        badge.className = "wheel-badge-item"; 
+        badge.innerHTML = `🎁 <span>${item.name}</span>`;
         userVisibleRewardsPool.appendChild(badge);
     });
 }
@@ -881,17 +861,14 @@ database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
     renderVisibleRewardsPoolList(wheelItemsList);
 });
 
-// 📡 4. ส่องกล้องประวัติเจาะตู้เซฟส่วนตัวคลังคูปอง (เวอร์ชันเพิ่มระบบแสดงรหัสตั๋วลับเพื่อยืนยันตัวตน)
+// 📡 4. ส่องกล้องประวัติเจาะตู้เซฟส่วนตัวคลังคูปองประจำไอดีสมาชิก (พ่นการ์ดคูปองวาร์ปเป็นระเบียบสวยงาม)
 function listenToMySavedCouponsVault(uid) {
     if (!myCouponsList) return;
     database.ref(`users_rewards_vault/${uid}`).on('value', (snapshot) => {
         myCouponsList.innerHTML = '';
         const coupons = snapshot.val();
         if (!coupons) {
-            myCouponsList.innerHTML = `
-                <div style="color:#333; text-align:center; padding-top:60px; font-size:0.85rem;">
-                    🎁 ตู้เซฟของคุณยังว่างเปล่า<br>กดสาดวงล้อฝั่งซ้ายเพื่อประเดิมรับรางวัลชิ้นแรกค่าย UDG ได้เลยคร้าบน้า BRO!
-                </div>`;
+            myCouponsList.innerHTML = `<div style="color:#333; text-align:center; padding-top:100px; font-size:0.85rem;">🎁 ตู้เซฟของคุณยังว่างเปล่า<br>กดสาดวงล้อฝั่งซ้ายเพื่อประเดิมรับรางวัลชิ้นแรกค่าย UDG ได้เลยคร้าบน้า BRO!</div>`;
             return;
         }
         Object.keys(coupons).forEach(k => {
@@ -899,20 +876,17 @@ function listenToMySavedCouponsVault(uid) {
             const dateObj = new Date(item.wonTimestamp);
             const dateStr = dateObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
             const timeStr = dateObj.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + " น.";
-            
-            // ดักดึงรหัสตั๋วลับจำเพาะตัว (ถ้ารุ่นเก่าไม่มีให้ขึ้นคำว่า NO-ID)
             const ticketIdDisplay = item.ticketId ? item.ticketId : "NO-ID";
 
             const div = document.createElement('div');
-            div.style.cssText = "background:#070707; border:1px solid #222; border-left:3px solid #00ffff; padding:12px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-bottom:8px;";
+            div.className = "vault-coupon-card";
             div.innerHTML = `
                 <div>
-                    <strong style="color:#fff; font-family:monospace; font-size:0.92rem; text-shadow:0 0 5px rgba(255,255,255,0.1);">🎫 ${item.rewardName}</strong>
-                    <!-- 🎯 ไฮไลท์รหัสตั๋วลับสีเหลืองนีออนเพื่อให้ลูกค้าใช้แคปมาเคลมสิทธิ์ -->
-                    <span style="display:block; margin-top:4px; font-family:monospace; color:#fff000; font-size:0.8rem; font-weight:bold; background:rgba(255,240,0,0.05); padding:2px 6px; border-radius:3px; border:1px solid rgba(255,240,0,0.1); width:fit-content;">CODE: ${ticketIdDisplay}</span>
-                    <span style="color:#444; font-size:0.68rem; display:block; margin-top:5px;"><i class="fa-solid fa-clock"></i> ได้รับเมื่อ: ${dateStr} - ${timeStr}</span>
+                    <strong class="coupon-info-title">🎫 ${item.rewardName}</strong>
+                    <span class="coupon-secret-code-badge">CODE: ${ticketIdDisplay}</span>
+                    <span class="coupon-timestamp"><i class="fa-solid fa-clock"></i> ได้รับเมื่อ: ${dateStr} - ${timeStr}</span>
                 </div>
-                <span style="color:#39ff14; font-size:0.68rem; font-weight:800; background:rgba(57,255,20,0.04); padding:3px 8px; border-radius:3px; border:1px solid rgba(57,255,20,0.15); letter-spacing:0.5px;">READY</span>
+                <span class="coupon-status-ready">READY</span>
             `;
             myCouponsList.appendChild(div);
         });
@@ -920,7 +894,100 @@ function listenToMySavedCouponsVault(uid) {
     });
 }
 
-// 🎰 9. มอเตอร์หลักส่งคำสั่งสุ่มวงล้อพ่วงการสร้าง "รหัสตั๋วลับผูกคู่ไอดีบัญชี" ส่งเข้าคลาวด์
+// 🎡 5. อัลกอริทึมคำนวณน้ำหนัก % โอกาสสุ่มได้ของแต่ละช่องรางวัลตามเรทหลังบ้านแอดมิน
+function calculateWeightedRewardIndex() {
+    let totalRateWeight = 0;
+    wheelItemsList.forEach(item => { totalRateWeight += parseFloat(item.rateWeight || 0); });
+    
+    let randomPointer = Math.random() * totalRateWeight;
+    for (let i = 0; i < wheelItemsList.length; i++) {
+        randomPointer -= parseFloat(wheelItemsList[i].rateWeight || 0);
+        if (randomPointer <= 0) return i;
+    }
+    return 0;
+}
+
+// 💥 6. ปุ่มคลิกเปิด-ปิด หน้าต่าง Pop-up สับตัวเลือกค่ายและสับสวิตช์ Dropdown Sign Out (จัดคิวระเบียบไร้เด้งเบิ้ล)
+if (openAuthModalBtn && authProviderModal && closeAuthModalBtn) {
+    openAuthModalBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const currentUser = firebase.auth().currentUser;
+        if (currentUser) {
+            if (userDropdownMenu) {
+                userDropdownMenu.style.display = (userDropdownMenu.style.display === 'block') ? 'none' : 'block';
+            }
+        } else {
+            authProviderModal.classList.add('active'); 
+        }
+    });
+    closeAuthModalBtn.addEventListener('click', () => {
+        authProviderModal.classList.remove('active'); 
+    });
+}
+
+document.addEventListener('click', () => {
+    if (userDropdownMenu) userDropdownMenu.style.display = 'none';
+});
+
+// 🎯 7. เมื่อการยืนยันตัวตน Google / Facebook สำเร็จแปลงสภาพปุ่มหลักพร้อมดึงอวตารผู้ใช้ทันที
+function handleAuthSuccess(userObj) {
+    if (!userObj) return;
+    
+    const displayName = userObj.displayName || "ANONYMOUS";
+    const photoURL = userObj.photoURL || "";
+
+    if (authUserName && userProfileDisplay) {
+        authUserName.innerText = displayName;
+        userProfileDisplay.style.display = "block";
+    }
+    
+    if (openAuthModalBtn) {
+        let displayContent = `<i class="fa-solid fa-user-check" style="color:#39ff14;"></i> <span class="auth-btn-text">${displayName.toUpperCase()}</span>`;
+        if (photoURL && photoURL !== "") {
+            displayContent = `
+                <img src="${photoURL}" class="user-nav-avatar" alt="${displayName}">
+                <span class="auth-btn-text" style="color:#00ffff; font-size:0.8rem; font-weight:800; letter-spacing:0.5px;">${displayName.toUpperCase()}</span>
+                <i class="fa-solid fa-caret-down" style="font-size:0.7rem; color:#555; margin-left:2px;"></i>
+            `;
+        }
+        openAuthModalBtn.innerHTML = displayContent;
+        openAuthModalBtn.style.borderColor = "#00ffff";
+        openAuthModalBtn.style.padding = "4px 10px 4px 6px"; 
+    }
+
+    if (graffitiName && (graffitiName.value === "" || graffitiName.value === "@")) {
+        graffitiName.value = displayName.replace(/\s+/g, ''); 
+    }
+
+    setTimeout(() => {
+        if (authProviderModal) authProviderModal.classList.remove('active');
+    }, 1200);
+}
+
+// 🚪 8. ปุ่มกด SIGN OUT ออกจากระบบคืนปุ่มล็อกอินเคลียร์เซสชันบอร์ดลื่นไหล
+if (signOutBtn) {
+    signOutBtn.addEventListener('click', async () => {
+        try {
+            await firebase.auth().signOut();
+            if (openAuthModalBtn) {
+                openAuthModalBtn.innerHTML = `
+                    <div id="authBtnContent" style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-right-to-bracket"></i> 
+                        <span class="auth-btn-text">LOGIN</span>
+                    </div>`;
+                openAuthModalBtn.style.borderColor = "var(--accent-color)";
+                openAuthModalBtn.style.padding = "8px 16px";
+            }
+            if (graffitiName) graffitiName.value = "";
+            if (userProfileDisplay) userProfileDisplay.style.display = "none";
+            await showErrorAlert("SIGNED OUT", "ออกจากระบบ Underground Culture เรียบร้อยแล้วครับ BRO! 🩹");
+        } catch (error) {
+            showErrorAlert("SIGN OUT ERROR", `เกิดข้อผิดพลาด: ${error.message}`);
+        }
+    });
+}
+
+// 🎰 9. มอเตอร์วงล้อนำโชคสุ่มของรางวัลพ่วง "สร้างรหัสตั๋วลับ CODE" 5 หลักส่งประวัติผู้ใช้ขึ้นคลาวด์แอดมิน
 if (spinWheelBtn) {
     spinWheelBtn.addEventListener('click', async () => {
         const currentUser = firebase.auth().currentUser;
@@ -957,14 +1024,14 @@ if (spinWheelBtn) {
         setTimeout(async () => {
             database.ref(`users_wheel_cooldown/${uid}/${todayKey}`).set({ spun: true, timestamp: Date.now() });
 
-            // 🎯 เจนรหัสตั๋วลับสตรีทไซเบอร์สุ่ม 5 หลักขึ้นมาป้องกันการปลอมแปลง (เช่น UDG-A8F23)
+            // เจนรหัสตั๋วลับไซเบอร์สุ่ม 5 หลักกันคนก็อปปี้แอบอ้างสิทธิ์ (เช่น UDG-7F3A9)
             const randomSecretCode = "UDG-" + Math.random().toString(36).substring(2, 7).toUpperCase();
 
-            // สาดคูปองบันทึกชื่อพ่วงรหัสตั๋วลับเฉพาะตัวส่งขึ้นระบบคลาวด์
+            // ส่งข้อมูลคูปองพ่วงรหัสตั๋วและชื่อจริงโปรไฟล์บันทึกขึ้นระบบคลาวด์ส่วนกลาง
             database.ref(`users_rewards_vault/${uid}`).push({
                 rewardName: targetRewardItem.name,
                 userName: displayName, 
-                ticketId: randomSecretCode, // ส่งรหัสลับเข้าคลาวด์ไปพร้อมกัน
+                ticketId: randomSecretCode, 
                 wonTimestamp: Date.now()
             });
 
@@ -979,6 +1046,7 @@ if (spinWheelBtn) {
         }, 4000);
     });
 }
+
 // 💥 10. ระบบยิงป๊อปอัปดักรับผลล็อกอิน Google Sign-in
 if (loginGoogleBtn) {
     loginGoogleBtn.addEventListener('click', () => {
@@ -1012,7 +1080,7 @@ if (loginFacebookBtn) {
     });
 }
 
-// 🎯 12. จดจำเซสชันAuto-Login และรับค่ากรณีไหลกลับมาจากช่องทางเปลี่ยนหน้ามือถือ Redirect
+// 🎯 12. จดจำเซสชัน Auto-Login คาสายสัญญาณรีเฟรชหน้าจอออโต้
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         handleAuthSuccess(user);
