@@ -876,3 +876,4 @@ firebase.auth().onAuthStateChanged((user) => {
         handleAuthSuccess(user);
     }
 });
+
