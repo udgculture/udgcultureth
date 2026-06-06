@@ -368,7 +368,7 @@ function removeRewardFromWheelCloud(key) {
 }
 
 // =================================================================
-// ─── 🔍 🎰 ADMINDESK: ENGINE สแกนประวัติแจกของและค้นหาชื่อบัญชีสมาชิก ───
+// ─── 🔍 🎰 ADMINDESK: ENGINE สแกนประวัติและระบบเคลมตัดสิทธิ์คูปอง ───
 // =================================================================
 const adminSearchInput = document.getElementById('adminUserRewardSearchInput');
 const adminUserRewardsTbody = document.getElementById('admin-user-rewards-tbody');
@@ -381,44 +381,67 @@ database.ref('users_rewards_vault').on('value', (snapshot) => {
     globalAllUsersRewardsCache = [];
 
     if (!allVaultData) {
-        adminUserRewardsTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center; padding: 20px;">📦 ยังไม่มีประวัติการได้ของรางวัลจากวงล้อของสมาชิกท่านใดเลยครับน้า</td></tr>`;
+        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#555; text-align:center; padding: 20px;">📦 ระบบเชื่อมต่อสำเร็จ: แต่ตอนนี้ยังไม่มีประวัติการกดสุ่มของสมาชิกท่านใดในฐานข้อมูลเลยครับน้า</td></tr>`;
         return;
     }
 
-    // กวาดลูปเจาะถังชั้นที่ 1 (UID ผู้ใช้) -> ถังชั้นที่ 2 (คีย์ไอเท็มรางวัล)
-    Object.keys(allVaultData).forEach(uid => {
-        const userItems = allVaultData[uid];
-        Object.keys(userItems).forEach(itemKey => {
-            const info = userItems[itemKey];
-            globalAllUsersRewardsCache.push({
-                accountName: info.userName || "ANONYMOUS USER", // ชื่อบัญชีล็อกอินจริงของสมาชิก
-                rewardName: info.rewardName || "UNKNOWN REWARD",
-                timestamp: info.wonTimestamp || Date.now()
-            });
+    try {
+        // กวาดลูปเจาะถังชั้นที่ 1 (UID ผู้ใช้) -> ถังชั้นที่ 2 (คีย์ไอเท็มรางวัล)
+        Object.keys(allVaultData).forEach(uid => {
+            const userItems = allVaultData[uid];
+            
+            if (userItems && typeof userItems === 'object') {
+                Object.keys(userItems).forEach(itemKey => {
+                    const info = userItems[itemKey];
+                    
+                    if (info) {
+                        // 🎯 พ่วงเก็บค่าคีย์หลัก (uid และ itemKey) เอาไว้ใช้สั่งลบข้อมูลรายชิ้นบนคลาวด์
+                        globalAllUsersRewardsCache.push({
+                            userUid: uid,
+                            couponKey: itemKey,
+                            accountName: info.userName || info.username || "ANONYMOUS USER", 
+                            rewardName: info.rewardName || "UNKNOWN REWARD",
+                            ticketId: info.ticketId || "NO-CODE", 
+                            timestamp: info.wonTimestamp || info.timestamp || Date.now()
+                        });
+                    }
+                });
+            }
         });
-    });
 
-    // สั่งจัดเรียงประวัติตามเวลาล่าสุดขึ้นก่อน
-    globalAllUsersRewardsCache.sort((a, b) => b.timestamp - a.timestamp);
-    renderFilteredUserRewards(""); // ประเดิมพ่นตารางแบบไม่กรอกคำค้นหา
+        // สั่งจัดเรียงประวัติตามเวลาล่าสุดขึ้นก่อน
+        globalAllUsersRewardsCache.sort((a, b) => b.timestamp - a.timestamp);
+        renderFilteredUserRewards(""); // ประเดิมพ่นตารางแบบไม่กรอกคำค้นหา
+        
+    } catch (error) {
+        console.error("สคริปต์สแกนประวัติเจอจุดสะดุดน้าบักหำทิว: ", error);
+        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#ff3333; text-align:center; padding: 20px;">❌ เกิดข้อผิดพลาดในการแกะข้อมูล: ${error.message}</td></tr>`;
+    }
 });
 
-// ฟังก์ชันกรองประวัติตามตัวอักษรที่แอดมินพิมพ์ช่องค้นหา (เวอร์ชันขยายคอลัมน์รองรับการเสิร์ชเช็ครหัสตั๋วลับ CODE)
+// ฟังก์ชันกรองประวัติตามตัวอักษรที่แอดมินพิมพ์ช่องค้นหา (รองรับเสิร์ช ชื่อ, รางวัล, รหัส CODE)
 function renderFilteredUserRewards(filterText) {
     if (!adminUserRewardsTbody) return;
     adminUserRewardsTbody.innerHTML = '';
     const query = filterText.toLowerCase().trim();
 
-    // ขยายความสามารถให้ช่องเสิร์ช สามารถพิมพ์รหัสตั๋วสุ่ม (เช่น UDG-X) เพื่อค้นหาประวัติได้ด้วย
+    if (globalAllUsersRewardsCache.length === 0) {
+        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#555; text-align:center; padding: 20px;">📦 ไม่มีข้อมูลประวัติรางวัลสมาชิกบนระบบคลาวด์ขณะนี้</td></tr>`;
+        return;
+    }
+
     const filteredList = globalAllUsersRewardsCache.filter(item => {
         const ticketStr = item.ticketId ? item.ticketId.toLowerCase() : "";
-        return item.accountName.toLowerCase().includes(query) || 
-               item.rewardName.toLowerCase().includes(query) ||
+        const nameStr = item.accountName ? item.accountName.toLowerCase() : "";
+        const rewardStr = item.rewardName ? item.rewardName.toLowerCase() : "";
+        
+        return nameStr.includes(query) || 
+               rewardStr.includes(query) ||
                ticketStr.includes(query);
     });
 
     if (filteredList.length === 0) {
-        adminUserRewardsTbody.innerHTML = `<tr><td colspan="3" style="color:#ff007f; text-align:center; padding: 15px;">❌ ไม่พบรายชื่อบัญชี รางวัล หรือรหัสตั๋ว CODE ที่ตรงกับ "[ ${filterText} ]" ครับน้า</td></tr>`;
+        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#ff007f; text-align:center; padding: 15px;">❌ ไม่พบรายชื่อบัญชี รางวัล หรือรหัสตั๋ว CODE ที่ตรงกับ "[ ${filterText} ]" ครับน้า</td></tr>`;
         return;
     }
 
@@ -435,15 +458,38 @@ function renderFilteredUserRewards(filterText) {
             <td style="color:#fff; font-weight:bold;"><i class="fa-solid fa-circle-user" style="color:#ffaa00; font-size:0.8rem; margin-right:5px;"></i> ${item.accountName}</td>
             <td>
                 <span style="color:#00ffff; font-family:monospace; font-weight:bold; display:block;">[ ${item.rewardName} ]</span>
-                <!-- 🎯 พ่นรหัสตั๋วลับโชว์คาตาหลังบ้านแอดมินเพื่อใช้กดตรวจสอบความถูกต้อง -->
                 <span style="color:#fff000; font-family:monospace; font-size:0.75rem; font-weight:bold; background:rgba(255,240,0,0.05); padding:1px 4px; border-radius:2px; border:1px solid rgba(255,240,0,0.1); margin-top:3px; display:inline-block;">CODE: ${currentTicketId}</span>
             </td>
             <td style="color:#555; font-size:0.75rem; font-family:monospace;">${dateStr}</td>
+            <td style="text-align: center;">
+                <button type="button" class="delete-artist-btn" style="color:#ff3333; font-weight:800; background:rgba(255,51,51,0.03); border:1px solid rgba(255,51,51,0.2); padding:5px 10px; border-radius:4px; cursor:pointer;" onclick="markCouponAsUsedInCloud('${item.userUid}', '${item.couponKey}', '${currentTicketId}')">
+                    <i class="fa-solid fa-eraser"></i> USED
+                </button>
+            </td>
         `;
         adminUserRewardsTbody.appendChild(tr);
     });
 }
 
+// 🎯 ฟังก์ชันเด็ดขาดประจำค่าย: สั่งทำลายล้างข้อมูลรายใบเมื่อเคลมของเสร็จ ป้องกันฐานข้อมูลบวมร้อยเปอร์เซ็นต์
+function markCouponAsUsedInCloud(userUid, couponKey, ticketId) {
+    if (confirm(`🚨 ยืนยันการตัดสิทธิ์ตั๋วรหัส [ ${ticketId} ] ใช่หรือไม่?\n(ระบบจะลบคูปองใบนี้ออกจากตู้เซฟหน้าบ้านของลูกค้า และลบออกจากตารางแอดมินถาวรทันทีเพื่อประหยัดพื้นที่คลาวด์ครับน้า)`)) {
+        database.ref(`users_rewards_vault/${userUid}/${couponKey}`).remove()
+            .then(() => {
+                alert(`🔥 เคลียร์สิทธิ์ตั๋วรหัส ${ticketId} ออกจากคลาวด์สองฝั่งเรียบร้อยครับน้าบักหำทิว!`);
+            })
+            .catch((error) => {
+                alert(`❌ เกิดข้อผิดพลาดในการลบข้อมูล: ${error.message}`);
+            });
+    }
+}
+
+// ผูกตัวดักฟังแรงกดแป้นพิมพ์เวลาน้าแอดมินพิมพ์ค้นหาชื่อบัญชี
+if (adminSearchInput) {
+    adminSearchInput.addEventListener('input', (e) => {
+        renderFilteredUserRewards(e.target.value);
+    });
+}
 // หูฟังตัวเดิมกวาดลูปเพิ่มการพักข้อมูลตัวแปร ticketId ลงแคชหลังบ้าน
 database.ref('users_rewards_vault').on('value', (snapshot) => {
     if (!adminUserRewardsTbody) return;
@@ -472,9 +518,3 @@ database.ref('users_rewards_vault').on('value', (snapshot) => {
     renderFilteredUserRewards(""); 
 });
 
-// ผูกตัวดักฟังแรงกดแป้นพิมพ์เวลาน้าแอดมินพิมพ์ค้นหาชื่อบัญชี
-if (adminSearchInput) {
-    adminSearchInput.addEventListener('input', (e) => {
-        renderFilteredUserRewards(e.target.value);
-    });
-}

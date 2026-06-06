@@ -401,3 +401,15 @@ select:focus, input:focus, textarea:focus {
     object-fit: contain;
     filter: grayscale(100%) opacity(0.5);
 }
+
+/* 🎯 ปุ่มกดตัดสิทธิ์ USED นีออนแดงดุตอนเมาส์ชี้ */
+#admin-user-rewards-tbody .delete-artist-btn {
+    transition: all 0.2s ease-in-out;
+}
+#admin-user-rewards-tbody .delete-artist-btn:hover {
+    background: #ff3333 !important;
+    color: #000000 !important;
+    box-shadow: 0 0 10px #ff3333;
+    transform: scale(1.05);
+    text-decoration: none !important;
+}
