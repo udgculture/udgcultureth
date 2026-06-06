@@ -13,6 +13,7 @@
 </head>
 <body>
 
+    <!-- 🔒 🔌 ประตูสแกนรหัสผ่านแอดมินหลักค่าย UDG (GATE OVERLAY) -->
     <div class="login-overlay" id="gateOverlay">
         <div class="login-box">
             <div class="login-glow-line"></div>
@@ -30,6 +31,7 @@
         </div>
     </div>
 
+    <!-- 🎛️ แผงแท็บเมนูหลักส่วนกลาง -->
     <div class="tabs-container" id="adminTabsMenu" style="display: none;">
         <button type="button" class="tab-trigger-btn active" data-target="newsPanelBox"><i class="fa-solid fa-sliders"></i>📰 CONTENT</button>
         <button type="button" class="tab-trigger-btn" data-target="musicPanelBox"><i class="fa-solid fa-music"></i>🎵 MUSIC</button>
@@ -41,7 +43,8 @@
         <button type="button" class="tab-trigger-btn" data-target="wheelPanelBox" style="border-color:#ff007f; color:#ff007f;"><i class="fa-solid fa-ferry"></i>🎡 WHEEL</button>
     </div>
 
-    <div class="admin-box" id="newsPanelBox">
+    <!-- 📰 [แท็บที่ 1] CONTENT NEWS CONTROL -->
+    <div class="admin-box" id="newsPanelBox" style="display: none;">
         <h2><i class="fa-solid fa-sliders" style="color: #ff3333;"></i> UDG CENTRAL CONTROL PANEL</h2>
         <p style="color: #555; font-size: 0.85rem;">แผงควบคุมข่าวเด่น ข่าวสารทั่วไป และพื้นที่การ์ดเรดาร์แร็ปเปอร์</p>
         <div class="form-group">
@@ -69,7 +72,8 @@
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <div class="admin-box admin-box-cyan" id="musicPanelBox">
+    <!-- 🎵 [แท็บที่ 2] MUSIC TRACKS CONTROL -->
+    <div class="admin-box admin-box-cyan" id="musicPanelBox" style="display: none;">
         <h2><i class="fa-solid fa-music" style="color: #00ffff;"></i> UDG MUSIC TRACKS MANAGER</h2>
         <p style="color: #555; font-size: 0.85rem;">เพิ่มชื่อเพลงเซ็ตแบทเทิลรายสัปดาห์ (แต้มโหวตล้างกระดานนับ 0 ออโต้ทุกวันศุกร์)</p>
         <div class="form-group"><label style="color: #00ffff;">TRACK TITLE</label><input type="text" id="newTrackTitle"></div>
@@ -83,7 +87,8 @@
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <div class="admin-box admin-box-glow" id="artistPanelBox">
+    <!-- 🎤 [แท็บที่ 3] ARTIST KEYS CONTROL -->
+    <div class="admin-box admin-box-glow" id="artistPanelBox" style="display: none;">
         <h2><i class="fa-solid fa-user-shield" style="color: #ffaa00;"></i> UDG ARTIST KEYS MANAGER</h2>
         <p style="color: #555; font-size: 0.85rem;">มอบรหัสผ่านลับให้แร็ปเปอร์ใช้เข้าสิทธิ์พ่นสีฉลามทองในห้องแชททั่วไป</p>
         <div class="form-group"><label style="color: #ffaa00;">ARTIST USERNAME</label><input type="text" id="newArtistName"></div>
@@ -96,7 +101,8 @@
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <div class="admin-box" id="adPanelBox" style="border-color: #39ff14; box-shadow: 0 0 30px rgba(57, 255, 20, 0.05);">
+    <!-- 💸 [แท็บที่ 4] LIVE ADS CONTROL -->
+    <div class="admin-box" id="adPanelBox" style="display: none; border-color: #39ff14; box-shadow: 0 0 30px rgba(57, 255, 20, 0.05);">
         <h2><i class="fa-solid fa-rectangle-ad" style="color: #39ff14;"></i> UDG LIVE ADS ROTATOR</h2>
         <p style="color: #555; font-size: 0.85rem;">เพิ่มสปอนเซอร์ของลูกค้าหลายเจ้า ระบบจะสลับหมุนเวียนบนหน้าเว็บหลักให้ทุก 10 วินาที</p>
         <div class="form-group"><label style="color: #39ff14;">SPONSOR NAME</label><input type="text" id="newAdTitle"></div>
@@ -111,7 +117,8 @@
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <div class="admin-box admin-box-purple" id="archivePanelBox">
+    <!-- 🗳️ [แท็บที่ 5] VOTES ARCHIVE LOGS -->
+    <div class="admin-box admin-box-purple" id="archivePanelBox" style="display: none;">
         <h2><i class="fa-solid fa-box-archive" style="color: #cc00ff;"></i> UDG VOTES WEEKLY ARCHIVE</h2>
         <p style="color: #555; font-size: 0.85rem;">จดบันทึกประวัติหาแชมป์ประจำสัปดาห์ปัจจุบันมัดรวมส่งเข้าสู่แฟ้มประวัติหอเกียรติยศค่าย</p>
         <button type="button" class="post-btn" id="archiveWeeklyBtn" style="background: linear-gradient(45deg, #cc00ff, #7700ff);"><i class="fa-solid fa-trophy"></i> LOCK CURRENT WEEK & SAVE TO ARCHIVE</button>
@@ -122,7 +129,8 @@
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <div class="admin-box admin-box-yellow" id="logoPanelBox">
+    <!-- 🤝 [แท็บที่ 6] CULTURE PARTNERS LOGOS -->
+    <div class="admin-box admin-box-yellow" id="logoPanelBox" style="display: none;">
         <h2><i class="fa-solid fa-handshake" style="color: #fff000;"></i> UDG CULTURE PARTNERS LOGOS</h2>
         <p style="color: #555; font-size: 0.85rem;">เพิ่มหรือถอดถอนรูปภาพโลโก้สปอนเซอร์/ค่ายเพลงพันธมิตร หมุนเวียนแถบสไลด์แนวนอนด้านล่างเว็บ</p>
         <div class="form-group"><label style="color: #fff000;">PARTNER / BRAND NAME</label><input type="text" id="newPartnerName"></div>
@@ -139,7 +147,8 @@
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <div class="admin-box" id="gigPanelBox" style="border-color: #00ffaa; box-shadow: 0 0 30px rgba(0, 255, 170, 0.05);">
+    <!-- 📅 [แท็บที่ 7] GIGS & EVENTS DESK -->
+    <div class="admin-box" id="gigPanelBox" style="display: none; border-color: #00ffaa; box-shadow: 0 0 30px rgba(0, 255, 170, 0.05);">
         <h2><i class="fa-solid fa-calendar-days" style="color: #00ffaa;"></i> UDG GIGS & EVENTS DESK</h2>
         <p style="color: #555; font-size: 0.85rem;">เพิ่ม ลบ คอนเสิร์ต ปาร์ตี้ใต้ดิน หรืออีเวนต์ใหญ่ประจำค่าย พร้อมสับสีปุ่มสถานะและพ่นภาพโปสเตอร์</p>
         <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin-top: 20px;">
@@ -181,10 +190,11 @@
             <thead><tr><th>รอบงาน / ชื่อคอนเสิร์ต</th><th>สถานะปุ่ม</th><th>จัดการ</th></tr></thead>
             <tbody id="gig-list-tbody"><tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังโหลด...</td></tr></tbody>
         </table>
-        <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
+        <a href="index.html" class="back-link" style="margin-top: 30px;">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
 
-    <div class="admin-box" id="wheelPanelBox" style="border-color: #ff007f; box-shadow: 0 0 30px rgba(255, 0, 127, 0.05);">
+    <!-- 🎡 [แท็บที่ 8] LUCKY WHEEL CONTROL PANEL -->
+    <div class="admin-box" id="wheelPanelBox" style="display: none; border-color: #ff007f; box-shadow: 0 0 30px rgba(255, 0, 127, 0.05);">
         <h2><i class="fa-solid fa-ferry" style="color: #ff007f;"></i> UDG LUCKY WHEEL DESK</h2>
         <p style="color: #555; font-size: 0.85rem;">เพิ่ม ลบ ของรางวัล/คูปองลดราคา พร้อมล็อก % เรทโอกาสดร็อป และระบบสแกนเคลมรหัสตั๋วลับกันโกง</p>
 
@@ -202,18 +212,11 @@
         </div>
 
         <table class="artist-list-table" style="margin-top: 25px;">
-            <thead>
-                <tr>
-                    <th>ของรางวัลบนวงล้อ</th>
-                    <th>ล็อกเรทดร็อป</th>
-                    <th>จัดการ</th>
-                </tr>
-            </thead>
-            <tbody id="wheel-list-tbody">
-                <tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังดึงถังรายการของรางวัล...</td></tr>
-            </tbody>
+            <thead><tr><th>ของรางวัลบนวงล้อ</th><th>ล็อกเรทดร็อป</th><th>จัดการ</th></tr></thead>
+            <tbody id="wheel-list-tbody"><tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังดึงถังรายการของรางวัล...</td></tr></tbody>
         </table>
 
+        <!-- 🔍 🎰 แผงประวัติรางวัลและการเคลมรหัส USED ออกจากคลาวด์สองฝั่ง -->
         <div style="margin-top: 40px; background: #0f0f0f; padding: 20px; border-radius: 6px; border: 1px solid #ff007f; box-shadow: 0 0 15px rgba(255, 0, 127, 0.05);">
             <h3 style="font-family: 'Space Grotesk', sans-serif; color: #fff; font-size: 1.1rem; margin-bottom: 5px;">
                 <i class="fa-solid fa-magnifying-glass-chart" style="color: #39ff14;"></i> USER REWARDS SEARCH DESK
