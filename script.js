@@ -802,21 +802,17 @@ const loginGoogleBtn = document.getElementById('loginGoogleBtn');
 const loginFacebookBtn = document.getElementById('loginFacebookBtn');
 const userProfileDisplay = document.getElementById('userProfileDisplay');
 const authUserName = document.getElementById('authUserName');
-
-// 🎯 ดักดึงปุ่มชุดใหม่ประจำบอร์ดควบคุม
 const userDropdownMenu = document.getElementById('userDropdownMenu');
 const signOutBtn = document.getElementById('signOutBtn');
 
-// คำสั่งจัดการปุ่มล็อกอินหลัก (ปรับฟังก์ชันให้ฉลาดขึ้น: ถ้ายังไม่ล็อกอินให้เปิดป๊อปอัป ค้าล็อกอินแล้วให้สับสวิตช์ Dropdown)
+// 🎯 1. กลไกคำสั่ง คลิกเพื่อเปิด-ปิด หน้าต่าง Pop-up สับตัวเลือกค่ายล็อกอิน
 if (openAuthModalBtn && authProviderModal && closeAuthModalBtn) {
     openAuthModalBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const currentUser = firebase.auth().currentUser;
         if (currentUser) {
-            // ถ้าล็อกอินอยู่แล้ว สั่งให้กล่องปุ่ม SIGN OUT เด้งสไลด์ลงมา
             if (userDropdownMenu) userDropdownMenu.classList.toggle('active');
         } else {
-            // ถ้ายังไม่ได้ล็อกอิน ให้เปิดไฟป๊อปอัปเลือกค่ายเหมือนเดิม
             authProviderModal.classList.add('active'); 
         }
     });
@@ -825,14 +821,13 @@ if (openAuthModalBtn && authProviderModal && closeAuthModalBtn) {
     });
 }
 
-// คลิกพื้นที่ว่างอื่น ๆ บนหน้าจอเพื่อสั่งหดกล่องเมนู Dropdown ลงไปซ่อนอัตโนมัติ
 document.addEventListener('click', () => {
     if (userDropdownMenu && userDropdownMenu.classList.contains('active')) {
         userDropdownMenu.classList.remove('active');
     }
 });
 
-// 🎯 เมื่อผู้ใช้งานทำการยืนยันตัวตนสำเร็จ
+// 🎯 2. เมื่อกดยืนยันตัวตนสำเร็จผ่านตัวใดตัวหนึ่งสำเร็จให้แปรสภาพรูปและปุ่มมุมขวาบนเว็บ
 function handleAuthSuccess(userObj) {
     if (!userObj) return;
     
@@ -854,11 +849,11 @@ function handleAuthSuccess(userObj) {
         }
         openAuthModalBtn.innerHTML = displayContent;
         openAuthModalBtn.style.borderColor = "#00ffff";
-        openAuthModalBtn.style.padding = "4px 12px 4px 6px";
+        openAuthModalBtn.style.padding = "4px 12px 4px 6px"; 
     }
 
     if (graffitiName && (graffitiName.value === "" || graffitiName.value === "@")) {
-        graffitiName.value = displayName.replace(/\s+/g, '');
+        graffitiName.value = displayName.replace(/\s+/g, ''); 
     }
 
     setTimeout(() => {
@@ -866,13 +861,12 @@ function handleAuthSuccess(userObj) {
     }, 1200);
 }
 
-// 🚪 💥 ฟังก์ชันสั่งงานออกจากระบบ (SIGN OUT) คืนสภาพปุ่มเดิมล้างบอร์ดสะอาดหมดจด
+// 🚪 3. ฟังก์ชันสั่งงานออกจากระบบ (SIGN OUT) คืนสภาพปุ่มเดิมล้างบอร์ดสะอาดหมดจด
 if (signOutBtn) {
     signOutBtn.addEventListener('click', async () => {
         try {
             await firebase.auth().signOut();
             
-            // สั่งปรับสภาพดีไซน์ปุ่มขวาบนให้ถอยกลับไปขึ้นคำว่า LOGIN เหมือนเดิมตอนเข้าเว็บ
             if (openAuthModalBtn) {
                 openAuthModalBtn.innerHTML = `
                     <div id="authBtnContent" style="display: flex; align-items: center; gap: 8px;">
@@ -884,7 +878,6 @@ if (signOutBtn) {
                 openAuthModalBtn.style.padding = "8px 16px";
             }
             
-            // ล้างฟีดข้อมูลสเปรย์ชื่อเล่นและซ่อนกล่องประวัติหลังบ้าน
             if (graffitiName) graffitiName.value = "";
             if (userProfileDisplay) userProfileDisplay.style.display = "none";
             if (userDropdownMenu) userDropdownMenu.classList.remove('active');
@@ -896,47 +889,48 @@ if (signOutBtn) {
     });
 }
 
-// ระบบดักสตรีมเชื่อมต่อ Google SDK
+// 💥 4. ระบบดักฟังปุ่มคลิกล็อกอินผ่านค่าย GOOGLE (จัดระเบียบตัดระบบขัดขากันเองออก)
 if (loginGoogleBtn) {
-    loginGoogleBtn.addEventListener('click', async () => {
-        try {
-            await firebase.auth().signOut();
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
-            const result = await firebase.auth().signInWithPopup(provider);
-            handleAuthSuccess(result.user);
-        } catch (error) {
-            if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                firebase.auth().signInWithRedirect(provider);
-            } else {
-                showErrorAlert("GOOGLE AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
-            }
-        }
+    loginGoogleBtn.addEventListener('click', () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        
+        firebase.auth().signInWithPopup(provider)
+            .then((result) => {
+                handleAuthSuccess(result.user); 
+            })
+            .catch((error) => {
+                if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    firebase.auth().signInWithRedirect(provider);
+                } else {
+                    showErrorAlert("GOOGLE AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
+                }
+            });
     });
 }
 
-// ระบบดักสตรีมเชื่อมต่อ Facebook SDK
+// 💥 5. ระบบดักฟังปุ่มคลิกล็อกอินผ่านค่าย FACEBOOK (จัดระเบียบตัดระบบขัดขากันเองออก)
 if (loginFacebookBtn) {
-    loginFacebookBtn.addEventListener('click', async () => {
-        try {
-            await firebase.auth().signOut();
-            const provider = new firebase.auth.FacebookAuthProvider();
-            provider.setCustomParameters({ auth_type: 'rerequest' });
-            const result = await firebase.auth().signInWithPopup(provider);
-            handleAuthSuccess(result.user);
-        } catch (error) {
-            if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-                const provider = new firebase.auth.FacebookAuthProvider();
-                firebase.auth().signInWithRedirect(provider);
-            } else {
-                showErrorAlert("FACEBOOK AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
-            }
-        }
+    loginFacebookBtn.addEventListener('click', () => {
+        const provider = new firebase.auth.FacebookAuthProvider();
+        
+        firebase.auth().signInWithPopup(provider)
+            .then((result) => {
+                handleAuthSuccess(result.user); 
+            })
+            .catch((error) => {
+                if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+                    const provider = new firebase.auth.FacebookAuthProvider();
+                    firebase.auth().signInWithRedirect(provider);
+                } else {
+                    showErrorAlert("FACEBOOK AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
+                }
+            });
     });
 }
 
-// ระบบจดจำสถานะผู้ใช้งานหลังรีเฟรชหน้าจอออโต้
+// 🎯 6. ระบบจดจำสถานะผู้ใช้งานหลังรีเฟรชหน้าจอ (Auto-Login)
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         handleAuthSuccess(user);
