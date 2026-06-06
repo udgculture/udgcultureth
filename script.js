@@ -796,6 +796,30 @@ database.ref('udg_upcoming_gigs').on('value', (snapshot) => {
 // ─── 🔐 MEMBER LOGIN & 🎡 CYBER LUCKY WHEEL ENGINE (FULL SPEC) ───
 // =================================================================
 
+// =================================================================
+// ─── 🔐 MEMBER LOGIN & 🎡 CYBER LUCKY WHEEL ENGINE (ซ่อมแซมจุด Spin ล็อก) ───
+// =================================================================
+
+// 🎯 เช็กให้ชัวร์ว่าย้ายตัวดักจับ ID มาประกาศผูกมัดร่วมกันตรงนี้ทั้งหมดแบบไม่ซ้ำซ้อนครับน้าบักหำทิว
+const authProviderModal = document.getElementById('authProviderModal');
+const openAuthModalBtn = document.getElementById('openAuthModalBtn');
+const closeAuthModalBtn = document.getElementById('closeAuthModalBtn');
+const loginGoogleBtn = document.getElementById('loginGoogleBtn');
+const loginFacebookBtn = document.getElementById('loginFacebookBtn');
+const userProfileDisplay = document.getElementById('userProfileDisplay');
+const authUserName = document.getElementById('authUserName');
+
+const userDropdownMenu = document.getElementById('userDropdownMenu');
+const signOutBtn = document.getElementById('signOutBtn');
+
+const luckyWheelCanvas = document.getElementById('luckyWheelCanvas');
+const spinWheelBtn = document.getElementById('spinWheelBtn');
+const myCouponsList = document.getElementById('myCouponsList');
+const userVisibleRewardsPool = document.getElementById('userVisibleRewardsPool');
+
+let wheelItemsList = []; 
+let isWheelSpinning = false;
+
 // 🎨 1. ฟังก์ชันสั่งเขียนลายเส้นและระบายเฉดสีเรนเดอร์วงล้อลง Canvas แบบ Dynamic ตามระบบคลาวด์
 function drawLuckyWheelGraph(itemsArray) {
     if (!luckyWheelCanvas) return;
@@ -1024,10 +1048,9 @@ if (spinWheelBtn) {
         setTimeout(async () => {
             database.ref(`users_wheel_cooldown/${uid}/${todayKey}`).set({ spun: true, timestamp: Date.now() });
 
-            // เจนรหัสตั๋วลับไซเบอร์สุ่ม 5 หลักกันคนก็อปปี้แอบอ้างสิทธิ์ (เช่น UDG-7F3A9)
+            // เจนรหัสตั๋วลับไซเบอร์สุ่ม 5 หลักกันคนก็อปปี้แอบอ้างสิทธิ์
             const randomSecretCode = "UDG-" + Math.random().toString(36).substring(2, 7).toUpperCase();
 
-            // ส่งข้อมูลคูปองพ่วงรหัสตั๋วและชื่อจริงโปรไฟล์บันทึกขึ้นระบบคลาวด์ส่วนกลาง
             database.ref(`users_rewards_vault/${uid}`).push({
                 rewardName: targetRewardItem.name,
                 userName: displayName, 
