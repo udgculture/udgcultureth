@@ -1016,7 +1016,7 @@ if (signOutBtn) {
     });
 }
 
-// 🎰 9. มอเตอร์วงล้อนำโชคสุ่มของรางวัลพ่วง "สร้างรหัสตั๋วลับ CODE" 5 หลักส่งประวัติผู้ใช้ขึ้นคลาวด์แอดมิน
+// 🎰 9. มอเตอร์วงล้อนำโชค (เวอร์ชันสับเกียร์เร่ง+หน่วงความเร็ว ลุ้นตัวโก่ง)
 if (spinWheelBtn) {
     spinWheelBtn.addEventListener('click', async () => {
         const currentUser = firebase.auth().currentUser;
@@ -1038,24 +1038,40 @@ if (spinWheelBtn) {
             return;
         }
 
+        // 🚨 สตาร์ทเครื่องยนต์ความมันส์
         isWheelSpinning = true;
-        spinWheelBtn.style.opacity = '0.5'; spinWheelBtn.innerText = "SPINNING...";
+        spinWheelBtn.style.opacity = '0.5'; 
+        spinWheelBtn.innerText = "LUCKY SPINNING...";
 
+        // 1. คำนวณหาช่องรางวัลที่ถูกสุ่มล็อกเรทมาจากระบบหลังบ้าน
         const targetIndex = calculateWeightedRewardIndex();
         const targetRewardItem = wheelItemsList[targetIndex];
 
-        const arcAngle = 360 / wheelItemsList.length;
-        const stopAngleDeg = 270 - (targetIndex * arcAngle) - (arcAngle / 2); 
-        const totalRotationDeg = 1800 + stopAngleDeg; 
+        // 2. คำนวณพิกัดมุมองศาแบบแม่นยำ
+        const itemCount = wheelItemsList.length;
+        const arcAngle = 360 / itemCount;
+        
+        // คำนวณให้หมุดตกลงไปตรงกลางช่องรางวัลพอดีเป๊ะ
+        const targetAngleDeg = (targetIndex * arcAngle) + (arcAngle / 2);
+        
+        // 🎯 สูตรลับสะบัดล้อ: สั่งให้ล้อหมุนฟรีหนีแรงโน้มถ่วงไปก่อน 8 รอบเต็มๆ (8 * 360 = 2880 องศา) 
+        // แล้วค่อยๆ สโลว์ตัวถอยหลังกลับมาหยุดนิ่งสนิทที่ช่องพิกัดที่แท้จริง
+        const stopAngleDeg = 270 - targetAngleDeg; 
+        const totalRotationDeg = 2880 + stopAngleDeg; 
 
+        // ยิงเอฟเฟกต์ CSS สั่งหมุนแคนวาสแบบทวีคูณรอบ
+        luckyWheelCanvas.style.transition = 'transform 5s cubic-bezier(0.15, 0.85, 0.1, 1)';
         luckyWheelCanvas.style.transform = `rotate(${totalRotationDeg}deg)`;
 
+        // 3. ตั้งเวลาหน่วง 5 วินาทีให้สัมพันธ์กับอนิเมชันตอนล้อหยุดหมุน
         setTimeout(async () => {
+            // บันทึกสถานะลงคลาวด์กันผู้ใช้กดวนลูปซ้ำ
             database.ref(`users_wheel_cooldown/${uid}/${todayKey}`).set({ spun: true, timestamp: Date.now() });
 
-            // เจนรหัสตั๋วลับไซเบอร์สุ่ม 5 หลักกันคนก็อปปี้แอบอ้างสิทธิ์
+            // เจนรหัสตั๋วลับไซเบอร์สุ่ม 5 หลัก
             const randomSecretCode = "UDG-" + Math.random().toString(36).substring(2, 7).toUpperCase();
 
+            // ส่งข้อมูลประวัติพุ่งขึ้นคลาวด์คู่สายตรง
             database.ref(`users_rewards_vault/${uid}`).push({
                 rewardName: targetRewardItem.name,
                 userName: displayName, 
@@ -1063,15 +1079,18 @@ if (spinWheelBtn) {
                 wonTimestamp: Date.now()
             });
 
+            // แจ้งเตือนความปังเด้งบอกของรางวัลพร้อมรหัสตั๋ว
             await showErrorAlert("🏆 CONGRATULATIONS!", `ยินดีด้วยคร้าบน้า! น้านำโชคสุ่มได้รับรางวัล:<br><strong style="color:#00ffff; font-size:1.3rem;">[ ${targetRewardItem.name} ]</strong><br><br>รหัสยืนยันตัวตนตั๋วของคุณคือ: <strong style="color:#fff000; font-family:monospace; font-size:1.1rem;">${randomSecretCode}</strong><br>ระบบบันทึกเข้าตู้เซฟฝั่งขวาจอเรียบร้อยแล้วครับ BRO! 🔥`);
 
+            // 🎯 คืนค่าองศาฐานกลับมาไว้จุดสมดุลเดิมแบบเนียนๆ ไม่ให้ผู้ใช้จับโป๊ะได้ตอนกดสุ่มรอบถัดไป
             isWheelSpinning = false;
             luckyWheelCanvas.style.transition = 'none';
             luckyWheelCanvas.style.transform = `rotate(${stopAngleDeg % 360}deg)`;
-            setTimeout(() => { luckyWheelCanvas.style.transition = 'transform 4s cubic-bezier(0.1, 0.8, 0.1, 1)'; }, 50);
-            spinWheelBtn.style.opacity = '1'; spinWheelBtn.innerText = "SPIN NOW";
+            
+            spinWheelBtn.style.opacity = '1'; 
+            spinWheelBtn.innerText = "SPIN NOW";
 
-        }, 4000);
+        }, 5000); // รันคำสั่งแจ้งเตือนที่วินาทีที่ 5 พอดีเป๊ะตอนล้อหยุดสนิท
     });
 }
 
