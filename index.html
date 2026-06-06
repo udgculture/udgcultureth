@@ -92,20 +92,25 @@
             </div>
         </div>
     </header>
+<div class="ad-container">
+    <a href="#" id="live-ad-banner" class="ad-banner ad-fade-engine" target="_blank">
+        <span class="ad-label">
+            <i class="fa-solid fa-rectangle-ad"></i> SPONSOR 
+            <span id="ad-timer-countdown" style="color: var(--accent-color); font-family: monospace; margin-left: 5px;">8s</span>
+        </span>
+        
+        <img id="live-ad-img" src="" alt="Sponsor Banner" style="display: none;">
+        
+        <div id="live-ad-content" class="ad-content">
+            <h3>ADVERTISE WITH US</h3>
+            <p>พื้นที่โฆษณาว่าง ติดต่อเพื่อโปรโมทแบรนด์หรืออีเวนต์ของคุณที่นี่</p>
+        </div>
 
-<section class="ad-container">
-        <!-- 🎯 โครงสร้างใหม่: ดึงภาพจริงมาปั่นสเกลออโต้แทนภาพพื้นหลังเพื่อป้องกันขอบขาดบนมือถือ -->
-        <a href="#" target="_blank" class="ad-banner" id="live-ad-banner">
-            <span class="ad-label">SPONSORED</span>
-            <div class="ad-content" id="live-ad-content">
-                <!-- ข้อความมาตรฐานเดิมจะขึ้นโชว์เฉพาะตอนไม่มีป้ายสปอนเซอร์มาลงโฆษณา -->
-                <h3>ADVERTISE WITH US</h3>
-                <p>พื้นที่โฆษณาว่าง ติดต่อเพื่อโปรโมทแบรนด์หรืออีเวนต์ของคุณที่นี่</p>
-            </div>
-            <!-- 📸 จุดตาย: แท็กรูปภาพที่จะคอยรับลิงก์ภาพจากระบบคลาวด์มาพ่นโชว์เต็มใบ -->
-            <img src="" alt="UDG ADVERTISEMENT" id="live-ad-img" style="display: none;">
-        </a>
-    </section>
+        <div class="ad-progress-bar-wrap">
+            <div id="ad-progress-laser"></div>
+        </div>
+    </a>
+</div>
 
     <main>
         <!-- 📰 โซนไฮไลท์ข่าวเด่นตัวบนสุด (ดึงฟีดคลาวด์ออโต้) -->

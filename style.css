@@ -1696,6 +1696,7 @@ footer {
     #myCouponsList { min-height: 250px; }
 }
 
+/* 🎡 ปรับโครงสร้างแรงเฉื่อยเฉลี่ยแรงเหวี่ยงให้สมูทขั้นสุดใน style.css */
 #luckyWheelCanvas {
     width: 100% !important;
     height: 100% !important;
@@ -1704,8 +1705,8 @@ footer {
     max-height: 320px;
     border-radius: 50%;
     box-shadow: 0 0 25px rgba(0, 255, 255, 0.15);
-    /* 🎯 ตัวจุดระเบิดความสมจริง: 5 วินาทีแห่งความเร้าใจ ผ่อนแรงเหวี่ยงนุ่มลึก */
-    transition: transform 5s cubic-bezier(0.15, 0.85, 0.1, 1);
+    /* 🎯 สูตรลับสตรีท: ปรับเวลาเหวี่ยงยาวขึ้นเป็น 6 วินาที พ่วง Bezier ปล่อยฟรีปลายสายสไลด์เข้านิ่งๆ */
+    transition: transform 6s cubic-bezier(0.1, 0.8, 0.1, 1);
 }
 
 /* หมุดลูกศรชี้รางวัลด้านบนสุด */
@@ -1785,4 +1786,38 @@ footer {
     .wheel-rewards-grid-box {
         grid-template-columns: repeat(2, 1fr) !important; /* บังคับเรียงไอเท็มเป็น 2 คอลัมน์คู่บนมือถือ */
     }
+}
+
+
+/* =================================================================
+   💸 CYBER AD ROTATOR - NO BLINKING STYLE
+================================================================= */
+
+.ad-banner {
+    position: relative;
+    overflow: hidden;
+    /* 🎯 นิ่งสนิท: ลบอนิเมชัน opacity ทิ้งไป เหลือไว้แค่เอฟเฟกต์ตอนเมาส์ชี้เพื่อความสตรีท */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* ❌ ลบคลาส ad-fade-engine และ ad-invisible ตัวเก่าออกไปได้เลยครับน้า เพื่อตัดวงจรการกระพริบ */
+
+/* รางยึดแถบเลเซอร์นับถอยหลังขอบล่างสุด */
+.ad-progress-bar-wrap {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.03);
+    z-index: 20;
+}
+
+/* ⚡ เส้นเลเซอร์นีออนวิ่งถอยหลัง (ขยับนุ่มนวลแบบนิ่งๆ) */
+#ad-progress-laser {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #00ffff, #ff007f);
+    box-shadow: 0 0 8px #00ffff;
+    transition: width 0.1s linear; 
 }

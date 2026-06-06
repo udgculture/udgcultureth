@@ -623,15 +623,22 @@ async function deleteNewsItemByAdmin(newsId) {
 }
 
 // =================================================================
-// ─── 💸 🔄 AUTOMATED AD ROTATOR SYSTEM ───
+// ─── 💸 🔄 AUTOMATED AD ROTATOR SYSTEM (เวอร์ชันอนิเมชัน Fade + เลเซอร์นับถอยหลัง 8 วิ) ───
 // =================================================================
 const liveAdBanner = document.getElementById('live-ad-banner');
 const liveAdContent = document.getElementById('live-ad-content');
 const liveAdImg = document.getElementById('live-ad-img'); 
+const adTimerCountdown = document.getElementById('ad-timer-countdown');
+const adProgressLaser = document.getElementById('ad-progress-laser');
 
 let currentAdIndex = 0;
 let cloudAdsList = [];
 let adRotationInterval = null;
+let adTickInterval = null; // ตัวนับเวลาวินาทีย่อย
+
+// ตัวแปรสำหรับคุมเวลา 8 วินาที (8000 มิลลิวินาที)
+const AD_DISPLAY_TIME_MS = 8000; 
+let adTimeRemaining = AD_DISPLAY_TIME_MS;
 
 const fallbackDefaultAd = {
     url: "#",
@@ -640,17 +647,20 @@ const fallbackDefaultAd = {
     image: ""
 };
 
+// ฟังก์ชันสั่งสับเปลี่ยนโฆษณาพ่วงอนิเมชัน Fade In-Out นุ่มนวล
+// 🎯 ปรับปรุงฟังก์ชัน renderActiveAd ใน script.js ให้สับภาพทันที ไม่กระพริบ
 function renderActiveAd() {
     if (!liveAdBanner || !liveAdContent || !liveAdImg) return;
 
+    // 🚀 สับเปลี่ยนข้อมูลเจ้าใหม่ขึ้นแทนที่ทันทีแบบ No-Delay ไม่ต้องสั่ง Fade Out ให้กระพริบตา
     if (cloudAdsList.length === 0) {
         liveAdBanner.href = fallbackDefaultAd.url;
         liveAdImg.style.display = 'none'; 
         liveAdContent.style.display = 'block'; 
-        liveAdContent.innerHTML = `
-            <h3>${fallbackDefaultAd.title}</h3>
-            <p>${fallbackDefaultAd.description}</p>
-        `;
+        liveAdContent.innerHTML = `<h3>${fallbackDefaultAd.title}</h3><p>${fallbackDefaultAd.description}</p>`;
+        
+        if (adTimerCountdown) adTimerCountdown.innerText = "8s";
+        if (adProgressLaser) adProgressLaser.style.width = "100%";
         return;
     }
 
@@ -664,15 +674,54 @@ function renderActiveAd() {
     } else {
         liveAdImg.style.display = 'none';
         liveAdContent.style.display = 'block';
-        liveAdContent.innerHTML = `
-            <h3>${activeAd.title}</h3>
-            <p>${activeAd.description}</p>
-        `;
+        liveAdContent.innerHTML = `<h3>${activeAd.title}</h3><p>${activeAd.description}</p>`;
     }
 
+    // เตรียมคิวสำหรับสปอนเซอร์เจ้าถัดไป
     currentAdIndex = (currentAdIndex + 1) % cloudAdsList.length;
+
+    // รีเซ็ตแถบเลเซอร์ 8 วินาทีกลับมาเต็ม 100% ทันที
+    adTimeRemaining = AD_DISPLAY_TIME_MS;
+    if (adTimerCountdown) adTimerCountdown.innerText = "8s";
+    if (adProgressLaser) adProgressLaser.style.width = "100%";
 }
 
+
+// เครื่องยนต์ขับเคลื่อนฟิสิกส์เส้นเลเซอร์และตัวเลขดิจิตอลขยับทุก 100 มิลลิวินาที (เนียนตาขั้นสุด)
+function startAdProgressBarEngine() {
+    if (adTickInterval) clearInterval(adTickInterval);
+    
+    adTickInterval = setInterval(() => {
+        if (cloudAdsList.length <= 1) {
+            // ถ้ามีโฆษณาเจ้าเดียว หรือไม่มีเลย ไม่ต้องวิ่งเส้นเลเซอร์ให้เปลืองแรมเครื่องครับน้า
+            if (adProgressLaser) adProgressLaser.style.width = "100%";
+            if (adTimerCountdown) adTimerCountdown.innerText = "8s";
+            return;
+        }
+
+        // หักลบเวลาออกทีละ 100 มิลลิวินาที
+        adTimeRemaining -= 100;
+
+        // 1. คำนวณตัวเลขวินาทีดิจิตอลโชว์หน้าปัดป้าย (ปัดเศษขึ้นพ่นเป็นเลขกลมๆ 8s, 7s, 6s...)
+        if (adTimerCountdown) {
+            const secondsText = Math.ceil(adTimeRemaining / 1000);
+            adTimerCountdown.innerText = `${secondsText > 0 ? secondsText : 0}s`;
+        }
+
+        // 2. คำนวณสัดส่วน % ความกว้างสั่งเส้นเลเซอร์หดถอยหลังเข้าเส้นชัย
+        if (adProgressLaser) {
+            const percentageWidth = (adTimeRemaining / AD_DISPLAY_TIME_MS) * 100;
+            adProgressLaser.style.width = `${percentageWidth > 0 ? percentageWidth : 0}%`;
+        }
+
+        // 3. ถ้าเวลาของเจ้านี้หมดเกลี้ยง (ชน 0) สั่งล้างเกลียวรันภาพถัดไปทันที
+        if (adTimeRemaining <= 0) {
+            renderActiveAd();
+        }
+    }, 100);
+}
+
+// สัญญาณรับฟีดส์รายการสปอนเซอร์จาก Firebase โต๊ะกลางออนไลน์
 database.ref('udg_live_advertisements').on('value', (snapshot) => {
     const data = snapshot.val();
     cloudAdsList = [];
@@ -684,15 +733,12 @@ database.ref('udg_live_advertisements').on('value', (snapshot) => {
         });
     }
 
+    // ประเดิมรันโฆษณาตัวแรกขึ้นบอร์ด
     renderActiveAd();
 
-    if (adRotationInterval) clearInterval(adRotationInterval);
-
-    if (cloudAdsList.length > 1) {
-        adRotationInterval = setInterval(() => {
-            renderActiveAd();
-        }, 10000);
-    }
+    // เคลียร์สายเก่า สตาร์ทเครื่องยนต์เลเซอร์นับถอยหลังทำงานทันทีคาสายออนไลน์
+    if (adTickInterval) clearInterval(adTickInterval);
+    startAdProgressBarEngine();
 });
 
 // =================================================================
@@ -1016,7 +1062,7 @@ if (signOutBtn) {
     });
 }
 
-// 🎰 9. มอเตอร์วงล้อนำโชค (เวอร์ชันสับเกียร์เร่ง+หน่วงความเร็ว ลุ้นตัวโก่ง)
+// 🎰 9. มอเตอร์วงล้อนำโชค (เวอร์ชัน Fluid-Spin: หน่วงนุ่มนวล คลานเข้าเส้นชัยสัมพันธ์วิประกาศผล)
 if (spinWheelBtn) {
     spinWheelBtn.addEventListener('click', async () => {
         const currentUser = firebase.auth().currentUser;
@@ -1038,40 +1084,40 @@ if (spinWheelBtn) {
             return;
         }
 
-        // 🚨 สตาร์ทเครื่องยนต์ความมันส์
+        // 🚨 สตาร์ทเครื่องยนต์ระบบความมันส์
         isWheelSpinning = true;
         spinWheelBtn.style.opacity = '0.5'; 
         spinWheelBtn.innerText = "LUCKY SPINNING...";
 
-        // 1. คำนวณหาช่องรางวัลที่ถูกสุ่มล็อกเรทมาจากระบบหลังบ้าน
+        // 1. คำนวณหาช่องรางวัลที่ถูกล็อกเรทมาจากระบบแอดมินหลังบ้าน
         const targetIndex = calculateWeightedRewardIndex();
         const targetRewardItem = wheelItemsList[targetIndex];
 
-        // 2. คำนวณพิกัดมุมองศาแบบแม่นยำ
+        // 2. คำนวณพิกัดมุมองศาหลบฉากจับโป๊ะ
         const itemCount = wheelItemsList.length;
         const arcAngle = 360 / itemCount;
         
-        // คำนวณให้หมุดตกลงไปตรงกลางช่องรางวัลพอดีเป๊ะ
+        // สั่งคำนวณให้เข็มหมุดตกลงไปกึ่งกลางช่องของรางวัลนั้นๆ พอดีเป๊ะ
         const targetAngleDeg = (targetIndex * arcAngle) + (arcAngle / 2);
         
-        // 🎯 สูตรลับสะบัดล้อ: สั่งให้ล้อหมุนฟรีหนีแรงโน้มถ่วงไปก่อน 8 รอบเต็มๆ (8 * 360 = 2880 องศา) 
-        // แล้วค่อยๆ สโลว์ตัวถอยหลังกลับมาหยุดนิ่งสนิทที่ช่องพิกัดที่แท้จริง
+        // 🎯 สุ่มรอบหมุนฟรีแถมให้ระหว่าง 6-10 รอบ (Math.random) เพื่อไม่ให้ล้อหมุนเป็นระยะทางเท่ากันทุกครั้ง คนหมุนจะได้เดาทางไม่ได้
+        const randomExtraRounds = Math.floor(Math.random() * 5) + 6; 
         const stopAngleDeg = 270 - targetAngleDeg; 
-        const totalRotationDeg = 2880 + stopAngleDeg; 
+        const totalRotationDeg = (randomExtraRounds * 360) + stopAngleDeg; 
 
-        // ยิงเอฟเฟกต์ CSS สั่งหมุนแคนวาสแบบทวีคูณรอบ
-        luckyWheelCanvas.style.transition = 'transform 5s cubic-bezier(0.15, 0.85, 0.1, 1)';
+        // ยิงเอฟเฟกต์ CSS สั่งหมุนสะบัดล้อจี๋รัวๆ ยาวๆ 6 วินาที
+        luckyWheelCanvas.style.transition = 'transform 6s cubic-bezier(0.1, 0.8, 0.1, 1)';
         luckyWheelCanvas.style.transform = `rotate(${totalRotationDeg}deg)`;
 
-        // 3. ตั้งเวลาหน่วง 5 วินาทีให้สัมพันธ์กับอนิเมชันตอนล้อหยุดหมุน
+        // 3. 🎯 ดักจับคู่สายสัมพันธ์: หน่วงเวลาฟังก์ชันประกาศรางวัลไปที่ 6.2 วินาที (ให้ล้อหยุดสไลด์นิ่งสนิทคาช่องก่อน 0.2 วิ ค่อยเด้งป๊อปอัป)
         setTimeout(async () => {
-            // บันทึกสถานะลงคลาวด์กันผู้ใช้กดวนลูปซ้ำ
+            // บันทึกสถานะล็อกคูลดาวน์กันวนลูปสุ่มซ้ำ
             database.ref(`users_wheel_cooldown/${uid}/${todayKey}`).set({ spun: true, timestamp: Date.now() });
 
-            // เจนรหัสตั๋วลับไซเบอร์สุ่ม 5 หลัก
+            // เจนรหัสตั๋วลับไซเบอร์สุ่ม 5 หลักกันคนก็อปปี้
             const randomSecretCode = "UDG-" + Math.random().toString(36).substring(2, 7).toUpperCase();
 
-            // ส่งข้อมูลประวัติพุ่งขึ้นคลาวด์คู่สายตรง
+            // ส่งข้อมูลคูปองพ่วงรหัสตั๋วและชื่อจริงโปรไฟล์บันทึกขึ้นระบบคลาวด์ส่วนกลาง
             database.ref(`users_rewards_vault/${uid}`).push({
                 rewardName: targetRewardItem.name,
                 userName: displayName, 
@@ -1079,10 +1125,10 @@ if (spinWheelBtn) {
                 wonTimestamp: Date.now()
             });
 
-            // แจ้งเตือนความปังเด้งบอกของรางวัลพร้อมรหัสตั๋ว
+            // หน้าต่างแจ้งเตือนความปังเด้งประกาศผลแบบแมตช์จังหวะเป๊ะๆ
             await showErrorAlert("🏆 CONGRATULATIONS!", `ยินดีด้วยคร้าบน้า! น้านำโชคสุ่มได้รับรางวัล:<br><strong style="color:#00ffff; font-size:1.3rem;">[ ${targetRewardItem.name} ]</strong><br><br>รหัสยืนยันตัวตนตั๋วของคุณคือ: <strong style="color:#fff000; font-family:monospace; font-size:1.1rem;">${randomSecretCode}</strong><br>ระบบบันทึกเข้าตู้เซฟฝั่งขวาจอเรียบร้อยแล้วครับ BRO! 🔥`);
 
-            // 🎯 คืนค่าองศาฐานกลับมาไว้จุดสมดุลเดิมแบบเนียนๆ ไม่ให้ผู้ใช้จับโป๊ะได้ตอนกดสุ่มรอบถัดไป
+            // คืนค่าองศาฐานกลับมาแบบเนียนสนิท ไร้รอยกระตุกดีดกลับ
             isWheelSpinning = false;
             luckyWheelCanvas.style.transition = 'none';
             luckyWheelCanvas.style.transform = `rotate(${stopAngleDeg % 360}deg)`;
@@ -1090,9 +1136,10 @@ if (spinWheelBtn) {
             spinWheelBtn.style.opacity = '1'; 
             spinWheelBtn.innerText = "SPIN NOW";
 
-        }, 5000); // รันคำสั่งแจ้งเตือนที่วินาทีที่ 5 พอดีเป๊ะตอนล้อหยุดสนิท
+        }, 6200); // ดีเลย์บวกเผื่อให้ล้อสไลด์เข้านิ่งกริบพอดี บาลานซ์สุดเฉียบ
     });
 }
+
 
 // 💥 10. ระบบยิงป๊อปอัปดักรับผลล็อกอิน Google Sign-in
 if (loginGoogleBtn) {
