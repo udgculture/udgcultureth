@@ -966,12 +966,17 @@ function handleAuthSuccess(userObj) {
     }
     
     if (openAuthModalBtn) {
-        let displayContent = `<i class="fa-solid fa-user-check" style="color:#39ff14;"></i> <span class="auth-btn-text">${displayName.toUpperCase()}</span>`;
+    let displayContent = "";
         if (photoURL && photoURL !== "") {
             displayContent = `
                 <img src="${photoURL}" class="user-nav-avatar" alt="${displayName}">
                 <span class="auth-btn-text" style="color:#00ffff; font-size:0.8rem; font-weight:800; letter-spacing:0.5px;">${displayName.toUpperCase()}</span>
                 <i class="fa-solid fa-caret-down" style="font-size:0.7rem; color:#555; margin-left:2px;"></i>
+            `;
+        } else {
+            displayContent = `
+                <i class="fa-solid fa-user-check" style="color:#39ff14;"></i> 
+                <span class="auth-btn-text">${displayName.toUpperCase()}</span>
             `;
         }
         openAuthModalBtn.innerHTML = displayContent;
