@@ -866,7 +866,7 @@ const userVisibleRewardsPool = document.getElementById('userVisibleRewardsPool')
 let wheelItemsList = []; 
 let isWheelSpinning = false;
 
-// 🎨 1. ฟังก์ชันสั่งเขียนลายเส้นและระบายเฉดสีเรนเดอร์วงล้อลง Canvas แบบ Dynamic (ฉบับอัปเกรดตัวหนังสือไม่กลับหัวบนมือถือ)
+// 🎨 1. ฟังก์ชันวาดวงล้อลง Canvas (ฉบับแก้บั๊กตัวหนังสือกระจกเงาฝั่งซ้าย + จัดระเบียบบาลานซ์ช่องอ่านง่าย)
 function drawLuckyWheelGraph(itemsArray) {
     if (!luckyWheelCanvas) return;
     const ctx = luckyWheelCanvas.getContext('2d');
@@ -893,44 +893,46 @@ function drawLuckyWheelGraph(itemsArray) {
         ctx.arc(center, center, center - 5, angle, angle + arcAngle); ctx.lineTo(center, center); ctx.fill();
         ctx.strokeStyle = "rgba(0, 255, 255, 0.15)"; ctx.lineWidth = 1; ctx.stroke();
 
-        // 2. คำนวณจุดกึ่งกลางของช่องเพื่อพ่นข้อความ
+        // 2. จัดวางตำแหน่งและพ่นข้อความรางวัล
         ctx.save(); 
         ctx.translate(center, center); 
         
-        // หันหน้ากระดาษไปที่กึ่งกลางช่องรางวัลนั้นๆ
+        // หมุนหน้ากระดาษไปที่กึ่งกลางของช่องรางวัลนั้นๆ
         const textAngle = angle + arcAngle / 2;
         ctx.rotate(textAngle);
         
-        // ตั้งค่ารูปแบบ Font สตรีทไซเบอร์ค่าย UDG
-        ctx.font = "bold 12px 'Kanit', sans-serif"; 
+        ctx.font = "bold 11px 'Kanit', sans-serif"; 
         
-        // 🎯 [จุดแก้ไขสำคัญจาก image.png] ตรวจสอบมุมองศาเพื่อพลิกตัวอักษรกลับหัวให้อ่านง่าย
-        // ถ้ามุมอยู่ในโซนด้านล่าง (เกิน 90 องศา ถึง 270 องศา) ให้พลิกข้อความกลับมา 180 องศา ทันที
+        // ตรวจสอบมุมเรเดียนเพื่อคำนวณฝั่ง ซ้าย-ขวา ของวงล้อ
         const checkAngleRad = textAngle % (2 * Math.PI);
+        
+        // ระยะห่างในการพ่นข้อความจากจุดศูนย์กลางวงล้อ (ขยับให้บาลานซ์ ไม่ชิดขอบเกินไป)
+        const textDistanceFromCenter = 40; 
+
         if (checkAngleRad > Math.PI / 2 && checkAngleRad < (3 * Math.PI) / 2) {
+            // 🎯 [ฝั่งซ้ายของวงล้อ] สั่งหมุนและพลิกแกนกลับมาตรงๆ เพื่อแก้บั๊กตัวหนังสือนีออนกระจกเงาจาก image_2.png
             ctx.save();
-            // ขยับจุดหมุนไปที่ตำแหน่งข้อความ แล้วสั่งกลับหัวตัวหนังสือ
-            ctx.translate(center - 35, 0);
-            ctx.rotate(Math.PI); 
+            ctx.rotate(Math.PI); // พลิกแกน 180 องศา
             ctx.fillStyle = i % 2 === 0 ? "#00ffff" : "#ffffff";
-            ctx.textAlign = "left"; // พลิกแล้วต้องอิงจากซ้ายแทน
+            ctx.textAlign = "left"; // ปรับให้อ่านจากซ้ายเข้าหาขอบปกติ
             
             let textDisplay = item.name.length > 12 ? item.name.substring(0, 10) + ".." : item.name;
-            ctx.fillText(textDisplay, 0, 4);
+            // ดึงพิกัดติดลบเพื่อให้ข้อความถอยกลับมาอยู่ในระยะบาลานซ์ที่อ่านง่าย
+            ctx.fillText(textDisplay, -center + textDistanceFromCenter, 4);
             ctx.restore();
         } else {
-            // โซนด้านบน วาดตัวหนังสือวิ่งเข้าหาศูนย์กลางตามปกติเหมือนเดิม
+            // 🎯 [ฝั่งขวาของวงล้อ] วาดตัวหนังสือวิ่งเข้าหาศูนย์กลางตามทิศทางปกติ
             ctx.fillStyle = i % 2 === 0 ? "#00ffff" : "#ffffff";
             ctx.textAlign = "right";
             
             let textDisplay = item.name.length > 12 ? item.name.substring(0, 10) + ".." : item.name;
-            ctx.fillText(textDisplay, center - 35, 4);
+            ctx.fillText(textDisplay, center - textDistanceFromCenter, 4);
         }
         
         ctx.restore();
     });
 
-    // วาดจุดไข่ปลาสีฟ้านีออนตรงแกนกลางวงล้อส่วนควบคุม
+    // วาดจุดไข่ปลานีออนตรงแกนกลางวงล้อ
     ctx.fillStyle = "#00ffff"; ctx.beginPath(); ctx.arc(center, center, 14, 0, 2 * Math.PI); ctx.fill();
     ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
 }
