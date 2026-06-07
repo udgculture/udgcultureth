@@ -866,7 +866,7 @@ const userVisibleRewardsPool = document.getElementById('userVisibleRewardsPool')
 let wheelItemsList = []; 
 let isWheelSpinning = false;
 
-// 🎨 1. ฟังก์ชันสั่งเขียนลายเส้นและระบายเฉดสีเรนเดอร์วงล้อลง Canvas แบบ Dynamic ตามระบบคลาวด์
+// 🎨 1. ฟังก์ชันสั่งเขียนลายเส้นและระบายเฉดสีเรนเดอร์วงล้อลง Canvas แบบ Dynamic (ฉบับอัปเกรดตัวหนังสือไม่กลับหัวบนมือถือ)
 function drawLuckyWheelGraph(itemsArray) {
     if (!luckyWheelCanvas) return;
     const ctx = luckyWheelCanvas.getContext('2d');
@@ -886,19 +886,51 @@ function drawLuckyWheelGraph(itemsArray) {
 
     itemsArray.forEach((item, i) => {
         const angle = i * arcAngle;
+        
+        // 1. วาดชิ้นส่วนเค้กของแต่ละช่องรางวัล
         ctx.fillStyle = neonColors[i % neonColors.length];
         ctx.beginPath(); ctx.moveTo(center, center);
         ctx.arc(center, center, center - 5, angle, angle + arcAngle); ctx.lineTo(center, center); ctx.fill();
         ctx.strokeStyle = "rgba(0, 255, 255, 0.15)"; ctx.lineWidth = 1; ctx.stroke();
 
-        ctx.save(); ctx.translate(center, center); ctx.rotate(angle + arcAngle / 2);
-        ctx.fillStyle = i % 2 === 0 ? "#00ffff" : "#ffffff";
-        ctx.font = "bold 11px 'Space Grotesk', 'Kanit'"; ctx.textAlign = "right";
+        // 2. คำนวณจุดกึ่งกลางของช่องเพื่อพ่นข้อความ
+        ctx.save(); 
+        ctx.translate(center, center); 
         
-        let textDisplay = item.name.length > 15 ? item.name.substring(0, 13) + ".." : item.name;
-        ctx.fillText(textDisplay, center - 25, 4); ctx.restore();
+        // หันหน้ากระดาษไปที่กึ่งกลางช่องรางวัลนั้นๆ
+        const textAngle = angle + arcAngle / 2;
+        ctx.rotate(textAngle);
+        
+        // ตั้งค่ารูปแบบ Font สตรีทไซเบอร์ค่าย UDG
+        ctx.font = "bold 12px 'Kanit', sans-serif"; 
+        
+        // 🎯 [จุดแก้ไขสำคัญจาก image.png] ตรวจสอบมุมองศาเพื่อพลิกตัวอักษรกลับหัวให้อ่านง่าย
+        // ถ้ามุมอยู่ในโซนด้านล่าง (เกิน 90 องศา ถึง 270 องศา) ให้พลิกข้อความกลับมา 180 องศา ทันที
+        const checkAngleRad = textAngle % (2 * Math.PI);
+        if (checkAngleRad > Math.PI / 2 && checkAngleRad < (3 * Math.PI) / 2) {
+            ctx.save();
+            // ขยับจุดหมุนไปที่ตำแหน่งข้อความ แล้วสั่งกลับหัวตัวหนังสือ
+            ctx.translate(center - 35, 0);
+            ctx.rotate(Math.PI); 
+            ctx.fillStyle = i % 2 === 0 ? "#00ffff" : "#ffffff";
+            ctx.textAlign = "left"; // พลิกแล้วต้องอิงจากซ้ายแทน
+            
+            let textDisplay = item.name.length > 12 ? item.name.substring(0, 10) + ".." : item.name;
+            ctx.fillText(textDisplay, 0, 4);
+            ctx.restore();
+        } else {
+            // โซนด้านบน วาดตัวหนังสือวิ่งเข้าหาศูนย์กลางตามปกติเหมือนเดิม
+            ctx.fillStyle = i % 2 === 0 ? "#00ffff" : "#ffffff";
+            ctx.textAlign = "right";
+            
+            let textDisplay = item.name.length > 12 ? item.name.substring(0, 10) + ".." : item.name;
+            ctx.fillText(textDisplay, center - 35, 4);
+        }
+        
+        ctx.restore();
     });
 
+    // วาดจุดไข่ปลาสีฟ้านีออนตรงแกนกลางวงล้อส่วนควบคุม
     ctx.fillStyle = "#00ffff"; ctx.beginPath(); ctx.arc(center, center, 14, 0, 2 * Math.PI); ctx.fill();
     ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
 }

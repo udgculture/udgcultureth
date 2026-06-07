@@ -1821,3 +1821,14 @@ footer {
     box-shadow: 0 0 8px #00ffff;
     transition: width 0.1s linear; 
 }
+
+@media (max-width: 480px) {
+    .wheel-canvas-wrapper {
+        max-width: 280px !important; /* บีบโครงวงล้อให้พอดีกับจอ iPhone/Android ทุกรุ่น */
+        margin: 10px auto !important;
+    }
+    #luckyWheelCanvas {
+        width: 280px !important;
+        height: 280px !important;
+    }
+}
