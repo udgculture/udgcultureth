@@ -1168,11 +1168,11 @@ if (signOutBtn) {
     });
 }
 
-// 2. ปุ่มล็อกอิน Google (แบบมีระบบล็อกกันพัง)
+// 1. ปุ่มล็อกอิน Google (เพิ่มระบบ Fail-safe ป้องกันปุ่มค้าง)
 if (loginGoogleBtn) {
     loginGoogleBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        if (isLoginProcessing) return; // ถ้าระบบกำลังโหลด ห้ามทำงานซ้ำ
+        if (isLoginProcessing) return; 
         
         isLoginProcessing = true;
         const originalText = loginGoogleBtn.innerHTML;
@@ -1180,20 +1180,35 @@ if (loginGoogleBtn) {
         loginGoogleBtn.style.opacity = '0.5';
         loginGoogleBtn.style.pointerEvents = 'none';
 
+        // ⏱️ ระบบตัดการทำงานหาก Pop-up ค้างเกิน 60 วินาที
+        const failSafeTimer = setTimeout(() => {
+            if (isLoginProcessing) {
+                isLoginProcessing = false;
+                loginGoogleBtn.innerHTML = originalText;
+                loginGoogleBtn.style.opacity = '1';
+                loginGoogleBtn.style.pointerEvents = 'auto';
+                showErrorAlert("TIMEOUT", "หมดเวลาเชื่อมต่อ! กรุณาตรวจสอบว่าเบราว์เซอร์ได้บล็อกหน้าต่าง Pop-up ไว้หรือไม่");
+            }
+        }, 60000);
+
         try {
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.setCustomParameters({ prompt: 'select_account' });
             const result = await firebase.auth().signInWithPopup(provider);
+            clearTimeout(failSafeTimer);
             console.log("🔥 GOOGLE LOGIN SUCCESS:", result.user.displayName);
             handleAuthSuccess(result.user);
         } catch (error) {
+            clearTimeout(failSafeTimer);
             console.error("Auth Error:", error);
-            // ดัก Error เว้นแต่ว่ายูสเซอร์ตั้งใจกดยกเลิกหน้าต่างเอง หรือพยายามเปิดซ้อน
-            if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+            
+            // 🚨 ดักจับกรณีเบราว์เซอร์บล็อก Pop-up แจ้งเตือนผู้ใช้ทันที
+            if (error.code === 'auth/popup-blocked') {
+                showErrorAlert("POP-UP BLOCKED", "เบราว์เซอร์ของคุณบล็อกหน้าต่างเข้าสู่ระบบ!<br>กรุณากดอนุญาต Pop-up ที่มุมขวาบนของช่อง URL");
+            } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
                 showErrorAlert("SYSTEM ERROR", `ล็อกอินล้มเหลว: ${error.message}`);
             }
         } finally {
-            // ปลดล็อกปุ่มคืนสู่สภาพปกติเสมอ
             isLoginProcessing = false;
             loginGoogleBtn.innerHTML = originalText;
             loginGoogleBtn.style.opacity = '1';
@@ -1202,7 +1217,7 @@ if (loginGoogleBtn) {
     });
 }
 
-// 3. ปุ่มล็อกอิน Facebook (แบบมีระบบล็อกกันพัง)
+// 2. ปุ่มล็อกอิน Facebook (เพิ่มระบบ Fail-safe ป้องกันปุ่มค้าง)
 if (loginFacebookBtn) {
     loginFacebookBtn.addEventListener('click', async (e) => {
         e.preventDefault();
@@ -1214,14 +1229,29 @@ if (loginFacebookBtn) {
         loginFacebookBtn.style.opacity = '0.5';
         loginFacebookBtn.style.pointerEvents = 'none';
 
+        const failSafeTimer = setTimeout(() => {
+            if (isLoginProcessing) {
+                isLoginProcessing = false;
+                loginFacebookBtn.innerHTML = originalText;
+                loginFacebookBtn.style.opacity = '1';
+                loginFacebookBtn.style.pointerEvents = 'auto';
+                showErrorAlert("TIMEOUT", "หมดเวลาเชื่อมต่อ! กรุณาตรวจสอบว่าเบราว์เซอร์ได้บล็อกหน้าต่าง Pop-up ไว้หรือไม่");
+            }
+        }, 60000);
+
         try {
             const provider = new firebase.auth.FacebookAuthProvider();
             const result = await firebase.auth().signInWithPopup(provider);
+            clearTimeout(failSafeTimer);
             console.log("🔥 FACEBOOK LOGIN SUCCESS:", result.user.displayName);
             handleAuthSuccess(result.user);
         } catch (error) {
+            clearTimeout(failSafeTimer);
             console.error("Auth Error:", error);
-            if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+            
+            if (error.code === 'auth/popup-blocked') {
+                showErrorAlert("POP-UP BLOCKED", "เบราว์เซอร์ของคุณบล็อกหน้าต่างเข้าสู่ระบบ!<br>กรุณากดอนุญาต Pop-up ที่มุมขวาบนของช่อง URL");
+            } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
                 showErrorAlert("SYSTEM ERROR", `ล็อกอินล้มเหลว: ${error.message}`);
             }
         } finally {
