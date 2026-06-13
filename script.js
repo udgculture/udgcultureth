@@ -1143,39 +1143,63 @@ if (signOutBtn) {
     });
 }
 
-// 2. ปุ่มล็อกอิน (ใช้ตัวแปรแบบตรงเป๊ะๆ ไม่มีวงเล็บเกิน)
+// =================================================================
+// 🚪 เครื่องยนต์ล็อกอินแก้บั๊ก (ฉบับวัยรุ่น Redirect + กันคลิกเบิ้ล 100%)
+// =================================================================
+
+// 1. ปุ่มล็อกอิน Google
 if (loginGoogleBtn) {
-    loginGoogleBtn.addEventListener('click', () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
+    loginGoogleBtn.addEventListener('click', (e) => {
+        e.preventDefault(); // ดักการทำงานพื้นฐานไว้ก่อน
         
-        // 🎯 สลับมาใช้ Popup ชั่วคราวเพื่อดักจับ Error
-        firebase.auth().signInWithPopup(provider)
-            .then((result) => {
-                console.log("🔥 ล็อกอินสำเร็จ!", result.user.displayName);
-                handleAuthSuccess(result.user);
-            })
-            .catch((error) => {
-                // 🚨 ถ้าพัง มันจะเด้งหน้าต่างแจ้งเตือนบอกสาเหตุเป๊ะๆ
-                alert("เกิดข้อผิดพลาด Auth!: " + error.code + "\n" + error.message);
-                console.error("Auth Error:", error);
-            });
+        // 🔥 เปลี่ยนข้อความปุ่มให้รู้ว่ากำลังโหลด และล็อกห้ามกดซ้ำเด็ดขาด
+        loginGoogleBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังเชื่อมต่อระบบ...`;
+        loginGoogleBtn.disabled = true;
+        loginGoogleBtn.style.pointerEvents = 'none'; // ปิดการรับเมาส์คลิก
+        loginGoogleBtn.style.opacity = '0.7';
+
+        const provider = new firebase.auth.GoogleAuthProvider();
+        // ใช้ Redirect เหมาะกับคนเข้าผ่าน IG/TikTok ที่สุด
+        firebase.auth().signInWithRedirect(provider);
     });
 }
 
+// 2. ปุ่มล็อกอิน Facebook
 if (loginFacebookBtn) {
-    loginFacebookBtn.addEventListener('click', () => {
+    loginFacebookBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // 🔥 ล็อกปุ่มกันคลิกเบิ้ลเหมือนกัน
+        loginFacebookBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังเชื่อมต่อระบบ...`;
+        loginFacebookBtn.disabled = true;
+        loginFacebookBtn.style.pointerEvents = 'none';
+        loginFacebookBtn.style.opacity = '0.7';
+
         const provider = new firebase.auth.FacebookAuthProvider();
         firebase.auth().signInWithRedirect(provider);
     });
 }
 
-// 3. 📡 เรดาร์จับสัญญาณล็อกอินแบบถาวร (ดีกว่า getRedirectResult)
+// 3. 📡 เรดาร์จับสัญญาณล็อกอิน (สำคัญมาก ขาดตัวนี้หน้าเว็บจะไม่รู้ว่าล็อกอินแล้ว)
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         console.log("🔥 USER LOGGED IN:", user.displayName);
         handleAuthSuccess(user);
     } else {
         console.log("👀 WAITING FOR LOGIN...");
+        // ถ้าระบบเช็คแล้วว่ายังไม่ได้ล็อกอิน ให้คืนสภาพปุ่มกลับมาเผื่อจะกดใหม่
+        if (loginGoogleBtn) {
+            loginGoogleBtn.innerHTML = `<i class="fa-brands fa-google"></i> CONTINUE WITH GOOGLE`;
+            loginGoogleBtn.disabled = false;
+            loginGoogleBtn.style.pointerEvents = 'auto';
+            loginGoogleBtn.style.opacity = '1';
+        }
+        if (loginFacebookBtn) {
+            loginFacebookBtn.innerHTML = `<i class="fa-brands fa-facebook"></i> CONTINUE WITH FACEBOOK`;
+            loginFacebookBtn.disabled = false;
+            loginFacebookBtn.style.pointerEvents = 'auto';
+            loginFacebookBtn.style.opacity = '1';
+        }
     }
 });
 
