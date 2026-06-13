@@ -862,10 +862,10 @@ function buildInitialCsgoStrip() {
     }
 }
 
+// 🎯 บังคับฝังสีขอบล่างนีออนให้ล็อกตามชื่อมูลค่าของรางวัลจริง 
 function createItemCardNode(item, index) {
     const card = document.createElement('div');
     let rarityClass = 'rarity-common';
-    
     const rewardNameText = item.name ? item.name.toString() : "";
     
     if (rewardNameText.includes('300') || rewardNameText.includes('ใหญ่') || rewardNameText.includes('เสื้อ')) {
@@ -953,7 +953,7 @@ database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
     renderVisiblePool();
 });
 
-// 🎬 มอเตอร์ฟิสิกส์ฉบับทลายบั๊กเลยช่อง: ตรวจวัดระยะขนาดกว้างของกล่องจริงบนจอมือถือแบบ Real-time 100%
+// 🎬 มอเตอร์ฟิสิกส์เรดาร์อัจฉริยะ: ตรวจวัดระยะกว้างของการ์ดจริงในมือถือลูกค้า ณ วินาทีนั้นแบบ Real-time
 function corePhysicsCaseSpin(winnerItem) {
     return new Promise((resolve) => {
         if (!csgoStrip) return resolve();
@@ -963,35 +963,29 @@ function corePhysicsCaseSpin(winnerItem) {
         csgoStrip.innerHTML = '';
 
         const totalItemsInSpin = 60;   
-        const targetStopCardIndex = 45; // ตัวชี้ขาดรางวัลจริงจอดที่ลำดับใบที่ 45
+        const targetStopCardIndex = 45; // ตัวชี้ขาดผู้ชนะจอดสนิทที่ลำดับใบที่ 45 เสมอ
 
-        // วาดขบวนแถวรถไฟสล็อต
         for (let i = 0; i < totalItemsInSpin; i++) {
             let currentItem;
             if (i === targetStopCardIndex) {
-                currentItem = winnerItem;
+                currentItem = winnerItem; // บรรจุของรางวัลจริงลงล็อกเป้าหมายสีแดง
             } else {
                 currentItem = wheelItemsList[Math.floor(Math.random() * wheelItemsList.length)];
             }
             csgoStrip.appendChild(createItemCardNode(currentItem, i));
         }
 
-        // 📐 [สูตรลับปราบเซียนมือถือ]: สั่งให้เบราว์เซอร์ไปกวาดสายตาวัดระยะจริง ณ วินาทีนั้น
-        // ตรวจสอบว่าหน้าจอมือถือลูกค้าวาดกรอบตู้สุ่มกว้างกี่พิกเซล และตัวการ์ดสไลด์กว้างกี่พิกเซลกันแน่
+        // 📐 [สูตรทลายบั๊กเลยช่องบนมือถือ]: สั่งกวาดสายตาวัดหาขนาดกว้างจริงของหน้ากากตู้และการ์ดรางวัลในวินาทีนั้นบนเครื่องผู้ใช้งาน
         const currentWrapperWidth = csgoStrip.parentElement.getBoundingClientRect().width;
         const currentActualCardWidth = csgoStrip.children[0].getBoundingClientRect().width || 130;
         
-        // หาพิกัดขีดเป้าหมายสีแดงที่อยู่ตรงกลางตู้จริง
         const realCenterLine = currentWrapperWidth / 2;
         
-        // คำนวณขยับพิกัดให้เส้นแดงสับลงกลางใจรูปภาพของการ์ดใบที่ 45 แบบคม ๆ (ครึ่งการ์ดคือความกว้างจริง / 2)
-        // สาดค่าสุ่มแกว่งหลบความซ้ำซากในระยะมิลลิเมตรปลอดภัยเซฟตี้แคบ ๆ เพื่อไม่ให้ขอบการ์ดเลื่อนเลยช่อง
+        // คุมระยะให้เส้นแดงผ่าศูนย์กลางภาพแบบพอดี (ความกว้างการ์ดจริง / 2) แรนดอมหลบมุมตกกระทบแคบๆ ช่วงระนาบมิลลิเมตร (+-3px)
         const innerCardOffset = (currentActualCardWidth / 2) + (Math.floor(Math.random() * 6) - 3);
-        
-        // สรุปแกนสมการ X ดึงขบวนเลื่อนเทียบจอดตรงปกไม่ว่าจะเปิดบนอุปกรณ์ใดในโลก
         const finalStopX = -((targetStopCardIndex * currentActualCardWidth) + innerCardOffset - realCenterLine);
 
-        // รอเคลียร์ความจำหน้าจอเสร็จสมบูรณ์ 80ms แล้วสั่งสะบัดสายพานลื่นไหล 6.5 วินาที
+        // รอตั้งหลัก HTML 80ms แล้วสั่งสะบัดสายพานลื่นไหล 6.5 วินาทีเข้าล็อกตรงปก
         setTimeout(() => {
             csgoStrip.style.transition = 'transform 6.5s cubic-bezier(0.1, 0.85, 0.15, 1)';
             csgoStrip.style.transform = `translateX(${finalStopX}px)`;
@@ -1015,7 +1009,7 @@ if (demoSpinBtn) {
 
         await corePhysicsCaseSpin(actualWinnerItem);
 
-        await showErrorAlert("🔬 DEMO SPIN RESULTS", `[โหมดทดลองหมุนเล่นเพื่อความบันเทิง]<br>กล่องสุ่มดร็อปได้ไอเท็มตัวอย่าง:<br><strong style="color:#00ffff; font-size:1.25rem;">[ ${actualWinnerItem.name} ]</strong><br><br><span style="color:#666; font-size:0.8rem;">*แก้ไขสมการเรดาร์จับพิกเซล คราวนี้เปิดในแอป IG ขีดแดงก็ผ่ากลางตรงชิ้นแล้วครับน้า*</span>`, true);
+        await showErrorAlert("🔬 DEMO SPIN RESULTS", `[โหมดทดลองหมุนเล่นเพื่อความบันเทิง]<br>กล่องสุ่มดร็อปได้ไอเท็มตัวอย่าง:<br><strong style="color:#00ffff; font-size:1.25rem;">[ ${actualWinnerItem.name} ]</strong><br><br><span style="color:#666; font-size:0.8rem;">*ซ่อมแซมสมการซ้ำซ้อนเรียบร้อย คราวนี้ภาพบนเป้าแดงกับข้อความแจ้งเตือนตรงปกแน่นอนครับน้า*</span>`, true);
 
         buildInitialCsgoStrip();
         isCaseSpinning = false;
@@ -1024,7 +1018,7 @@ if (demoSpinBtn) {
     });
 }
 
-// 🎰 ปุ่มเปิดกล่องลุ้นโชคจริง (ระบบล็อกเซสชันคูลดาวน์วันละครั้งพ่วงความปลอดภัยเดิม)
+// 🎰 ปุ่มเปิดกล่องลุ้นโชคจริง (ระบบล็อกสิทธิ์คูลดาวน์วันละครั้งพ่วงความปลอดภัยเดิม)
 if (openCaseBtn) {
     openCaseBtn.addEventListener('click', async () => {
         const currentUser = firebase.auth().currentUser;
@@ -1080,7 +1074,120 @@ if (openCaseBtn) {
     });
 }
 
-// 🚪 [คงคำสั่งเก่าสำหรับดักจับ Auto-Login ท้ายไฟล์ไว้เหมือนเดิมเพื่อรันระบบแชทร่วมกันได้เสถียรครับน้า]
+// 🚪 เครื่องยนต์ล็อกอินยิงกระแสไฟตรงสะพานไฟ (ซ่อมแซมเสร็จสมบูรณ์แยกคีย์ closeAuthBtn)
+const closeAuthBtn = document.getElementById('closeAuthBtn'); 
+
+if (openAuthModalBtn && authProviderModal) {
+    openAuthModalBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const currentUser = firebase.auth().currentUser;
+        if (currentUser) {
+            if (userDropdownMenu) {
+                userDropdownMenu.style.display = (userDropdownMenu.style.display === 'block') ? 'none' : 'block';
+            }
+        } else {
+            authProviderModal.classList.add('active'); 
+        }
+    });
+}
+
+if (closeAuthBtn && authProviderModal) {
+    closeAuthBtn.addEventListener('click', () => { 
+        authProviderModal.classList.remove('active'); 
+    });
+}
+
+document.addEventListener('click', () => { if (userDropdownMenu) userDropdownMenu.style.display = 'none'; });
+
+function handleAuthSuccess(userObj) {
+    if (!userObj) return;
+    const displayName = userObj.displayName || "ANONYMOUS";
+    const photoURL = userObj.photoURL || "";
+
+    if (authUserName && userProfileDisplay) {
+        authUserName.innerText = displayName;
+        userProfileDisplay.style.display = "block";
+    }
+    
+    if (openAuthModalBtn) {
+        let displayContent = "";
+        if (photoURL && photoURL !== "") {
+            displayContent = `
+                <img src="${photoURL}" class="user-nav-avatar" alt="${displayName}">
+                <span class="auth-btn-text" style="color:#00ffff; font-size:0.8rem; font-weight:800; letter-spacing:0.5px;">${displayName.toUpperCase()}</span>
+                <i class="fa-solid fa-caret-down" style="font-size:0.7rem; color:#555; margin-left:2px;"></i>
+            `;
+        } else {
+            displayContent = `
+                <i class="fa-solid fa-user-check" style="color:#39ff14;"></i> 
+                <span class="auth-btn-text">${displayName.toUpperCase()}</span>
+            `;
+        }
+        openAuthModalBtn.innerHTML = displayContent;
+        openAuthModalBtn.style.borderColor = "#00ffff";
+        openAuthModalBtn.style.padding = "4px 10px 4px 6px"; 
+    }
+
+    if (graffitiName && (graffitiName.value === "" || graffitiName.value === "@")) {
+        graffitiName.value = displayName.replace(/\s+/g, ''); 
+    }
+
+    setTimeout(() => { if (authProviderModal) authProviderModal.classList.remove('active'); }, 1200);
+}
+
+if (signOutBtn) {
+    signOutBtn.addEventListener('click', async () => {
+        try {
+            await firebase.auth().signOut();
+            if (openAuthModalBtn) {
+                openAuthModalBtn.innerHTML = `
+                    <div id="authBtnContent" style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-right-to-bracket"></i> 
+                        <span class="auth-btn-text">LOGIN</span>
+                    </div>`;
+                openAuthModalBtn.style.borderColor = "var(--accent-color)";
+                openAuthModalBtn.style.padding = "8px 16px";
+            }
+            if (graffitiName) graffitiName.value = "";
+            if (userProfileDisplay) userProfileDisplay.style.display = "none";
+            await showErrorAlert("SIGNED OUT", "ออกจากระบบ Underground Culture เรียบร้อยแล้วครับ BRO! 🩹");
+        } catch (error) {
+            showErrorAlert("SIGN OUT ERROR", `เกิดข้อผิดพลาด: ${error.message}`);
+        }
+    });
+}
+
+if (loginGoogleBtn) {
+    loginGoogleBtn.addEventListener('click', () => {
+        const provider = new firebase.auth().GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        firebase.auth().signInWithPopup(provider)
+            .then((result) => { handleAuthSuccess(result.user); })
+            .catch((error) => {
+                if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+                    firebase.auth().signInWithRedirect(provider);
+                } else {
+                    showErrorAlert("GOOGLE AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
+                }
+            });
+    });
+}
+
+if (loginFacebookBtn) {
+    loginFacebookBtn.addEventListener('click', () => {
+        const provider = new firebase.auth().FacebookAuthProvider();
+        firebase.auth().signInWithPopup(provider)
+            .then((result) => { handleAuthSuccess(result.user); })
+            .catch((error) => {
+                if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+                    firebase.auth().signInWithRedirect(provider);
+                } else {
+                    showErrorAlert("FACEBOOK AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
+                }
+            });
+    });
+}
+
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         handleAuthSuccess(user);
@@ -1093,28 +1200,3 @@ firebase.auth().onAuthStateChanged((user) => {
 firebase.auth().getRedirectResult()
     .then((result) => { if (result && result.user) handleAuthSuccess(result.user); })
     .catch((error) => { console.error("Redirect Auth Error:", error); });
-
-    // =================================================================
-// 🔑 ซ่อมแซมระบบคลิกปุ่ม LOGIN หน้าบ้าน (ปลุกระดม Pop-up สมาชิก)
-// =================================================================
-if (openAuthModalBtn && authProviderModal && closeAuthModalBtn) {
-    // 🎯 สั่งการเมื่อแร็ปเปอร์กดป้าย LOGIN ขวาบนจอ
-    openAuthModalBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const currentUser = firebase.auth().currentUser;
-        if (currentUser) {
-            // ถ้าระบบล็อกอินค้างไว้อยู่แล้ว ให้เด้งเมนูแยก Sign Out ออกมา
-            if (userDropdownMenu) {
-                userDropdownMenu.style.display = (userDropdownMenu.style.display === 'block') ? 'none' : 'block';
-            }
-        } else {
-            // ถ้ายังไม่ได้ล็อกอิน บังคับปลุกโมดอลข้ามระบบความปลอดภัยเด้งช่องทาง Google / Facebook ขึ้นมาเน้นๆ!
-            authProviderModal.classList.add('active'); 
-        }
-    });
-
-    // สั่งปิดหน้าต่างเมื่อกดกากบาทสีเทาขวาบนโมดอล
-    closeAuthModalBtn.addEventListener('click', () => { 
-        authProviderModal.classList.remove('active'); 
-    });
-}
