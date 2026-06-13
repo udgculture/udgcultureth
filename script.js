@@ -844,7 +844,6 @@ function buildInitialCsgoStrip() {
     }
 }
 
-// 🎯 บังคับฝังสีขอบล่างนีออนให้ล็อกตามชื่อมูลค่าของรางวัลจริง 
 function createItemCardNode(item, index) {
     const card = document.createElement('div');
     let rarityClass = 'rarity-common';
@@ -935,7 +934,6 @@ database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
     renderVisiblePool();
 });
 
-// 🎬 มอเตอร์ฟิสิกส์ฉบับทลายบั๊กเลยช่อง: ตรวจวัดระยะขนาดกว้างของกล่องจริงบนจอมือถือแบบ Real-time 100%
 function corePhysicsCaseSpin(winnerItem) {
     return new Promise((resolve) => {
         if (!csgoStrip) return resolve();
@@ -945,9 +943,8 @@ function corePhysicsCaseSpin(winnerItem) {
         csgoStrip.innerHTML = '';
 
         const totalItemsInSpin = 60;   
-        const targetStopCardIndex = 45; // ตัวชี้ขาดรางวัลจริงจอดที่ลำดับใบที่ 45
+        const targetStopCardIndex = 45; 
 
-        // วาดขบวนแถวรถไฟสล็อต
         for (let i = 0; i < totalItemsInSpin; i++) {
             let currentItem;
             if (i === targetStopCardIndex) {
@@ -958,22 +955,13 @@ function corePhysicsCaseSpin(winnerItem) {
             csgoStrip.appendChild(createItemCardNode(currentItem, i));
         }
 
-        // 📐 [สูตรลับปราบเซียนมือถือ]: สั่งให้เบราว์เซอร์ไปกวาดสายตาวัดระยะจริง ณ วินาทีนั้น
-        // ตรวจสอบว่าหน้าจอมือถือลูกค้าวาดกรอบตู้สุ่มกว้างกี่พิกเซล และตัวการ์ดสไลด์กว้างกี่พิกเซลกันแน่
         const currentWrapperWidth = csgoStrip.parentElement.getBoundingClientRect().width;
         const currentActualCardWidth = csgoStrip.children[0].getBoundingClientRect().width || 130;
         
-        // หาพิกัดขีดเป้าหมายสีแดงที่อยู่ตรงกลางตู้จริง
         const realCenterLine = currentWrapperWidth / 2;
-        
-        // คำนวณขยับพิกัดให้เส้นแดงสับลงกลางใจรูปภาพของการ์ดใบที่ 45 แบบคม ๆ (ครึ่งการ์ดคือความกว้างจริง / 2)
-        // สาดค่าสุ่มแกว่งหลบความซ้ำซากในระยะมิลลิเมตรปลอดภัยเซฟตี้แคบ ๆ เพื่อไม่ให้ขอบการ์ดเลื่อนเลยช่อง
         const innerCardOffset = (currentActualCardWidth / 2) + (Math.floor(Math.random() * 6) - 3);
-        
-        // สรุปแกนสมการ X ดึงขบวนเลื่อนเทียบจอดตรงปกไม่ว่าจะเปิดบนอุปกรณ์ใดในโลก
         const finalStopX = -((targetStopCardIndex * currentActualCardWidth) + innerCardOffset - realCenterLine);
 
-        // รอเคลียร์ความจำหน้าจอเสร็จสมบูรณ์ 80ms แล้วสั่งสะบัดสายพานลื่นไหล 6.5 วินาที
         setTimeout(() => {
             csgoStrip.style.transition = 'transform 6.5s cubic-bezier(0.1, 0.85, 0.15, 1)';
             csgoStrip.style.transform = `translateX(${finalStopX}px)`;
@@ -983,7 +971,6 @@ function corePhysicsCaseSpin(winnerItem) {
     });
 }
 
-// 🔬 ปุ่มทดลองสุ่ม (TEST SPIN)
 if (demoSpinBtn) {
     demoSpinBtn.addEventListener('click', async () => {
         if (isCaseSpinning || wheelItemsList.length === 0) return;
@@ -1006,7 +993,6 @@ if (demoSpinBtn) {
     });
 }
 
-// 🎰 ปุ่มเปิดกล่องลุ้นโชคจริง (ระบบล็อกเซสชันคูลดาวน์วันละครั้งพ่วงความปลอดภัยเดิม)
 if (openCaseBtn) {
     openCaseBtn.addEventListener('click', async () => {
         const currentUser = firebase.auth().currentUser;
@@ -1062,10 +1048,20 @@ if (openCaseBtn) {
     });
 }
 
-// 🚪 เครื่องยนต์ล็อกอินยิงกระแสไฟตรงสะพานไฟ (ซ่อมแซมเสร็จสมบูรณ์แยกคีย์ closeAuthBtn ดักทาง Crash)
-const closeAuthBtn = document.getElementById('closeAuthBtn'); 
+// =================================================================
+// 🚪 เครื่องยนต์ล็อกอินแก้บั๊ก (ฉบับอุดรอยรั่ว 100%)
+// =================================================================
+
+// 1. ประกาศตัวแปรรับค่า ID ทั้งหมดให้ชัวร์ก่อนเรียกใช้งาน
+const closeAuthBtn = document.getElementById('closeAuthBtn');
 const authProviderModal = document.getElementById('authProviderModal');
 const openAuthModalBtn = document.getElementById('openAuthModalBtn');
+const userDropdownMenu = document.getElementById('userDropdownMenu');
+const signOutBtn = document.getElementById('signOutBtn');
+const authUserName = document.getElementById('authUserName');
+const userProfileDisplay = document.getElementById('userProfileDisplay');
+const loginGoogleBtn = document.getElementById('loginGoogleBtn');
+const loginFacebookBtn = document.getElementById('loginFacebookBtn');
 
 if (openAuthModalBtn && authProviderModal) {
     openAuthModalBtn.addEventListener('click', (e) => {
@@ -1146,16 +1142,12 @@ if (signOutBtn) {
         }
     });
 }
-// =================================================================
-// ─── 🚪 เครื่องยนต์ล็อกอินแก้บั๊กป็อปอัปหลุด (ฉบับอัปเดตใช้ Redirect) ───
-// =================================================================
 
+// 2. ปุ่มล็อกอิน (ใช้ตัวแปรแบบตรงเป๊ะๆ ไม่มีวงเล็บเกิน)
 if (loginGoogleBtn) {
     loginGoogleBtn.addEventListener('click', () => {
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
-        
-        // 🎯 เปลี่ยนจาก signInWithPopup เป็น Redirect ทันที ป้องกันแอป IG บล็อกหน้าต่าง
         firebase.auth().signInWithRedirect(provider);
     });
 }
@@ -1163,34 +1155,22 @@ if (loginGoogleBtn) {
 if (loginFacebookBtn) {
     loginFacebookBtn.addEventListener('click', () => {
         const provider = new firebase.auth.FacebookAuthProvider();
-        
-        // 🎯 ส่งไปล็อกอินฝั่ง Facebook แล้วดึงหน้ากลับออโต้
         firebase.auth().signInWithRedirect(provider);
     });
 }
 
-// 📡 ระบบดักรับสายสัญญาณ Auth หลังจากหน้าจอรีไดเรกต์กลับมาหน้าหลัก
-firebase.auth().getRedirectResult()
-    .then((result) => { 
-        if (result && result.user) {
-            handleAuthSuccess(result.user); 
-        }
-    })
-    .catch((error) => { 
-        console.error("Redirect Auth Error:", error); 
-        // 🚨 ถ้าเกิดเออร์เรอร์ ให้พ่นกล่องแจ้งเตือนนีออนแดงดักทางทันที
-        showErrorAlert("AUTH ERROR", `รหัสข้อผิดพลาด: ${error.code}<br>ข้อความ: ${error.message}`);
-    });
-
-    // =================================================================
-// 📡 ทรงอย่างแบด เรดาร์ตรวจจับสถานะล็อกอินถาวร (Observer)
-// =================================================================
+// 3. 📡 เรดาร์จับสัญญาณล็อกอินแบบถาวร (ดีกว่า getRedirectResult)
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-        // ถ้าพบว่ามียูสเซอร์ล็อกอินผ่านแล้ว (หรือล็อกอินค้างไว้) ให้สลับปุ่มเป็นหน้าโปรไฟล์ทันที
+        console.log("🔥 USER LOGGED IN:", user.displayName);
         handleAuthSuccess(user);
     } else {
-        // ถ้ายังไม่มีใครล็อกอิน
-        console.log("WAITING FOR USER LOGIN...");
+        console.log("👀 WAITING FOR LOGIN...");
     }
+});
+
+// ตรวจจับ Error จาก Redirect กันเหนียว
+firebase.auth().getRedirectResult().catch((error) => {
+    console.error("Redirect Auth Error:", error);
+    showErrorAlert("AUTH ERROR", `รหัสข้อผิดพลาด: ${error.code}<br>ข้อความ: ${error.message}`);
 });
