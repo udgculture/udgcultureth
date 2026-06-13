@@ -152,45 +152,47 @@
         <div class="news-grid" id="live-news-grid">
             <div style="padding: 40px; color: #555; text-align: center; grid-column: 1/-1;">⏳ กำลังระเบิดสัญญาณดึงข้อมูลข่าวสารล่าสุดจากคลาวด์...</div>
         </div>
-<h2 id="luckywheel" class="section-title" style="margin-top: 60px;">UDG LUCKY WHEEL</h2>
-    <div class="wheel-system-flex-container">
+
+<h2 id="luckywheel" class="section-title" style="margin-top: 60px;">UDG CYBER CASE OPENING</h2>
+<div class="wheel-system-flex-container">
+    
+    <div class="wheel-left-panel" style="width: 100%; max-width: 460px; margin: 0 auto; display: flex; flex-direction: column; align-items: center;">
         
-        <div class="wheel-left-panel">
-            <div class="wheel-canvas-wrapper">
-                <div id="wheelPointer"></div>
-                <canvas id="luckyWheelCanvas" width="340" height="340"></canvas>
-            </div>
-            <div style="margin-top: 22px; width: 100%; text-align: center;">
-                <button type="button" id="spinWheelBtn" class="graffiti-btn" style="width: 220px; padding: 12px 0; font-weight: 800;">SPIN NOW</button>
-            </div>
-            
-            <div class="wheel-pool-section">
-                <span class="wheel-pool-title">
-                    <i class="fa-solid fa-boxes-stacked"></i> // CURRENT REWARD POOL (รายการรางวัลในวงล้อ):
-                </span>
-                <div id="userVisibleRewardsPool" class="wheel-rewards-grid-box">
-                    <span style="color: #444; font-size: 0.8rem; grid-column: 1/-1; text-align: center;">Document Scanning...</span>
-                </div>
+        <div class="csgo-roulette-wrapper" style="position: relative; width: 420px; max-width: 420px; height: 160px; background: #090909; border: 2px solid #222; border-radius: 6px; overflow: hidden; margin: 20px auto; box-sizing: border-box;">
+            <div class="csgo-pointer" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 3px; height: 100%; background: #ff3333; box-shadow: 0 0 12px #ff3333; z-index: 15;"></div>
+            <div class="csgo-strip" id="csgoStrip" style="display: flex; position: absolute; left: 0; top: 0; height: 100%; width: max-content; align-items: center; will-change: transform; margin: 0; padding: 0;">
+                <div class="csgo-item-card"><img src="image/ขาวใส.png"><p>LOADING CASE...</p></div>
             </div>
         </div>
 
-        <div class="rewards-vault-right-panel">
-            <div class="vault-header">
-                <h3><i class="fa-solid fa-vault"></i> MY REWARDS VAULT</h3>
-                <p>ตู้เซฟเก็บประวัติคูปองส่วนลดส่วนตัวของคุณ (ใช้สำหรับนำรหัส CODE ไปยืนยันเคลมของรางวัลกับ UDG)</p>
-                <p>วิธีใช้งาน : แคปหน้าจอให้เห็นโค้ดที่รับส่งในข้อความ IG ของ UDG CULTURE TH</p>
-            </div>
-            
-            <div id="myCouponsList">
-                <p style="color: #444; text-align: center; margin-top: 120px; font-size: 0.85rem;">⏳ กรุณาล็อกอินเพื่อเปิดใช้งานตู้เซฟประวัติส่วนตัวของคุณ...</p>
-            </div>
-            
-            <div style="border-top: 1px solid #1a1a1a; padding-top: 12px; text-align: center;">
-                <span style="font-size: 0.72rem; color: #444; font-family: sans-serif; letter-spacing: 0.5px;">* จำกัดสิทธิ์หมุนวงล้อนำโชคได้ 1 ครั้งต่อวันต่อบัญชีสมาชิกเท่านั้น *</span>
-            </div>
+        <div class="csgo-control-buttons" style="display: flex; gap: 15px; justify-content: center; margin-top: 25px; flex-wrap: wrap; width: 100%;">
+            <!-- <button type="button" id="demoSpinBtn" class="graffiti-btn" style="background: linear-gradient(135deg, #222 0%, #111 100%); border: 1px solid #444; color: #aaa; width: 140px; padding: 12px 0; font-weight: 500;">
+                <i class="fa-solid fa-flask"></i> TEST SPIN
+            </button> -->
+            <button type="button" id="openCaseBtn" class="graffiti-btn" style="width: 200px; padding: 12px 0; font-weight: 800; font-size: 1.1rem; background: linear-gradient(135deg, #ff3333 0%, #700000 100%); border: 1px solid #ff3333;">
+                <i class="fa-solid fa-box-open"></i> OPEN CASE
+            </button>
         </div>
-
+        
+        <div class="wheel-pool-section" style="width: 100%;">
+            <span class="wheel-pool-title"><i class="fa-solid fa-boxes-stacked"></i> // AVAILABLE ITEMS IN CASE:</span>
+            <div id="userVisibleRewardsPool" class="wheel-rewards-grid-box"></div>
+        </div>
     </div>
+
+    <div class="rewards-vault-right-panel">
+        <div class="vault-header">
+            <h3><i class="fa-solid fa-vault"></i> MY REWARDS VAULT</h3>
+            <p>ตู้เซฟเก็บประวัติคูปองส่วนลดส่วนตัวของคุณ (แคปหน้าจอให้เห็นโค้ดส่งไปทางข้อความ IG ของ UDG CULTURE TH เพื่อเคลมสิทธิ์)</p>
+        </div>
+        <div id="myCouponsList">
+            <p style="color: #444; text-align: center; margin-top: 120px; font-size: 0.85rem;">⏳ กรุณาล็อกอินเพื่อเปิดใช้งานตู้เซฟ...</p>
+        </div>
+        <div style="border-top: 1px solid #1a1a1a; padding-top: 12px; text-align: center;">
+            <span style="font-size: 0.72rem; color: #444;">* จำกัดสิทธิ์เปิดกล่องสุ่มได้ 1 ครั้งต่อวันต่อบัญชีสมาชิกเท่านั้น *</span>
+        </div>
+    </div>
+</div>
 
     </div>
         <!-- 💬 โซนกำแพงแชทสเปรย์ไซเบอร์ -->

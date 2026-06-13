@@ -45,13 +45,25 @@ const errorModalTitle = document.getElementById('errorModalTitle');
 const errorModalMessage = document.getElementById('errorModalMessage');
 const errorModalCloseBtn = document.getElementById('errorModalCloseBtn');
 
-function showErrorAlert(title, message) {
+function showErrorAlert(title, message, isSuccess = false) {
     if (!errorModalTitle || !errorModalMessage || !errorModal) {
         alert(title + "\n" + message.replace(/<br>/g, '\n').replace(/<[^>]*>/g, ''));
         return Promise.resolve();
     }
     errorModalTitle.innerText = title;
     errorModalMessage.innerHTML = message;
+    
+    const customModalIcon = document.getElementById('customModalIcon');
+    if (customModalIcon) {
+        if (isSuccess) {
+            customModalIcon.className = "fa-solid fa-trophy error-modal-icon";
+            customModalIcon.style.color = "#39ff14";
+        } else {
+            customModalIcon.className = "fa-solid fa-triangle-exclamation error-modal-icon";
+            customModalIcon.style.color = "#ff3333";
+        }
+    }
+
     errorModal.classList.add('active');
 
     return new Promise((resolve) => {
@@ -391,7 +403,7 @@ function renderModalVotingStation(currentWeekVotes, filterText = "") {
         
         const voteRow = document.createElement('div');
         voteRow.className = 'vote-station-item';
-        voteRow.style.removeAttribute = 'margin-bottom'; // ดึงระเบียบจาก CSS
+        voteRow.style.removeAttribute = 'margin-bottom'; 
         voteRow.innerHTML = `
             <div class="track-info">
                 <h4 style="color: #fff; font-size: 0.95rem; margin:0;">${track.title}</h4>
@@ -623,7 +635,7 @@ async function deleteNewsItemByAdmin(newsId) {
 }
 
 // =================================================================
-// ─── 💸 🔄 AUTOMATED AD ROTATOR SYSTEM (เวอร์ชันอนิเมชัน Fade + เลเซอร์นับถอยหลัง 8 วิ) ───
+// ─── 💸 🔄 AUTOMATED AD ROTATOR SYSTEM ───
 // =================================================================
 const liveAdBanner = document.getElementById('live-ad-banner');
 const liveAdContent = document.getElementById('live-ad-content');
@@ -633,10 +645,8 @@ const adProgressLaser = document.getElementById('ad-progress-laser');
 
 let currentAdIndex = 0;
 let cloudAdsList = [];
-let adRotationInterval = null;
-let adTickInterval = null; // ตัวนับเวลาวินาทีย่อย
+let adTickInterval = null; 
 
-// ตัวแปรสำหรับคุมเวลา 8 วินาที (8000 มิลลิวินาที)
 const AD_DISPLAY_TIME_MS = 8000; 
 let adTimeRemaining = AD_DISPLAY_TIME_MS;
 
@@ -647,12 +657,9 @@ const fallbackDefaultAd = {
     image: ""
 };
 
-// ฟังก์ชันสั่งสับเปลี่ยนโฆษณาพ่วงอนิเมชัน Fade In-Out นุ่มนวล
-// 🎯 ปรับปรุงฟังก์ชัน renderActiveAd ใน script.js ให้สับภาพทันที ไม่กระพริบ
 function renderActiveAd() {
     if (!liveAdBanner || !liveAdContent || !liveAdImg) return;
 
-    // 🚀 สับเปลี่ยนข้อมูลเจ้าใหม่ขึ้นแทนที่ทันทีแบบ No-Delay ไม่ต้องสั่ง Fade Out ให้กระพริบตา
     if (cloudAdsList.length === 0) {
         liveAdBanner.href = fallbackDefaultAd.url;
         liveAdImg.style.display = 'none'; 
@@ -677,66 +684,50 @@ function renderActiveAd() {
         liveAdContent.innerHTML = `<h3>${activeAd.title}</h3><p>${activeAd.description}</p>`;
     }
 
-    // เตรียมคิวสำหรับสปอนเซอร์เจ้าถัดไป
     currentAdIndex = (currentAdIndex + 1) % cloudAdsList.length;
-
-    // รีเซ็ตแถบเลเซอร์ 8 วินาทีกลับมาเต็ม 100% ทันที
     adTimeRemaining = AD_DISPLAY_TIME_MS;
     if (adTimerCountdown) adTimerCountdown.innerText = "8s";
     if (adProgressLaser) adProgressLaser.style.width = "100%";
 }
 
-
-// เครื่องยนต์ขับเคลื่อนฟิสิกส์เส้นเลเซอร์และตัวเลขดิจิตอลขยับทุก 100 มิลลิวินาที (เนียนตาขั้นสุด)
 function startAdProgressBarEngine() {
     if (adTickInterval) clearInterval(adTickInterval);
     
     adTickInterval = setInterval(() => {
         if (cloudAdsList.length <= 1) {
-            // ถ้ามีโฆษณาเจ้าเดียว หรือไม่มีเลย ไม่ต้องวิ่งเส้นเลเซอร์ให้เปลืองแรมเครื่องครับน้า
             if (adProgressLaser) adProgressLaser.style.width = "100%";
             if (adTimerCountdown) adTimerCountdown.innerText = "8s";
             return;
         }
 
-        // หักลบเวลาออกทีละ 100 มิลลิวินาที
         adTimeRemaining -= 100;
 
-        // 1. คำนวณตัวเลขวินาทีดิจิตอลโชว์หน้าปัดป้าย (ปัดเศษขึ้นพ่นเป็นเลขกลมๆ 8s, 7s, 6s...)
         if (adTimerCountdown) {
             const secondsText = Math.ceil(adTimeRemaining / 1000);
             adTimerCountdown.innerText = `${secondsText > 0 ? secondsText : 0}s`;
         }
 
-        // 2. คำนวณสัดส่วน % ความกว้างสั่งเส้นเลเซอร์หดถอยหลังเข้าเส้นชัย
         if (adProgressLaser) {
             const percentageWidth = (adTimeRemaining / AD_DISPLAY_TIME_MS) * 100;
             adProgressLaser.style.width = `${percentageWidth > 0 ? percentageWidth : 0}%`;
         }
 
-        // 3. ถ้าเวลาของเจ้านี้หมดเกลี้ยง (ชน 0) สั่งล้างเกลียวรันภาพถัดไปทันที
         if (adTimeRemaining <= 0) {
             renderActiveAd();
         }
     }, 100);
 }
 
-// สัญญาณรับฟีดส์รายการสปอนเซอร์จาก Firebase โต๊ะกลางออนไลน์
 database.ref('udg_live_advertisements').on('value', (snapshot) => {
     const data = snapshot.val();
     cloudAdsList = [];
     currentAdIndex = 0;
 
     if (data) {
-        Object.keys(data).forEach(key => {
-            cloudAdsList.push(data[key]);
-        });
+        Object.keys(data).forEach(key => { cloudAdsList.push(data[key]); });
     }
 
-    // ประเดิมรันโฆษณาตัวแรกขึ้นบอร์ด
     renderActiveAd();
-
-    // เคลียร์สายเก่า สตาร์ทเครื่องยนต์เลเซอร์นับถอยหลังทำงานทันทีคาสายออนไลน์
     if (adTickInterval) clearInterval(adTickInterval);
     startAdProgressBarEngine();
 });
@@ -780,9 +771,7 @@ database.ref('udg_culture_partners_logos').on('value', (snapshot) => {
     if (!data) {
         currentLogosList = fallbackDefaultLogos;
     } else {
-        Object.keys(data).forEach(key => {
-            currentLogosList.push(data[key]);
-        });
+        Object.keys(data).forEach(key => { currentLogosList.push(data[key]); });
     }
 
     renderSponsorTickerItems(currentLogosList);
@@ -806,10 +795,7 @@ database.ref('udg_upcoming_gigs').on('value', (snapshot) => {
         return;
     }
 
-    let sortedGigs = Object.keys(gigsData).map(key => {
-        return { gigId: key, ...gigsData[key] };
-    });
-    
+    let sortedGigs = Object.keys(gigsData).map(key => { return { gigId: key, ...gigsData[key] }; });
     sortedGigs.sort((a, b) => b.timestamp - a.timestamp);
 
     sortedGigs.forEach(gig => {
@@ -839,14 +825,8 @@ database.ref('udg_upcoming_gigs').on('value', (snapshot) => {
 });
 
 // =================================================================
-// ─── 🔐 MEMBER LOGIN & 🎡 CYBER LUCKY WHEEL ENGINE (FULL SPEC) ───
+// ─── 🔐 MEMBER PORTAL & 🎰 INTEGRATED CS:GO ROULETTE ENGINE ───
 // =================================================================
-
-// =================================================================
-// ─── 🔐 MEMBER LOGIN & 🎡 CYBER LUCKY WHEEL ENGINE (ซ่อมแซมจุด Spin ล็อก) ───
-// =================================================================
-
-// 🎯 เช็กให้ชัวร์ว่าย้ายตัวดักจับ ID มาประกาศผูกมัดร่วมกันตรงนี้ทั้งหมดแบบไม่ซ้ำซ้อนครับน้าบักหำทิว
 const authProviderModal = document.getElementById('authProviderModal');
 const openAuthModalBtn = document.getElementById('openAuthModalBtn');
 const closeAuthModalBtn = document.getElementById('closeAuthModalBtn');
@@ -854,125 +834,93 @@ const loginGoogleBtn = document.getElementById('loginGoogleBtn');
 const loginFacebookBtn = document.getElementById('loginFacebookBtn');
 const userProfileDisplay = document.getElementById('userProfileDisplay');
 const authUserName = document.getElementById('authUserName');
-
 const userDropdownMenu = document.getElementById('userDropdownMenu');
 const signOutBtn = document.getElementById('signOutBtn');
 
-const luckyWheelCanvas = document.getElementById('luckyWheelCanvas');
-const spinWheelBtn = document.getElementById('spinWheelBtn');
+// =================================================================
+// ─── 🎰 มอเตอร์สุ่มตู้สไลด์ CS:GO ระบบซิงค์สมดุลสีภาพล็อกตรงปก 100% ───
+// =================================================================
+const csgoStrip = document.getElementById('csgoStrip');
+const openCaseBtn = document.getElementById('openCaseBtn');
+const demoSpinBtn = document.getElementById('demoSpinBtn'); 
 const myCouponsList = document.getElementById('myCouponsList');
 const userVisibleRewardsPool = document.getElementById('userVisibleRewardsPool');
 
+// 🎯 ล็อกระยะหน้ากว้างคงที่ถาวร (หน้าการ์ดกว้าง 130px ไร้ margin ตาม CSS)
+const CARD_WIDTH = 130; 
 let wheelItemsList = []; 
-let isWheelSpinning = false;
+let isCaseSpinning = false; 
+let preloadedImageCache = []; 
 
-// 🎨 1. ฟังก์ชันวาดวงล้อลง Canvas (ฉบับแก้บั๊กตัวหนังสือกระจกเงาฝั่งซ้าย + จัดระเบียบบาลานซ์ช่องอ่านง่าย)
-function drawLuckyWheelGraph(itemsArray) {
-    if (!luckyWheelCanvas) return;
-    const ctx = luckyWheelCanvas.getContext('2d');
-    const len = itemsArray.length;
-    const center = luckyWheelCanvas.width / 2;
-    ctx.clearRect(0, 0, luckyWheelCanvas.width, luckyWheelCanvas.height);
-
-    if (len === 0) {
-        luckyWheelCanvas.style.transform = 'none';
-        ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(center, center, center - 10, 0, 2 * Math.PI); ctx.fill();
-        ctx.fillStyle = "#444"; ctx.font = "13px Kanit"; ctx.textAlign = "center"; ctx.fillText("⏳ รอแอดมินสาดรางวัลเข้าคลาวด์...", center, center + 5);
-        return;
+function buildInitialCsgoStrip() {
+    if (isCaseSpinning || wheelItemsList.length === 0 || !csgoStrip) return;
+    csgoStrip.style.transition = 'none';
+    csgoStrip.style.transform = 'translateX(0px)';
+    csgoStrip.innerHTML = '';
+    
+    for (let i = 0; i < 15; i++) {
+        const item = wheelItemsList[i % wheelItemsList.length];
+        csgoStrip.appendChild(createItemCardNode(item, i));
     }
-
-    const arcAngle = (2 * Math.PI) / len;
-    const neonColors = ['#0f0f0f', '#161616', '#0a0a0a', '#1c1c1c']; 
-
-    itemsArray.forEach((item, i) => {
-        const angle = i * arcAngle;
-        
-        // 1. วาดชิ้นส่วนเค้กของแต่ละช่องรางวัล
-        ctx.fillStyle = neonColors[i % neonColors.length];
-        ctx.beginPath(); ctx.moveTo(center, center);
-        ctx.arc(center, center, center - 5, angle, angle + arcAngle); ctx.lineTo(center, center); ctx.fill();
-        ctx.strokeStyle = "rgba(0, 255, 255, 0.15)"; ctx.lineWidth = 1; ctx.stroke();
-
-        // 2. จัดวางตำแหน่งและพ่นข้อความรางวัล
-        ctx.save(); 
-        ctx.translate(center, center); 
-        
-        // หมุนหน้ากระดาษไปที่กึ่งกลางของช่องรางวัลนั้นๆ
-        const textAngle = angle + arcAngle / 2;
-        ctx.rotate(textAngle);
-        
-        ctx.font = "bold 11px 'Kanit', sans-serif"; 
-        
-        // ตรวจสอบมุมเรเดียนเพื่อคำนวณฝั่ง ซ้าย-ขวา ของวงล้อ
-        const checkAngleRad = textAngle % (2 * Math.PI);
-        
-        // ระยะห่างในการพ่นข้อความจากจุดศูนย์กลางวงล้อ (ขยับให้บาลานซ์ ไม่ชิดขอบเกินไป)
-        const textDistanceFromCenter = 40; 
-
-        if (checkAngleRad > Math.PI / 2 && checkAngleRad < (3 * Math.PI) / 2) {
-            // 🎯 [ฝั่งซ้ายของวงล้อ] สั่งหมุนและพลิกแกนกลับมาตรงๆ เพื่อแก้บั๊กตัวหนังสือนีออนกระจกเงาจาก image_2.png
-            ctx.save();
-            ctx.rotate(Math.PI); // พลิกแกน 180 องศา
-            ctx.fillStyle = i % 2 === 0 ? "#00ffff" : "#ffffff";
-            ctx.textAlign = "left"; // ปรับให้อ่านจากซ้ายเข้าหาขอบปกติ
-            
-            let textDisplay = item.name.length > 12 ? item.name.substring(0, 10) + ".." : item.name;
-            // ดึงพิกัดติดลบเพื่อให้ข้อความถอยกลับมาอยู่ในระยะบาลานซ์ที่อ่านง่าย
-            ctx.fillText(textDisplay, -center + textDistanceFromCenter, 4);
-            ctx.restore();
-        } else {
-            // 🎯 [ฝั่งขวาของวงล้อ] วาดตัวหนังสือวิ่งเข้าหาศูนย์กลางตามทิศทางปกติ
-            ctx.fillStyle = i % 2 === 0 ? "#00ffff" : "#ffffff";
-            ctx.textAlign = "right";
-            
-            let textDisplay = item.name.length > 12 ? item.name.substring(0, 10) + ".." : item.name;
-            ctx.fillText(textDisplay, center - textDistanceFromCenter, 4);
-        }
-        
-        ctx.restore();
-    });
-
-    // วาดจุดไข่ปลานีออนตรงแกนกลางวงล้อ
-    ctx.fillStyle = "#00ffff"; ctx.beginPath(); ctx.arc(center, center, 14, 0, 2 * Math.PI); ctx.fill();
-    ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
 }
 
-// 🎨 2. ฟังก์ชันพ่นป้ายแท็กนีออนโชว์รายการของที่มีให้ลุ้นรอบวงล้อ (ฉบับซ่อนเรทเปอร์เซ็นต์ ไม่ให้ผู้ใช้เห็น)
-function renderVisibleRewardsPoolList(itemsArray) {
-    if (!userVisibleRewardsPool) return;
-    userVisibleRewardsPool.innerHTML = '';
+// 🎯 [ซ่อมแซมจุดสับขาหลอก]: บังคับฝังสีขอบล่างนีออนให้ล็อกตามชื่อมูลค่าของรางวัลจริง 
+// เพื่อไม่ให้สีกล่องดั้งเดิมเพี้ยน สลับที่ แสร้งหลอกตาแร็ปเปอร์ตอนล้อหยุดนิ่ง
+function createItemCardNode(item, index) {
+    const card = document.createElement('div');
+    let rarityClass = 'rarity-common';
     
-    if (itemsArray.length === 0) {
-        userVisibleRewardsPool.innerHTML = `<span style="color:#444; font-size:0.8rem; grid-column:1/-1; text-align:center;">⏳ ไม่มีตั๋วคูปองสแตนบายในระบบคลาวด์ขณะนี้</span>`;
-        return;
+    const rewardNameText = item.name ? item.name.toString() : "";
+    
+    if (rewardNameText.includes('300') || rewardNameText.includes('ใหญ่') || rewardNameText.includes('เสื้อ')) {
+        rarityClass = 'rarity-legendary'; // สีทองประดับค่าย
+    } else if (rewardNameText.includes('150') || rewardNameText.includes('100')) {
+        rarityClass = 'rarity-epic';      // สีม่วงแรร์
+    } else if (rewardNameText.includes('50') || rewardNameText.includes('20') || rewardNameText.includes('30')) {
+        rarityClass = 'rarity-rare';      // สีฟ้านีออน
+    } else if (rewardNameText.includes('เกลือ')) {
+        rarityClass = 'rarity-common';    // สีเทาคลาสสิก
     }
     
-    itemsArray.forEach(item => {
+    card.className = `csgo-item-card ${rarityClass}`;
+    const itemImgUrl = (item.image && item.image.trim() !== "") ? item.image : "image/ขาวใส.png";
+    card.innerHTML = `<img src="${itemImgUrl}" onerror="this.src='image/ขาวใส.png'"><p>${rewardNameText}</p>`;
+    return card;
+}
+
+function renderVisiblePool() {
+    if (!userVisibleRewardsPool) return;
+    userVisibleRewardsPool.innerHTML = '';
+    if (wheelItemsList.length === 0) {
+        userVisibleRewardsPool.innerHTML = `<span style="color:#444; font-size:0.8rem; text-align:center; width:100%;">⏳ ไม่มีไอเท็มในระบบขณะนี้</span>`;
+        return;
+    }
+    wheelItemsList.forEach(item => {
         const badge = document.createElement('span');
-        badge.className = "wheel-badge-item"; 
+        badge.className = "wheel-badge-item";
         badge.innerHTML = `🎁 <span>${item.name}</span>`;
         userVisibleRewardsPool.appendChild(badge);
     });
 }
 
-// 📡 3. ดาวเทียมคอยส่องดูถังรายการของรางวัลจาก Firebase มาปั่นหน้าล้อและลิสต์ของรางวัลแบบเรียลไทม์
-database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
-    const data = snapshot.val(); wheelItemsList = [];
-    if (data) {
-        Object.keys(data).forEach(k => { wheelItemsList.push({ id: k, ...data[k] }); });
-    }
-    drawLuckyWheelGraph(wheelItemsList);
-    renderVisibleRewardsPoolList(wheelItemsList);
-});
+function preloadAllRewardImages(itemsArray) {
+    preloadedImageCache = [];
+    itemsArray.forEach(item => {
+        if (item.image && item.image.trim() !== "") {
+            const img = new Image();
+            img.src = item.image;
+            preloadedImageCache.push(img);
+        }
+    });
+}
 
-// 📡 4. ส่องกล้องประวัติเจาะตู้เซฟส่วนตัวคลังคูปองประจำไอดีสมาชิก (พ่นการ์ดคูปองวาร์ปเป็นระเบียบสวยงาม)
 function listenToMySavedCouponsVault(uid) {
     if (!myCouponsList) return;
     database.ref(`users_rewards_vault/${uid}`).on('value', (snapshot) => {
         myCouponsList.innerHTML = '';
         const coupons = snapshot.val();
         if (!coupons) {
-            myCouponsList.innerHTML = `<div style="color:#333; text-align:center; padding-top:100px; font-size:0.85rem;">🎁 ตู้เซฟของคุณยังว่างเปล่า<br>กดสาดวงล้อฝั่งซ้ายเพื่อประเดิมรับรางวัลชิ้นแรกค่าย UDG ได้เลยคร้าบน้า BRO!</div>`;
+            myCouponsList.innerHTML = `<div style="color:#333; text-align:center; padding-top:100px; font-size:0.85rem;">🎁 ตู้เซฟของคุณยังว่างเปล่า<br>กดเปิดกล่องสุ่มสไลด์เพื่อลุ้นรับคูปองกันน้า BRO!</div>`;
             return;
         }
         Object.keys(coupons).forEach(k => {
@@ -998,20 +946,140 @@ function listenToMySavedCouponsVault(uid) {
     });
 }
 
-// 🎡 5. อัลกอริทึมคำนวณน้ำหนัก % โอกาสสุ่มได้ของแต่ละช่องรางวัลตามเรทหลังบ้านแอดมิน
-function calculateWeightedRewardIndex() {
-    let totalRateWeight = 0;
-    wheelItemsList.forEach(item => { totalRateWeight += parseFloat(item.rateWeight || 0); });
-    
-    let randomPointer = Math.random() * totalRateWeight;
-    for (let i = 0; i < wheelItemsList.length; i++) {
-        randomPointer -= parseFloat(wheelItemsList[i].rateWeight || 0);
-        if (randomPointer <= 0) return i;
+database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
+    const data = snapshot.val();
+    wheelItemsList = [];
+    if (data) {
+        Object.keys(data).forEach(k => { wheelItemsList.push({ id: k, ...data[k] }); });
     }
-    return 0;
+    preloadAllRewardImages(wheelItemsList); 
+    buildInitialCsgoStrip();
+    renderVisiblePool();
+});
+
+// 🎬 มอเตอร์ฟิสิกส์แอนิเมชันล็อกพิกเซลคงที่ (คุมหน้ากากตู้กว้าง 420px จุดศูนย์กลางขีดแดงคือ 210px เสมอ)
+function corePhysicsCaseSpin(winnerItem) {
+    return new Promise((resolve) => {
+        if (!csgoStrip) return resolve();
+        
+        csgoStrip.style.transition = 'none';
+        csgoStrip.style.transform = 'translateX(0px)';
+        csgoStrip.innerHTML = '';
+
+        const totalItemsInSpin = 60;   
+        const targetStopCardIndex = 45; // ล็อกเป้าของรางวัลผู้ชนะเด็ดขาดไว้ที่ขบวนใบที่ 45
+
+        for (let i = 0; i < totalItemsInSpin; i++) {
+            let currentItem;
+            if (i === targetStopCardIndex) {
+                currentItem = winnerItem; // บรรจุของรางวัลจริงที่คำนวณได้ลงพิกัดตรวจเป้าแดง
+            } else {
+                currentItem = wheelItemsList[Math.floor(Math.random() * wheelItemsList.length)];
+            }
+            csgoStrip.appendChild(createItemCardNode(currentItem, i));
+        }
+
+        // โครงหน้ากากกว้าง 420px แน่นอน กึ่งกลางขีดแดงคือ 210px คงที่
+        const centerMarkerLine = 210;
+        
+        // 📐 บังคับทิศทางจอด: ให้ขีดแดงผ่าใจกลางหน้าการ์ดกว้าง 130px แบบพอดี (ครึ่งการ์ดคือ 65px)
+        // บวกลบค่าแกว่งสั่นของลูกศรเล็กน้อยช่วงแคบระนาบมิลลิเมตร (+-4px) เพื่อให้ภาพสมจริงโดยไม่หลุดขอบข้าง
+        const exactCenterOfTargetCard = 65 + (Math.floor(Math.random() * 8) - 4);
+        const finalStopX = -((targetStopCardIndex * CARD_WIDTH) + exactCenterOfTargetCard - centerMarkerLine);
+
+        // 🛡️ ดักเซฟตี้หน่วงเวลา 100ms เพื่อให้เบราว์เซอร์คำนวณสัดส่วน HTML และ Cache รูปภาพนิ่งกริบก่อนเริ่มออกตัววิ่ง
+        setTimeout(() => {
+            csgoStrip.style.transition = 'transform 6.5s cubic-bezier(0.1, 0.85, 0.15, 1)';
+            csgoStrip.style.transform = `translateX(${finalStopX}px)`;
+        }, 100);
+
+        setTimeout(() => { resolve(); }, 6800);
+    });
 }
 
-// 💥 6. ปุ่มคลิกเปิด-ปิด หน้าต่าง Pop-up สับตัวเลือกค่ายและสับสวิตช์ Dropdown Sign Out (จัดคิวระเบียบไร้เด้งเบิ้ล)
+// 🔬 ปุ่มทดลองสุ่ม (TEST SPIN) - บังคับซิงค์ตัวแปรชิ้นเดียวกันเปิดแจ้งเตือน
+if (demoSpinBtn) {
+    demoSpinBtn.addEventListener('click', async () => {
+        if (isCaseSpinning || wheelItemsList.length === 0) return;
+
+        isCaseSpinning = true;
+        demoSpinBtn.innerText = "TEST SPINNING...";
+        openCaseBtn.style.opacity = '0.5';
+
+        const mockWinnerIndex = Math.floor(Math.random() * wheelItemsList.length);
+        const actualWinnerItem = wheelItemsList[mockWinnerIndex];
+
+        await corePhysicsCaseSpin(actualWinnerItem);
+
+        // ดึงชื่อไอเท็มจากดาต้าก้อนเดียวกันผุดคำเตือน Pop-up ตรงล็อกหมดปัญหาไม่ตรงปกถาวร
+        await showErrorAlert("🔬 DEMO SPIN RESULTS", `[โหมดทดลองหมุนเล่นเพื่อความบันเทิง]<br>กล่องสุ่มดร็อปได้ไอเท็มตัวอย่าง:<br><strong style="color:#00ffff; font-size:1.25rem;">[ ${actualWinnerItem.name} ]</strong><br><br><span style="color:#666; font-size:0.8rem;">*ระบบซิงค์รหัสสี Layout และค่าแปรผันตรงล็อก 100% แล้วครับน้า*</span>`, true);
+
+        buildInitialCsgoStrip();
+        isCaseSpinning = false;
+        demoSpinBtn.innerHTML = `<i class="fa-solid fa-flask"></i> TEST SPIN`;
+        openCaseBtn.style.opacity = '1';
+    });
+}
+
+// 🎰 ปุ่มเปิดกล่องลุ้นโชคจริง (ระบบเซสชันคูลดาวน์วันละครั้งพ่วงความปลอดภัยเดิม)
+if (openCaseBtn) {
+    openCaseBtn.addEventListener('click', async () => {
+        const currentUser = firebase.auth().currentUser;
+        if (!currentUser) {
+            showErrorAlert("ACCESS DENIED", "❌ YOU MUST LOGIN FIRST!<br>กรุณากดล็อกอินสมาชิกด้านบนสุดเพื่อสุ่มรับสิทธิ์ของรางวัลจริงประจำวันครับน้า!");
+            return;
+        }
+        if (isCaseSpinning || wheelItemsList.length === 0) return;
+
+        const uid = currentUser.uid;
+        const displayName = currentUser.displayName || "MEMBER UDG";
+        const todayKey = new Date().toDateString();
+
+        const checkSnapshot = await database.ref(`users_wheel_cooldown/${uid}/${todayKey}`).once('value');
+        if (checkSnapshot.exists()) {
+            showErrorAlert("DAILY LIMIT REACHED", "❌ วันนี้น้ากดรับสิทธิ์เปิดกล่องไปแล้วครับ!<br>จำกัดสิทธิ์สุ่มเปิดกล่องวันละ 1 ครั้ง พรุ่งนี้ค่อยแวะมาแก้ตัวใหม่น้า BRO", false);
+            return;
+        }
+
+        isCaseSpinning = true;
+        openCaseBtn.innerText = "OPENING CASE...";
+        if (demoSpinBtn) demoSpinBtn.style.opacity = '0.5';
+
+        // คำนวณเรทโอกาสดร็อปแรนดอม % จากถังคลาวด์หลังบ้านแอดมินสูตรเดิม
+        let totalRateWeight = 0;
+        wheelItemsList.forEach(item => { totalRateWeight += parseFloat(item.rateWeight || 0); });
+        let randomPointer = Math.random() * totalRateWeight;
+        let targetWinnerIndex = 0;
+        for (let i = 0; i < wheelItemsList.length; i++) {
+            randomPointer -= parseFloat(wheelItemsList[i].rateWeight || 0);
+            if (randomPointer <= 0) { targetWinnerIndex = i; break; }
+        }
+        
+        const finalWinnerItem = wheelItemsList[targetWinnerIndex];
+
+        // รันแถบขบวนติดความเร็ว
+        await corePhysicsCaseSpin(finalWinnerItem);
+
+        database.ref(`users_wheel_cooldown/${uid}/${todayKey}`).set({ spun: true, timestamp: Date.now() });
+        
+        const randomSecretCode = "UDG-" + Math.random().toString(36).substring(2, 7).toUpperCase();
+        database.ref(`users_rewards_vault/${uid}`).push({
+            rewardName: finalWinnerItem.name,
+            userName: displayName,
+            ticketId: randomSecretCode,
+            wonTimestamp: Date.now()
+        });
+
+        await showErrorAlert("🏆 CASE UNBOXED COMPLETED", `ยินดีด้วยครับน้าบักหำทิว! ได้ของรางวัลตรงปกตรงใจ:<br><strong style="color:#fff000; font-size:1.3rem;">[ ${finalWinnerItem.name} ]</strong><br><br>รหัสคูปอง CODE ลับยืนยันสิทธิ์: <strong style="color:#00ffff; font-family:monospace;">${randomSecretCode}</strong><br>ระบบอัปเดตใส่ตู้เซฟฝั่งขวาจอเรียบร้อย แคปหน้าจอส่งไปเคลมสิทธิ์ที่ไอจีได้เลยครับ! 🔥`, true);
+
+        buildInitialCsgoStrip();
+        isCaseSpinning = false;
+        openCaseBtn.innerHTML = `<i class="fa-solid fa-box-open"></i> OPEN CASE`;
+        if (demoSpinBtn) demoSpinBtn.style.opacity = '1';
+    });
+}
+
+// 🚪 GATEKEEPER MECHANICS: LOGIN / OUT SESSIONS
 if (openAuthModalBtn && authProviderModal && closeAuthModalBtn) {
     openAuthModalBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1024,19 +1092,13 @@ if (openAuthModalBtn && authProviderModal && closeAuthModalBtn) {
             authProviderModal.classList.add('active'); 
         }
     });
-    closeAuthModalBtn.addEventListener('click', () => {
-        authProviderModal.classList.remove('active'); 
-    });
+    closeAuthModalBtn.addEventListener('click', () => { authProviderModal.classList.remove('active'); });
 }
 
-document.addEventListener('click', () => {
-    if (userDropdownMenu) userDropdownMenu.style.display = 'none';
-});
+document.addEventListener('click', () => { if (userDropdownMenu) userDropdownMenu.style.display = 'none'; });
 
-// 🎯 7. เมื่อการยืนยันตัวตน Google / Facebook สำเร็จแปลงสภาพปุ่มหลักพร้อมดึงอวตารผู้ใช้ทันที
 function handleAuthSuccess(userObj) {
     if (!userObj) return;
-    
     const displayName = userObj.displayName || "ANONYMOUS";
     const photoURL = userObj.photoURL || "";
 
@@ -1046,7 +1108,7 @@ function handleAuthSuccess(userObj) {
     }
     
     if (openAuthModalBtn) {
-    let displayContent = "";
+        let displayContent = "";
         if (photoURL && photoURL !== "") {
             displayContent = `
                 <img src="${photoURL}" class="user-nav-avatar" alt="${displayName}">
@@ -1068,12 +1130,9 @@ function handleAuthSuccess(userObj) {
         graffitiName.value = displayName.replace(/\s+/g, ''); 
     }
 
-    setTimeout(() => {
-        if (authProviderModal) authProviderModal.classList.remove('active');
-    }, 1200);
+    setTimeout(() => { if (authProviderModal) authProviderModal.classList.remove('active'); }, 1200);
 }
 
-// 🚪 8. ปุ่มกด SIGN OUT ออกจากระบบคืนปุ่มล็อกอินเคลียร์เซสชันบอร์ดลื่นไหล
 if (signOutBtn) {
     signOutBtn.addEventListener('click', async () => {
         try {
@@ -1096,89 +1155,9 @@ if (signOutBtn) {
     });
 }
 
-// 🎰 9. มอเตอร์วงล้อนำโชค (เวอร์ชัน Fluid-Spin: หน่วงนุ่มนวล คลานเข้าเส้นชัยสัมพันธ์วิประกาศผล)
-if (spinWheelBtn) {
-    spinWheelBtn.addEventListener('click', async () => {
-        const currentUser = firebase.auth().currentUser;
-        
-        if (!currentUser) {
-            showErrorAlert("ACCESS DENIED", "❌ YOU MUST LOGIN FIRST!<br>(น้าต้องเข้าสู่ระบบล็อกอินด้านบนสุดเว็บก่อน จึงจะได้รับสิทธิ์กดสุ่มรับคูปองส่วนลดประจำวันครับ BRO!)");
-            return;
-        }
-        if (isWheelSpinning) return;
-        if (wheelItemsList.length === 0) { alert("❌ วงล้อระบบคลาวด์ยังว่างเปล่า รอแอดมินสาดรางวัลก่อนครับน้า"); return; }
-
-        const uid = currentUser.uid;
-        const displayName = currentUser.displayName || "ANONYMOUS USER"; 
-        const todayKey = new Date().toDateString(); 
-
-        const checkSnapshot = await database.ref(`users_wheel_cooldown/${uid}/${todayKey}`).once('value');
-        if (checkSnapshot.exists()) {
-            showErrorAlert("DAILY LIMIT REACHED", "❌ LIMIT 1 SPIN PER DAY!<br>(น้ากดสุ่มรางวัลประจำวันนี้ไปเรียบร้อยแล้ว จำกัดหมุนได้ 1 ครั้งต่อวัน พรุ่งนี้แวะมาลุ้นแต้มลดราคาชุดใหม่นะคร้าบน้า BRO!)");
-            return;
-        }
-
-        // 🚨 สตาร์ทเครื่องยนต์ระบบความมันส์
-        isWheelSpinning = true;
-        spinWheelBtn.style.opacity = '0.5'; 
-        spinWheelBtn.innerText = "LUCKY SPINNING...";
-
-        // 1. คำนวณหาช่องรางวัลที่ถูกล็อกเรทมาจากระบบแอดมินหลังบ้าน
-        const targetIndex = calculateWeightedRewardIndex();
-        const targetRewardItem = wheelItemsList[targetIndex];
-
-        // 2. คำนวณพิกัดมุมองศาหลบฉากจับโป๊ะ
-        const itemCount = wheelItemsList.length;
-        const arcAngle = 360 / itemCount;
-        
-        // สั่งคำนวณให้เข็มหมุดตกลงไปกึ่งกลางช่องของรางวัลนั้นๆ พอดีเป๊ะ
-        const targetAngleDeg = (targetIndex * arcAngle) + (arcAngle / 2);
-        
-        // 🎯 สุ่มรอบหมุนฟรีแถมให้ระหว่าง 6-10 รอบ (Math.random) เพื่อไม่ให้ล้อหมุนเป็นระยะทางเท่ากันทุกครั้ง คนหมุนจะได้เดาทางไม่ได้
-        const randomExtraRounds = Math.floor(Math.random() * 5) + 6; 
-        const stopAngleDeg = 270 - targetAngleDeg; 
-        const totalRotationDeg = (randomExtraRounds * 360) + stopAngleDeg; 
-
-        // ยิงเอฟเฟกต์ CSS สั่งหมุนสะบัดล้อจี๋รัวๆ ยาวๆ 6 วินาที
-        luckyWheelCanvas.style.transition = 'transform 6s cubic-bezier(0.1, 0.8, 0.1, 1)';
-        luckyWheelCanvas.style.transform = `rotate(${totalRotationDeg}deg)`;
-
-        // 3. 🎯 ดักจับคู่สายสัมพันธ์: หน่วงเวลาฟังก์ชันประกาศรางวัลไปที่ 6.2 วินาที (ให้ล้อหยุดสไลด์นิ่งสนิทคาช่องก่อน 0.2 วิ ค่อยเด้งป๊อปอัป)
-        setTimeout(async () => {
-            // บันทึกสถานะล็อกคูลดาวน์กันวนลูปสุ่มซ้ำ
-            database.ref(`users_wheel_cooldown/${uid}/${todayKey}`).set({ spun: true, timestamp: Date.now() });
-
-            // เจนรหัสตั๋วลับไซเบอร์สุ่ม 5 หลักกันคนก็อปปี้
-            const randomSecretCode = "UDG-" + Math.random().toString(36).substring(2, 7).toUpperCase();
-
-            // ส่งข้อมูลคูปองพ่วงรหัสตั๋วและชื่อจริงโปรไฟล์บันทึกขึ้นระบบคลาวด์ส่วนกลาง
-            database.ref(`users_rewards_vault/${uid}`).push({
-                rewardName: targetRewardItem.name,
-                userName: displayName, 
-                ticketId: randomSecretCode, 
-                wonTimestamp: Date.now()
-            });
-
-            // หน้าต่างแจ้งเตือนความปังเด้งประกาศผลแบบแมตช์จังหวะเป๊ะๆ
-            await showErrorAlert("🏆 CONGRATULATIONS!", `ยินดีด้วยคร้าบน้า! น้านำโชคสุ่มได้รับรางวัล:<br><strong style="color:#00ffff; font-size:1.3rem;">[ ${targetRewardItem.name} ]</strong><br><br>รหัสยืนยันตัวตนตั๋วของคุณคือ: <strong style="color:#fff000; font-family:monospace; font-size:1.1rem;">${randomSecretCode}</strong><br>ระบบบันทึกเข้าตู้เซฟฝั่งขวาจอเรียบร้อยแล้วครับ BRO! 🔥`);
-
-            // คืนค่าองศาฐานกลับมาแบบเนียนสนิท ไร้รอยกระตุกดีดกลับ
-            isWheelSpinning = false;
-            luckyWheelCanvas.style.transition = 'none';
-            luckyWheelCanvas.style.transform = `rotate(${stopAngleDeg % 360}deg)`;
-            
-            spinWheelBtn.style.opacity = '1'; 
-            spinWheelBtn.innerText = "SPIN NOW";
-
-        }, 6200); // ดีเลย์บวกเผื่อให้ล้อสไลด์เข้านิ่งกริบพอดี บาลานซ์สุดเฉียบ
-    });
-}
-
-
-// 💥 10. ระบบยิงป๊อปอัปดักรับผลล็อกอิน Google Sign-in
 if (loginGoogleBtn) {
     loginGoogleBtn.addEventListener('click', () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
+        const provider = new firebase.auth().GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
         firebase.auth().signInWithPopup(provider)
             .then((result) => { handleAuthSuccess(result.user); })
@@ -1192,10 +1171,9 @@ if (loginGoogleBtn) {
     });
 }
 
-// 💥 11. ระบบยิงป๊อปอัปดักรับผลล็อกอิน Facebook Sign-in
 if (loginFacebookBtn) {
     loginFacebookBtn.addEventListener('click', () => {
-        const provider = new firebase.auth.FacebookAuthProvider();
+        const provider = new firebase.auth().FacebookAuthProvider();
         firebase.auth().signInWithPopup(provider)
             .then((result) => { handleAuthSuccess(result.user); })
             .catch((error) => {
@@ -1208,13 +1186,12 @@ if (loginFacebookBtn) {
     });
 }
 
-// 🎯 12. จดจำเซสชัน Auto-Login คาสายสัญญาณรีเฟรชหน้าจอออโต้
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         handleAuthSuccess(user);
         listenToMySavedCouponsVault(user.uid);
     } else {
-        if (myCouponsList) myCouponsList.innerHTML = `<div style="color:#333; text-align:center; padding-top:60px; font-size:0.85rem;">⏳ กรุณาล็อกอินเพื่อเปิดใช้งานตู้เซฟประวัติส่วนตัวของคุณ...</div>`;
+        if (myCouponsList) myCouponsList.innerHTML = `<div style="color:#333; text-align:center; padding-top:60px; font-size:0.85rem;">⏳ กรุณาล็อกอินสมาชิกเพื่อเปิดใช้งานตู้เซฟ...</div>`;
     }
 });
 

@@ -332,10 +332,11 @@ database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
     if (!wheelTbody) return;
     wheelTbody.innerHTML = '';
     const items = snapshot.val();
-    if (!items) {
-        wheelTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center;">🎡 บอร์ดตารางวงล้อยังว่างเปล่า สาดของรางวัลลดราคาชิ้นใหม่บรรทัดบนได้เลยคร้าบน้าบักหำทิว!</td></tr>`;
-        return;
-    }
+   // เปลี่ยนข้อความแจ้งเตือนตอนตารางว่างเปล่า และตอนสรุปผลรวม %
+if (!items) {
+    wheelTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center;">📦 บอร์ดรายการกล่องสุ่มยังว่างเปล่า สาดของรางวัลชิ้นใหม่บรรทัดบนได้เลยคร้าบน้าบักหำทิว!</td></tr>`;
+    return;
+}
     let totalRateChecked = 0;
     Object.keys(items).forEach(key => {
         const item = items[key];
@@ -359,25 +360,35 @@ database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
 document.getElementById('addWheelItemBtn').addEventListener('click', () => {
     const name = document.getElementById('newWheelName').value.trim();
     const rate = document.getElementById('newWheelRate').value.trim();
+    
+    // 🎯 ดักจับดึงค่าจากช่องกรอก URL รูปภาพไอเท็มที่น้าเพิ่มเข้ามาใหม่
+    const imgUrl = document.getElementById('newWheelImg').value.trim();
+    
     if (!name || !rate) {
-        alert("❌ แจ้งเตือนแอดมิน: กรุณากรอกชื่อของรางวัล/รหัสคูปอง และระบุเลขเปอร์เซ็นต์เรทให้ครบถ้วนก่อนคร้าบน้า!");
+        alert("❌ แจ้งเตือนแอดมิน: กรุณากรอกชื่อของรางวัล และระบุเลขเปอร์เซ็นต์เรทให้ครบถ้วนก่อนคร้าบน้า!");
         return;
     }
+    
+    // ส่งข้อมูล Payload ขึ้นฐานข้อมูลชุดเดิม แต่พ่วงตัวแปร image ยัดเข้าไปด้วย
     database.ref('udg_lucky_wheel_rewards').push({
         name: name,
         rateWeight: parseFloat(rate),
+        image: imgUrl ? imgUrl : "", // ถ้าน้าไม่ได้กรอก ลระบบจะเซ็ตค่าว่างเพื่อเอาไว้สลับเป็นภาพ Standby หน้าบ้าน
         timestamp: Date.now()
     }, (error) => {
         if (!error) {
+            // ล้างเคลียร์ขยะออกจากกล่องรับข้อความเมื่อแอดมินกดสาดสำเร็จ
             document.getElementById('newWheelName').value = '';
             document.getElementById('newWheelRate').value = '';
-            alert(`🔥 สาดของรางวัล "${name}" เข้าสู่ช่องวงล้อหน้าบ้านเรียบร้อยคร้าบน้าบักหำทิว!`);
+            document.getElementById('newWheelImg').value = ''; // 👈 เคลียร์ช่องรูปภาพตัวใหม่ด้วยครับน้า
+            alert(`🔥 สาดของรางวัล "${name}" พร้อมรูปภาพเข้าสู่กล่องสุ่มหน้าบ้านเรียบร้อยคร้าบน้าบักหำทิว!`);
         }
     });
 });
 
+// เปลี่ยนข้อความแจ้งเตือนตอนจะกดลบไอเท็มออกจากกล่อง
 function removeRewardFromWheelCloud(key) {
-    if (confirm("แจ้งเตือนแอดมิน UDG: คุณต้องการลบรางวัลไอเท็มชิ้นนี้ออกจากช่องสุ่มบนวงล้อหน้าบ้านใช่หรือไม่?")) {
+    if (confirm("แจ้งเตือนแอดมิน UDG: คุณต้องการลบรางวัลไอเท็มชิ้นนี้ออกจากกล่องสุ่มหน้าบ้านใช่หรือไม่?")) {
         database.ref(`udg_lucky_wheel_rewards/${key}`).remove();
     }
 }

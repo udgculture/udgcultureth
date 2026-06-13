@@ -1832,3 +1832,122 @@ footer {
         height: 280px !important;
     }
 }
+
+/* =================================================================
+   🚨 CS:GO ROULETTE INTEGRATED STYLE (ยัดรวมเข้าหน้าหลัก)
+================================================================= */
+.csgo-roulette-wrapper {
+    position: relative;
+    width: 100%;
+    height: 160px;
+    background: #090909;
+    border: 2px solid #222;
+    box-shadow: inset 0 0 25px rgba(0,0,0,0.9), 0 0 15px rgba(0, 255, 255, 0.05);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+/* เส้นเป้าเล็งสีแดงสดตรงกลางกล่อง */
+.csgo-pointer {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 100%;
+    background: #ff3333;
+    box-shadow: 0 0 12px #ff3333;
+    z-index: 15;
+}
+
+/* สายพานขบวนการ์ดรางวัล */
+.csgo-strip {
+    display: flex;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: max-content;
+    align-items: center;
+    padding-left: 50%; /* เซ็ตจุดศูนย์กลางตั้งต้น */
+    will-change: transform;
+}
+
+/* =================================================================
+   🎰 ตู้สไลด์ CS:GO - ขอบชิดติดกันหนารัวๆ ล็อกสเกลถาวร (style.css)
+================================================================= */
+.csgo-item-card {
+    width: 130px !important;    /* 🎯 บังคับบล็อกหน้านิ้วกว้างคงที่ถาวร */
+    height: 130px !important;   /* บังคับความสูงคงที่ */
+    margin: 0 !important;       /* ขอบชนชิดติดกันสนิทไร้ช่องร่องห่าง */
+    padding: 8px !important;    /* คุมช่องไฟข้างในไม่ให้เบียดกระดอน */
+    background: linear-gradient(180deg, #0d0d0d 0%, #050505 100%) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;   /* 🎯 คีย์สำคัญที่สุด: ห้ามเบราว์เซอร์อุปกรณ์ใดๆ สั่งหดหน้าการ์ดเด็ดขาด */
+    text-align: center !important;
+    box-sizing: border-box !important;
+    
+    /* สาดเส้นขอบหนา 2px รัวๆ และเน้นด้านซ้ายขวาเพิ่มมิติขอบคั่นกล่องถี่ๆ สะใจแบบในเกม */
+    border: 2px solid #252525 !important; 
+    border-left: 3px solid #1a1a1a !important;
+    border-right: 3px solid #1a1a1a !important;
+    border-bottom: 5px solid #444 !important; /* พื้นฐานสีขอบล่าง */
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8) !important; 
+}
+
+.csgo-item-card img {
+    width: 65px !important;
+    height: 65px !important;
+    object-fit: contain !important;
+    margin-bottom: 6px !important;
+    filter: drop-shadow(0 0 6px rgba(255,255,255,0.1));
+}
+
+.csgo-item-card p {
+    font-size: 0.72rem !important;
+    color: #aaa !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+/* แถบไฟสีบอกระดับความแรร์ขอบล่างการ์ดซิงค์ตามดาต้าภาพ */
+.rarity-common { border-bottom-color: #555555 !important; }
+.rarity-rare { border-bottom-color: #00ffff !important; background: linear-gradient(180deg, #051a1d 0%, #040404 100%) !important; }
+.rarity-epic { border-bottom-color: #cc00ff !important; background: linear-gradient(180deg, #17051d 0%, #040404 100%) !important; }
+.rarity-legendary { border-bottom-color: #fff000 !important; background: linear-gradient(180deg, #1d1b05 0%, #040404 100%) !important; }
+
+@media (max-width: 768px) {
+    .csgo-control-buttons { flex-direction: column; align-items: center; width: 100%; }
+    #demoSpinBtn, #openCaseBtn { width: 100% !important; }
+}
+/* @media (max-width: 768px) {
+    .csgo-roulette-wrapper { height: 135px; }
+    .csgo-item-card { width: 110px; height: 110px; }
+    .csgo-item-card img { width: 45px; height: 45px; }
+    .csgo-control-buttons { flex-direction: column; align-items: center; width: 100%; }
+    #demoSpinBtn, #openCaseBtn { width: 100% !important; }
+} */
+
+/* 📸 จัดระเบียบขนาดรูปภาพไอเท็มในกล่องสไลด์ CS:GO */
+.csgo-item-card img {
+    width: 70px;          /* ปรับความกว้างให้เหมาะสมพอดีการ์ด */
+    height: 70px;         /* ล็อกความสูงจัตุรัส */
+    object-fit: contain;  /* บังคับไม่ให้รูปบิดเบี้ยวทรงสัดส่วน */
+    margin-bottom: 6px;   /* เว้นระยะห่างจากตัวหนังสือด้านล่าง */
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.3)); /* เอฟเฟกต์แสงเรืองแสงรอบตัวไอเท็มรางวัล */
+    transition: transform 0.2s ease;
+}
+
+/* ตอนสไลด์ผ่าน หรือเมาส์ชี้ให้รูปขยับเด้งนิด ๆ เพิ่มมิติเกมเมอร์ */
+.csgo-item-card:hover img {
+    transform: scale(1.1) translateY(-2px);
+    filter: drop-shadow(0 0 12px var(--accent-color));
+}
