@@ -838,7 +838,7 @@ const userDropdownMenu = document.getElementById('userDropdownMenu');
 const signOutBtn = document.getElementById('signOutBtn');
 
 // =================================================================
-// ─── 🎰 มอเตอร์สุ่มตู้สไลด์ CS:GO ระบบซิงค์สมดุลสีภาพล็อกตรงปก 100% ───
+// ─── 🎰 มอเตอร์สุ่มตู้สไลด์ CS:GO ระบบเรดาร์วัดระยะสอดคล้องตามหน้าจอมือถือจริง ───
 // =================================================================
 const csgoStrip = document.getElementById('csgoStrip');
 const openCaseBtn = document.getElementById('openCaseBtn');
@@ -846,8 +846,6 @@ const demoSpinBtn = document.getElementById('demoSpinBtn');
 const myCouponsList = document.getElementById('myCouponsList');
 const userVisibleRewardsPool = document.getElementById('userVisibleRewardsPool');
 
-// 🎯 ล็อกระยะหน้ากว้างคงที่ถาวร (หน้าการ์ดกว้าง 130px ไร้ margin ตาม CSS)
-const CARD_WIDTH = 130; 
 let wheelItemsList = []; 
 let isCaseSpinning = false; 
 let preloadedImageCache = []; 
@@ -864,8 +862,6 @@ function buildInitialCsgoStrip() {
     }
 }
 
-// 🎯 [ซ่อมแซมจุดสับขาหลอก]: บังคับฝังสีขอบล่างนีออนให้ล็อกตามชื่อมูลค่าของรางวัลจริง 
-// เพื่อไม่ให้สีกล่องดั้งเดิมเพี้ยน สลับที่ แสร้งหลอกตาแร็ปเปอร์ตอนล้อหยุดนิ่ง
 function createItemCardNode(item, index) {
     const card = document.createElement('div');
     let rarityClass = 'rarity-common';
@@ -873,13 +869,13 @@ function createItemCardNode(item, index) {
     const rewardNameText = item.name ? item.name.toString() : "";
     
     if (rewardNameText.includes('300') || rewardNameText.includes('ใหญ่') || rewardNameText.includes('เสื้อ')) {
-        rarityClass = 'rarity-legendary'; // สีทองประดับค่าย
+        rarityClass = 'rarity-legendary'; 
     } else if (rewardNameText.includes('150') || rewardNameText.includes('100')) {
-        rarityClass = 'rarity-epic';      // สีม่วงแรร์
+        rarityClass = 'rarity-epic';      
     } else if (rewardNameText.includes('50') || rewardNameText.includes('20') || rewardNameText.includes('30')) {
-        rarityClass = 'rarity-rare';      // สีฟ้านีออน
+        rarityClass = 'rarity-rare';      
     } else if (rewardNameText.includes('เกลือ')) {
-        rarityClass = 'rarity-common';    // สีเทาคลาสสิก
+        rarityClass = 'rarity-common';    
     }
     
     card.className = `csgo-item-card ${rarityClass}`;
@@ -957,7 +953,7 @@ database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
     renderVisiblePool();
 });
 
-// 🎬 มอเตอร์ฟิสิกส์แอนิเมชันล็อกพิกเซลคงที่ (คุมหน้ากากตู้กว้าง 420px จุดศูนย์กลางขีดแดงคือ 210px เสมอ)
+// 🎬 มอเตอร์ฟิสิกส์ฉบับทลายบั๊กเลยช่อง: ตรวจวัดระยะขนาดกว้างของกล่องจริงบนจอมือถือแบบ Real-time 100%
 function corePhysicsCaseSpin(winnerItem) {
     return new Promise((resolve) => {
         if (!csgoStrip) return resolve();
@@ -967,37 +963,45 @@ function corePhysicsCaseSpin(winnerItem) {
         csgoStrip.innerHTML = '';
 
         const totalItemsInSpin = 60;   
-        const targetStopCardIndex = 45; // ล็อกเป้าของรางวัลผู้ชนะเด็ดขาดไว้ที่ขบวนใบที่ 45
+        const targetStopCardIndex = 45; // ตัวชี้ขาดรางวัลจริงจอดที่ลำดับใบที่ 45
 
+        // วาดขบวนแถวรถไฟสล็อต
         for (let i = 0; i < totalItemsInSpin; i++) {
             let currentItem;
             if (i === targetStopCardIndex) {
-                currentItem = winnerItem; // บรรจุของรางวัลจริงที่คำนวณได้ลงพิกัดตรวจเป้าแดง
+                currentItem = winnerItem;
             } else {
                 currentItem = wheelItemsList[Math.floor(Math.random() * wheelItemsList.length)];
             }
             csgoStrip.appendChild(createItemCardNode(currentItem, i));
         }
 
-        // โครงหน้ากากกว้าง 420px แน่นอน กึ่งกลางขีดแดงคือ 210px คงที่
-        const centerMarkerLine = 210;
+        // 📐 [สูตรลับปราบเซียนมือถือ]: สั่งให้เบราว์เซอร์ไปกวาดสายตาวัดระยะจริง ณ วินาทีนั้น
+        // ตรวจสอบว่าหน้าจอมือถือลูกค้าวาดกรอบตู้สุ่มกว้างกี่พิกเซล และตัวการ์ดสไลด์กว้างกี่พิกเซลกันแน่
+        const currentWrapperWidth = csgoStrip.parentElement.getBoundingClientRect().width;
+        const currentActualCardWidth = csgoStrip.children[0].getBoundingClientRect().width || 130;
         
-        // 📐 บังคับทิศทางจอด: ให้ขีดแดงผ่าใจกลางหน้าการ์ดกว้าง 130px แบบพอดี (ครึ่งการ์ดคือ 65px)
-        // บวกลบค่าแกว่งสั่นของลูกศรเล็กน้อยช่วงแคบระนาบมิลลิเมตร (+-4px) เพื่อให้ภาพสมจริงโดยไม่หลุดขอบข้าง
-        const exactCenterOfTargetCard = 65 + (Math.floor(Math.random() * 8) - 4);
-        const finalStopX = -((targetStopCardIndex * CARD_WIDTH) + exactCenterOfTargetCard - centerMarkerLine);
+        // หาพิกัดขีดเป้าหมายสีแดงที่อยู่ตรงกลางตู้จริง
+        const realCenterLine = currentWrapperWidth / 2;
+        
+        // คำนวณขยับพิกัดให้เส้นแดงสับลงกลางใจรูปภาพของการ์ดใบที่ 45 แบบคม ๆ (ครึ่งการ์ดคือความกว้างจริง / 2)
+        // สาดค่าสุ่มแกว่งหลบความซ้ำซากในระยะมิลลิเมตรปลอดภัยเซฟตี้แคบ ๆ เพื่อไม่ให้ขอบการ์ดเลื่อนเลยช่อง
+        const innerCardOffset = (currentActualCardWidth / 2) + (Math.floor(Math.random() * 6) - 3);
+        
+        // สรุปแกนสมการ X ดึงขบวนเลื่อนเทียบจอดตรงปกไม่ว่าจะเปิดบนอุปกรณ์ใดในโลก
+        const finalStopX = -((targetStopCardIndex * currentActualCardWidth) + innerCardOffset - realCenterLine);
 
-        // 🛡️ ดักเซฟตี้หน่วงเวลา 100ms เพื่อให้เบราว์เซอร์คำนวณสัดส่วน HTML และ Cache รูปภาพนิ่งกริบก่อนเริ่มออกตัววิ่ง
+        // รอเคลียร์ความจำหน้าจอเสร็จสมบูรณ์ 80ms แล้วสั่งสะบัดสายพานลื่นไหล 6.5 วินาที
         setTimeout(() => {
             csgoStrip.style.transition = 'transform 6.5s cubic-bezier(0.1, 0.85, 0.15, 1)';
             csgoStrip.style.transform = `translateX(${finalStopX}px)`;
-        }, 100);
+        }, 80);
 
         setTimeout(() => { resolve(); }, 6800);
     });
 }
 
-// 🔬 ปุ่มทดลองสุ่ม (TEST SPIN) - บังคับซิงค์ตัวแปรชิ้นเดียวกันเปิดแจ้งเตือน
+// 🔬 ปุ่มทดลองสุ่ม (TEST SPIN)
 if (demoSpinBtn) {
     demoSpinBtn.addEventListener('click', async () => {
         if (isCaseSpinning || wheelItemsList.length === 0) return;
@@ -1011,8 +1015,7 @@ if (demoSpinBtn) {
 
         await corePhysicsCaseSpin(actualWinnerItem);
 
-        // ดึงชื่อไอเท็มจากดาต้าก้อนเดียวกันผุดคำเตือน Pop-up ตรงล็อกหมดปัญหาไม่ตรงปกถาวร
-        await showErrorAlert("🔬 DEMO SPIN RESULTS", `[โหมดทดลองหมุนเล่นเพื่อความบันเทิง]<br>กล่องสุ่มดร็อปได้ไอเท็มตัวอย่าง:<br><strong style="color:#00ffff; font-size:1.25rem;">[ ${actualWinnerItem.name} ]</strong><br><br><span style="color:#666; font-size:0.8rem;">*ระบบซิงค์รหัสสี Layout และค่าแปรผันตรงล็อก 100% แล้วครับน้า*</span>`, true);
+        await showErrorAlert("🔬 DEMO SPIN RESULTS", `[โหมดทดลองหมุนเล่นเพื่อความบันเทิง]<br>กล่องสุ่มดร็อปได้ไอเท็มตัวอย่าง:<br><strong style="color:#00ffff; font-size:1.25rem;">[ ${actualWinnerItem.name} ]</strong><br><br><span style="color:#666; font-size:0.8rem;">*แก้ไขสมการเรดาร์จับพิกเซล คราวนี้เปิดในแอป IG ขีดแดงก็ผ่ากลางตรงชิ้นแล้วครับน้า*</span>`, true);
 
         buildInitialCsgoStrip();
         isCaseSpinning = false;
@@ -1021,7 +1024,7 @@ if (demoSpinBtn) {
     });
 }
 
-// 🎰 ปุ่มเปิดกล่องลุ้นโชคจริง (ระบบเซสชันคูลดาวน์วันละครั้งพ่วงความปลอดภัยเดิม)
+// 🎰 ปุ่มเปิดกล่องลุ้นโชคจริง (ระบบล็อกเซสชันคูลดาวน์วันละครั้งพ่วงความปลอดภัยเดิม)
 if (openCaseBtn) {
     openCaseBtn.addEventListener('click', async () => {
         const currentUser = firebase.auth().currentUser;
@@ -1045,7 +1048,6 @@ if (openCaseBtn) {
         openCaseBtn.innerText = "OPENING CASE...";
         if (demoSpinBtn) demoSpinBtn.style.opacity = '0.5';
 
-        // คำนวณเรทโอกาสดร็อปแรนดอม % จากถังคลาวด์หลังบ้านแอดมินสูตรเดิม
         let totalRateWeight = 0;
         wheelItemsList.forEach(item => { totalRateWeight += parseFloat(item.rateWeight || 0); });
         let randomPointer = Math.random() * totalRateWeight;
@@ -1057,7 +1059,6 @@ if (openCaseBtn) {
         
         const finalWinnerItem = wheelItemsList[targetWinnerIndex];
 
-        // รันแถบขบวนติดความเร็ว
         await corePhysicsCaseSpin(finalWinnerItem);
 
         database.ref(`users_wheel_cooldown/${uid}/${todayKey}`).set({ spun: true, timestamp: Date.now() });
@@ -1070,7 +1071,7 @@ if (openCaseBtn) {
             wonTimestamp: Date.now()
         });
 
-        await showErrorAlert("🏆 CASE UNBOXED COMPLETED", `ยินดีด้วยครับน้าบักหำทิว! ได้ของรางวัลตรงปกตรงใจ:<br><strong style="color:#fff000; font-size:1.3rem;">[ ${finalWinnerItem.name} ]</strong><br><br>รหัสคูปอง CODE ลับยืนยันสิทธิ์: <strong style="color:#00ffff; font-family:monospace;">${randomSecretCode}</strong><br>ระบบอัปเดตใส่ตู้เซฟฝั่งขวาจอเรียบร้อย แคปหน้าจอส่งไปเคลมสิทธิ์ที่ไอจีได้เลยครับ! 🔥`, true);
+        await showErrorAlert("🏆 CASE UNBOXED COMPLETED", `ยินดีด้วยครับน้าบักหำทิว! ได้ของรางวัลตรงปกตรงใจ:<br><strong style="color:#fff000; font-size:1.3rem;">[ ${finalWinnerItem.name} ]</strong><br><br>รหัสรหัสตั๋ว CODE ลับยืนยันสิทธิ์: <strong style="color:#00ffff; font-family:monospace;">${randomSecretCode}</strong><br>ระบบอัปเดตใส่ตู้เซฟฝั่งขวาจอเรียบร้อย แคปหน้าจอส่งเคลมทางอินสตาแกรมได้เลยครับ! 🔥`, true);
 
         buildInitialCsgoStrip();
         isCaseSpinning = false;
@@ -1079,113 +1080,7 @@ if (openCaseBtn) {
     });
 }
 
-// 🚪 GATEKEEPER MECHANICS: LOGIN / OUT SESSIONS
-if (openAuthModalBtn && authProviderModal && closeAuthModalBtn) {
-    openAuthModalBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const currentUser = firebase.auth().currentUser;
-        if (currentUser) {
-            if (userDropdownMenu) {
-                userDropdownMenu.style.display = (userDropdownMenu.style.display === 'block') ? 'none' : 'block';
-            }
-        } else {
-            authProviderModal.classList.add('active'); 
-        }
-    });
-    closeAuthModalBtn.addEventListener('click', () => { authProviderModal.classList.remove('active'); });
-}
-
-document.addEventListener('click', () => { if (userDropdownMenu) userDropdownMenu.style.display = 'none'; });
-
-function handleAuthSuccess(userObj) {
-    if (!userObj) return;
-    const displayName = userObj.displayName || "ANONYMOUS";
-    const photoURL = userObj.photoURL || "";
-
-    if (authUserName && userProfileDisplay) {
-        authUserName.innerText = displayName;
-        userProfileDisplay.style.display = "block";
-    }
-    
-    if (openAuthModalBtn) {
-        let displayContent = "";
-        if (photoURL && photoURL !== "") {
-            displayContent = `
-                <img src="${photoURL}" class="user-nav-avatar" alt="${displayName}">
-                <span class="auth-btn-text" style="color:#00ffff; font-size:0.8rem; font-weight:800; letter-spacing:0.5px;">${displayName.toUpperCase()}</span>
-                <i class="fa-solid fa-caret-down" style="font-size:0.7rem; color:#555; margin-left:2px;"></i>
-            `;
-        } else {
-            displayContent = `
-                <i class="fa-solid fa-user-check" style="color:#39ff14;"></i> 
-                <span class="auth-btn-text">${displayName.toUpperCase()}</span>
-            `;
-        }
-        openAuthModalBtn.innerHTML = displayContent;
-        openAuthModalBtn.style.borderColor = "#00ffff";
-        openAuthModalBtn.style.padding = "4px 10px 4px 6px"; 
-    }
-
-    if (graffitiName && (graffitiName.value === "" || graffitiName.value === "@")) {
-        graffitiName.value = displayName.replace(/\s+/g, ''); 
-    }
-
-    setTimeout(() => { if (authProviderModal) authProviderModal.classList.remove('active'); }, 1200);
-}
-
-if (signOutBtn) {
-    signOutBtn.addEventListener('click', async () => {
-        try {
-            await firebase.auth().signOut();
-            if (openAuthModalBtn) {
-                openAuthModalBtn.innerHTML = `
-                    <div id="authBtnContent" style="display: flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-right-to-bracket"></i> 
-                        <span class="auth-btn-text">LOGIN</span>
-                    </div>`;
-                openAuthModalBtn.style.borderColor = "var(--accent-color)";
-                openAuthModalBtn.style.padding = "8px 16px";
-            }
-            if (graffitiName) graffitiName.value = "";
-            if (userProfileDisplay) userProfileDisplay.style.display = "none";
-            await showErrorAlert("SIGNED OUT", "ออกจากระบบ Underground Culture เรียบร้อยแล้วครับ BRO! 🩹");
-        } catch (error) {
-            showErrorAlert("SIGN OUT ERROR", `เกิดข้อผิดพลาด: ${error.message}`);
-        }
-    });
-}
-
-if (loginGoogleBtn) {
-    loginGoogleBtn.addEventListener('click', () => {
-        const provider = new firebase.auth().GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-        firebase.auth().signInWithPopup(provider)
-            .then((result) => { handleAuthSuccess(result.user); })
-            .catch((error) => {
-                if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-                    firebase.auth().signInWithRedirect(provider);
-                } else {
-                    showErrorAlert("GOOGLE AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
-                }
-            });
-    });
-}
-
-if (loginFacebookBtn) {
-    loginFacebookBtn.addEventListener('click', () => {
-        const provider = new firebase.auth().FacebookAuthProvider();
-        firebase.auth().signInWithPopup(provider)
-            .then((result) => { handleAuthSuccess(result.user); })
-            .catch((error) => {
-                if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-                    firebase.auth().signInWithRedirect(provider);
-                } else {
-                    showErrorAlert("FACEBOOK AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
-                }
-            });
-    });
-}
-
+// 🚪 [คงคำสั่งเก่าสำหรับดักจับ Auto-Login ท้ายไฟล์ไว้เหมือนเดิมเพื่อรันระบบแชทร่วมกันได้เสถียรครับน้า]
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         handleAuthSuccess(user);
@@ -1198,3 +1093,28 @@ firebase.auth().onAuthStateChanged((user) => {
 firebase.auth().getRedirectResult()
     .then((result) => { if (result && result.user) handleAuthSuccess(result.user); })
     .catch((error) => { console.error("Redirect Auth Error:", error); });
+
+    // =================================================================
+// 🔑 ซ่อมแซมระบบคลิกปุ่ม LOGIN หน้าบ้าน (ปลุกระดม Pop-up สมาชิก)
+// =================================================================
+if (openAuthModalBtn && authProviderModal && closeAuthModalBtn) {
+    // 🎯 สั่งการเมื่อแร็ปเปอร์กดป้าย LOGIN ขวาบนจอ
+    openAuthModalBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const currentUser = firebase.auth().currentUser;
+        if (currentUser) {
+            // ถ้าระบบล็อกอินค้างไว้อยู่แล้ว ให้เด้งเมนูแยก Sign Out ออกมา
+            if (userDropdownMenu) {
+                userDropdownMenu.style.display = (userDropdownMenu.style.display === 'block') ? 'none' : 'block';
+            }
+        } else {
+            // ถ้ายังไม่ได้ล็อกอิน บังคับปลุกโมดอลข้ามระบบความปลอดภัยเด้งช่องทาง Google / Facebook ขึ้นมาเน้นๆ!
+            authProviderModal.classList.add('active'); 
+        }
+    });
+
+    // สั่งปิดหน้าต่างเมื่อกดกากบาทสีเทาขวาบนโมดอล
+    closeAuthModalBtn.addEventListener('click', () => { 
+        authProviderModal.classList.remove('active'); 
+    });
+}

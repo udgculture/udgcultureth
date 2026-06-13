@@ -1875,27 +1875,26 @@ footer {
 }
 
 /* =================================================================
-   🎰 ตู้สไลด์ CS:GO - ขอบชิดติดกันหนารัวๆ ล็อกสเกลถาวร (style.css)
+   🎰 ตู้สไลด์ CS:GO - ขอบชิดติดหนาตัดขาดอาการเลยป้าย (style.css)
 ================================================================= */
 .csgo-item-card {
-    width: 130px !important;    /* 🎯 บังคับบล็อกหน้านิ้วกว้างคงที่ถาวร */
-    height: 130px !important;   /* บังคับความสูงคงที่ */
-    margin: 0 !important;       /* ขอบชนชิดติดกันสนิทไร้ช่องร่องห่าง */
-    padding: 8px !important;    /* คุมช่องไฟข้างในไม่ให้เบียดกระดอน */
+    width: 130px !important;    /* ล็อกขนาดหน้ากว้างพื้นฐานสำหรับการคำนวณแกน X */
+    height: 130px !important;   
+    margin: 0 !important;       /* ตัวกล่องแนบสนิทชิดขอบรัวๆ ไร้ร่องรอย */
+    padding: 8px !important;    
     background: linear-gradient(180deg, #0d0d0d 0%, #050505 100%) !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    flex-shrink: 0 !important;   /* 🎯 คีย์สำคัญที่สุด: ห้ามเบราว์เซอร์อุปกรณ์ใดๆ สั่งหดหน้าการ์ดเด็ดขาด */
+    flex-shrink: 0 !important;   /* บังคับค้ำประกัน ห้ามมือถือแอบลดขนาดการ์ดจนระบบฟิสิกส์หลุดช่อง */
     text-align: center !important;
     box-sizing: border-box !important;
     
-    /* สาดเส้นขอบหนา 2px รัวๆ และเน้นด้านซ้ายขวาเพิ่มมิติขอบคั่นกล่องถี่ๆ สะใจแบบในเกม */
     border: 2px solid #252525 !important; 
     border-left: 3px solid #1a1a1a !important;
     border-right: 3px solid #1a1a1a !important;
-    border-bottom: 5px solid #444 !important; /* พื้นฐานสีขอบล่าง */
+    border-bottom: 5px solid #444 !important; 
     box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8) !important; 
 }
 
@@ -1918,23 +1917,18 @@ footer {
     margin: 0 !important;
 }
 
-/* แถบไฟสีบอกระดับความแรร์ขอบล่างการ์ดซิงค์ตามดาต้าภาพ */
+/* รหัสกลุ่มคลาสสีความแรร์ ผูกขาดติดเข้าหาเนื้อดาต้าไอเท็มจริงหลังบ้าน */
 .rarity-common { border-bottom-color: #555555 !important; }
 .rarity-rare { border-bottom-color: #00ffff !important; background: linear-gradient(180deg, #051a1d 0%, #040404 100%) !important; }
 .rarity-epic { border-bottom-color: #cc00ff !important; background: linear-gradient(180deg, #17051d 0%, #040404 100%) !important; }
 .rarity-legendary { border-bottom-color: #fff000 !important; background: linear-gradient(180deg, #1d1b05 0%, #040404 100%) !important; }
 
+/* 📱 🎯 เคลียร์ระเบิดเวลาเดิมทิ้ง: ห้ามสั่งสเกลย่อขนาด width การ์ดลงเหลือ 110px บนมือถือเด็ดขาดเพื่อความเที่ยงตรงปก */
 @media (max-width: 768px) {
-    .csgo-control-buttons { flex-direction: column; align-items: center; width: 100%; }
-    #demoSpinBtn, #openCaseBtn { width: 100% !important; }
+    .csgo-roulette-wrapper { height: 150px !important; }
+    .csgo-item-card { height: 125px !important; } /* ย่อความสูงลงเล็กน้อยได้ แต่ห้ามแตะต้องความกว้างกว้าง 130px เด็ดขาด */
+    .csgo-control-buttons { flex-direction: row !important; }
 }
-/* @media (max-width: 768px) {
-    .csgo-roulette-wrapper { height: 135px; }
-    .csgo-item-card { width: 110px; height: 110px; }
-    .csgo-item-card img { width: 45px; height: 45px; }
-    .csgo-control-buttons { flex-direction: column; align-items: center; width: 100%; }
-    #demoSpinBtn, #openCaseBtn { width: 100% !important; }
-} */
 
 /* 📸 จัดระเบียบขนาดรูปภาพไอเท็มในกล่องสไลด์ CS:GO */
 .csgo-item-card img {
