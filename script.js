@@ -984,7 +984,7 @@ if (demoSpinBtn) {
 
         await corePhysicsCaseSpin(actualWinnerItem);
 
-        await showErrorAlert("🔬 DEMO SPIN RESULTS", `[โหมดทดลองหมุนเล่นเพื่อความบันเทิง]<br>กล่องสุ่มดร็อปได้ไอเท็มตัวอย่าง:<br><strong style="color:#00ffff; font-size:1.25rem;">[ ${actualWinnerItem.name} ]</strong><br><br><span style="color:#666; font-size:0.8rem;">*แก้ไขสมการเรดาร์จับพิกเซล คราวนี้เปิดในแอป IG ขีดแดงก็ผ่ากลางตรงชิ้นแล้วครับน้า*</span>`, true);
+        await showErrorAlert("🔬 DEMO SPIN RESULTS", `[โหมดทดลองหมุนเล่นเพื่อความบันเทิง]<br>กล่องสุ่มดร็อปได้ไอเท็มตัวอย่าง:<br><strong style="color:#00ffff; font-size:1.25rem;">[ ${actualWinnerItem.name} ]</strong><br><br><span style="color:#666; font-size:0.8rem;"></span>`, true);
 
         buildInitialCsgoStrip();
         isCaseSpinning = false;
@@ -1147,8 +1147,18 @@ if (signOutBtn) {
 if (loginGoogleBtn) {
     loginGoogleBtn.addEventListener('click', () => {
         const provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-        firebase.auth().signInWithRedirect(provider);
+        
+        // 🎯 สลับมาใช้ Popup ชั่วคราวเพื่อดักจับ Error
+        firebase.auth().signInWithPopup(provider)
+            .then((result) => {
+                console.log("🔥 ล็อกอินสำเร็จ!", result.user.displayName);
+                handleAuthSuccess(result.user);
+            })
+            .catch((error) => {
+                // 🚨 ถ้าพัง มันจะเด้งหน้าต่างแจ้งเตือนบอกสาเหตุเป๊ะๆ
+                alert("เกิดข้อผิดพลาด Auth!: " + error.code + "\n" + error.message);
+                console.error("Auth Error:", error);
+            });
     });
 }
 
