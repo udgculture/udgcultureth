@@ -15,7 +15,9 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
+// =================================================================
 // ─── 💬 ELEMENT ZONE: CYBER GRAFFITI WALL ───
+// =================================================================
 const graffitiWall = document.getElementById('graffitiWall');
 const graffitiName = document.getElementById('graffitiName');
 const graffitiInput = document.getElementById('graffitiInput');
@@ -844,6 +846,7 @@ function buildInitialCsgoStrip() {
     }
 }
 
+// 🎯 บังคับฝังสีขอบล่างนีออนให้ล็อกตามชื่อมูลค่าของรางวัลจริง 
 function createItemCardNode(item, index) {
     const card = document.createElement('div');
     let rarityClass = 'rarity-common';
@@ -934,6 +937,7 @@ database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
     renderVisiblePool();
 });
 
+// 🎬 มอเตอร์ฟิสิกส์ฉบับทลายบั๊กเลยช่อง: ตรวจวัดระยะขนาดกว้างของกล่องจริงบนจอมือถือแบบ Real-time 100%
 function corePhysicsCaseSpin(winnerItem) {
     return new Promise((resolve) => {
         if (!csgoStrip) return resolve();
@@ -943,8 +947,9 @@ function corePhysicsCaseSpin(winnerItem) {
         csgoStrip.innerHTML = '';
 
         const totalItemsInSpin = 60;   
-        const targetStopCardIndex = 45; 
+        const targetStopCardIndex = 45; // ตัวชี้ขาดรางวัลจริงจอดที่ลำดับใบที่ 45
 
+        // วาดขบวนแถวรถไฟสล็อต
         for (let i = 0; i < totalItemsInSpin; i++) {
             let currentItem;
             if (i === targetStopCardIndex) {
@@ -955,13 +960,20 @@ function corePhysicsCaseSpin(winnerItem) {
             csgoStrip.appendChild(createItemCardNode(currentItem, i));
         }
 
+        // 📐 [สูตรลับปราบเซียนมือถือ]: สั่งให้เบราว์เซอร์ไปกวาดสายตาวัดระยะจริง ณ วินาทีนั้น
         const currentWrapperWidth = csgoStrip.parentElement.getBoundingClientRect().width;
         const currentActualCardWidth = csgoStrip.children[0].getBoundingClientRect().width || 130;
         
+        // หาพิกัดขีดเป้าหมายสีแดงที่อยู่ตรงกลางตู้จริง
         const realCenterLine = currentWrapperWidth / 2;
+        
+        // คำนวณขยับพิกัดให้เส้นแดงสับลงกลางใจรูปภาพของการ์ดใบที่ 45 แบบคม ๆ
         const innerCardOffset = (currentActualCardWidth / 2) + (Math.floor(Math.random() * 6) - 3);
+        
+        // สรุปแกนสมการ X ดึงขบวนเลื่อนเทียบจอดตรงปกไม่ว่าจะเปิดบนอุปกรณ์ใดในโลก
         const finalStopX = -((targetStopCardIndex * currentActualCardWidth) + innerCardOffset - realCenterLine);
 
+        // รอเคลียร์ความจำหน้าจอเสร็จสมบูรณ์ 80ms แล้วสั่งสะบัดสายพานลื่นไหล 6.5 วินาที
         setTimeout(() => {
             csgoStrip.style.transition = 'transform 6.5s cubic-bezier(0.1, 0.85, 0.15, 1)';
             csgoStrip.style.transform = `translateX(${finalStopX}px)`;
@@ -971,6 +983,7 @@ function corePhysicsCaseSpin(winnerItem) {
     });
 }
 
+// 🔬 ปุ่มทดลองสุ่ม (TEST SPIN)
 if (demoSpinBtn) {
     demoSpinBtn.addEventListener('click', async () => {
         if (isCaseSpinning || wheelItemsList.length === 0) return;
@@ -984,7 +997,7 @@ if (demoSpinBtn) {
 
         await corePhysicsCaseSpin(actualWinnerItem);
 
-        await showErrorAlert("🔬 DEMO SPIN RESULTS", `[โหมดทดลองหมุนเล่นเพื่อความบันเทิง]<br>กล่องสุ่มดร็อปได้ไอเท็มตัวอย่าง:<br><strong style="color:#00ffff; font-size:1.25rem;">[ ${actualWinnerItem.name} ]</strong><br><br><span style="color:#666; font-size:0.8rem;"></span>`, true);
+        await showErrorAlert("🔬 DEMO SPIN RESULTS", `[โหมดทดลองหมุนเล่นเพื่อความบันเทิง]<br>กล่องสุ่มดร็อปได้ไอเท็มตัวอย่าง:<br><strong style="color:#00ffff; font-size:1.25rem;">[ ${actualWinnerItem.name} ]</strong><br><br><span style="color:#666; font-size:0.8rem;">*แก้ไขสมการเรดาร์จับพิกเซล คราวนี้เปิดในแอป IG ขีดแดงก็ผ่ากลางตรงชิ้นแล้วครับน้า*</span>`, true);
 
         buildInitialCsgoStrip();
         isCaseSpinning = false;
@@ -993,6 +1006,7 @@ if (demoSpinBtn) {
     });
 }
 
+// 🎰 ปุ่มเปิดกล่องลุ้นโชคจริง (ระบบล็อกเซสชันคูลดาวน์วันละครั้งพ่วงความปลอดภัยเดิม)
 if (openCaseBtn) {
     openCaseBtn.addEventListener('click', async () => {
         const currentUser = firebase.auth().currentUser;
@@ -1049,10 +1063,10 @@ if (openCaseBtn) {
 }
 
 // =================================================================
-// 🚪 เครื่องยนต์ล็อกอินแก้บั๊ก (ฉบับอุดรอยรั่ว 100%)
+// 🚪 เครื่องยนต์ล็อกอิน (ฉบับ Popup ทลายบั๊กข้ามโดเมน 100% + กันคลิกเบิ้ล)
 // =================================================================
 
-// 1. ประกาศตัวแปรรับค่า ID ทั้งหมดให้ชัวร์ก่อนเรียกใช้งาน
+// 1. ประกาศตัวแปรรับค่า ID ให้ชัวร์ก่อนเรียกใช้งาน
 const closeAuthBtn = document.getElementById('closeAuthBtn');
 const authProviderModal = document.getElementById('authProviderModal');
 const openAuthModalBtn = document.getElementById('openAuthModalBtn');
@@ -1062,6 +1076,8 @@ const authUserName = document.getElementById('authUserName');
 const userProfileDisplay = document.getElementById('userProfileDisplay');
 const loginGoogleBtn = document.getElementById('loginGoogleBtn');
 const loginFacebookBtn = document.getElementById('loginFacebookBtn');
+
+let isLoginProcessing = false; // 🔒 สลักล็อกป้องกันการคลิกเบิ้ล
 
 if (openAuthModalBtn && authProviderModal) {
     openAuthModalBtn.addEventListener('click', (e) => {
@@ -1118,6 +1134,9 @@ function handleAuthSuccess(userObj) {
         graffitiName.value = displayName.replace(/\s+/g, ''); 
     }
 
+    // โหลดตู้เซฟคูปองออโต้เมื่อล็อกอินเสร็จ
+    listenToMySavedCouponsVault(userObj.uid);
+
     setTimeout(() => { if (authProviderModal) authProviderModal.classList.remove('active'); }, 1200);
 }
 
@@ -1136,6 +1155,12 @@ if (signOutBtn) {
             }
             if (graffitiName) graffitiName.value = "";
             if (userProfileDisplay) userProfileDisplay.style.display = "none";
+            
+            // ล้างข้อมูลตู้เซฟตอนกดออก
+            if (myCouponsList) {
+                 myCouponsList.innerHTML = `<div style="color:#333; text-align:center; padding-top:100px; font-size:0.85rem;">🎁 ตู้เซฟของคุณยังว่างเปล่า<br>กดเปิดกล่องสุ่มสไลด์เพื่อลุ้นรับคูปองกันน้า BRO!</div>`;
+            }
+
             await showErrorAlert("SIGNED OUT", "ออกจากระบบ Underground Culture เรียบร้อยแล้วครับ BRO! 🩹");
         } catch (error) {
             showErrorAlert("SIGN OUT ERROR", `เกิดข้อผิดพลาด: ${error.message}`);
@@ -1143,62 +1168,77 @@ if (signOutBtn) {
     });
 }
 
-// =================================================================
-// 🚪 เครื่องยนต์ล็อกอินแก้บั๊ก (คอมโบเซ็ต Redirect + ตาข่ายดักจับ)
-// =================================================================
-
-// 1. กดปุ่มล็อกอิน
+// 2. ปุ่มล็อกอิน Google (แบบมีระบบล็อกกันพัง)
 if (loginGoogleBtn) {
-    loginGoogleBtn.addEventListener('click', (e) => {
+    loginGoogleBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        loginGoogleBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> WAIT...`;
-        loginGoogleBtn.style.pointerEvents = 'none';
-        const provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithRedirect(provider);
-    });
-}
-
-if (loginFacebookBtn) {
-    loginFacebookBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        loginFacebookBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> WAIT...`;
-        loginFacebookBtn.style.pointerEvents = 'none';
-        const provider = new firebase.auth.FacebookAuthProvider();
-        firebase.auth().signInWithRedirect(provider);
-    });
-}
-
-// 2. 🕸️ ตาข่ายดักจับตอนหน้าเว็บเด้งกลับมา (สำคัญมาก!)
-firebase.auth().getRedirectResult()
-    .then((result) => {
-        if (result && result.user) {
-            console.log("🔥 REDIRECT SUCCESS:", result.user.displayName);
-            handleAuthSuccess(result.user);
-        }
-    })
-    .catch((error) => {
-        // ถ้าระบบเตะออก มันจะพ่นกล่องแจ้งเตือนบอกสาเหตุตรงนี้เลย!
-        console.error("Auth Error:", error);
-        showErrorAlert("SYSTEM ERROR", `เข้าสู่ระบบไม่ได้: ${error.message}`);
+        if (isLoginProcessing) return; // ถ้าระบบกำลังโหลด ห้ามทำงานซ้ำ
         
-        // คืนสภาพปุ่มกลับมาเผื่อกดใหม่
-        if (loginGoogleBtn) {
-            loginGoogleBtn.innerHTML = `<i class="fa-brands fa-google"></i> CONTINUE WITH GOOGLE`;
+        isLoginProcessing = true;
+        const originalText = loginGoogleBtn.innerHTML;
+        loginGoogleBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังเชื่อมต่อ...`;
+        loginGoogleBtn.style.opacity = '0.5';
+        loginGoogleBtn.style.pointerEvents = 'none';
+
+        try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            const result = await firebase.auth().signInWithPopup(provider);
+            console.log("🔥 GOOGLE LOGIN SUCCESS:", result.user.displayName);
+            handleAuthSuccess(result.user);
+        } catch (error) {
+            console.error("Auth Error:", error);
+            // ดัก Error เว้นแต่ว่ายูสเซอร์ตั้งใจกดยกเลิกหน้าต่างเอง หรือพยายามเปิดซ้อน
+            if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+                showErrorAlert("SYSTEM ERROR", `ล็อกอินล้มเหลว: ${error.message}`);
+            }
+        } finally {
+            // ปลดล็อกปุ่มคืนสู่สภาพปกติเสมอ
+            isLoginProcessing = false;
+            loginGoogleBtn.innerHTML = originalText;
+            loginGoogleBtn.style.opacity = '1';
             loginGoogleBtn.style.pointerEvents = 'auto';
         }
     });
+}
 
-// 3. 📡 เรดาร์สแกนถาวร (เผื่อกรณีรีเฟรชหน้าเว็บเฉยๆ)
+// 3. ปุ่มล็อกอิน Facebook (แบบมีระบบล็อกกันพัง)
+if (loginFacebookBtn) {
+    loginFacebookBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (isLoginProcessing) return; 
+        
+        isLoginProcessing = true;
+        const originalText = loginFacebookBtn.innerHTML;
+        loginFacebookBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังเชื่อมต่อ...`;
+        loginFacebookBtn.style.opacity = '0.5';
+        loginFacebookBtn.style.pointerEvents = 'none';
+
+        try {
+            const provider = new firebase.auth.FacebookAuthProvider();
+            const result = await firebase.auth().signInWithPopup(provider);
+            console.log("🔥 FACEBOOK LOGIN SUCCESS:", result.user.displayName);
+            handleAuthSuccess(result.user);
+        } catch (error) {
+            console.error("Auth Error:", error);
+            if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+                showErrorAlert("SYSTEM ERROR", `ล็อกอินล้มเหลว: ${error.message}`);
+            }
+        } finally {
+            isLoginProcessing = false;
+            loginFacebookBtn.innerHTML = originalText;
+            loginFacebookBtn.style.opacity = '1';
+            loginFacebookBtn.style.pointerEvents = 'auto';
+        }
+    });
+}
+
+// 4. 📡 เรดาร์จับสัญญาณล็อกอินถาวร (เปิดหน้าเว็บปุ๊บรู้ปั๊บ)
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         console.log("🔥 USER ALREADY LOGGED IN:", user.displayName);
-        handleAuthSuccess(user);
+        handleAuthSuccess(user); // จะไปเรียกให้โหลดตู้เซฟคูปองด้วย
     } else {
         console.log("👀 NO USER LOGGED IN.");
     }
-});
-// ตรวจจับ Error จาก Redirect กันเหนียว
-firebase.auth().getRedirectResult().catch((error) => {
-    console.error("Redirect Auth Error:", error);
-    showErrorAlert("AUTH ERROR", `รหัสข้อผิดพลาด: ${error.code}<br>ข้อความ: ${error.message}`);
 });
