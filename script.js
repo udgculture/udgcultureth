@@ -1146,47 +1146,39 @@ if (signOutBtn) {
         }
     });
 }
+// =================================================================
+// ─── 🚪 เครื่องยนต์ล็อกอินแก้บั๊กป็อปอัปหลุด (ฉบับอัปเดตใช้ Redirect) ───
+// =================================================================
 
 if (loginGoogleBtn) {
     loginGoogleBtn.addEventListener('click', () => {
         const provider = new firebase.auth().GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
-        firebase.auth().signInWithPopup(provider)
-            .then((result) => { handleAuthSuccess(result.user); })
-            .catch((error) => {
-                if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-                    firebase.auth().signInWithRedirect(provider);
-                } else {
-                    showErrorAlert("GOOGLE AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
-                }
-            });
+        
+        // 🎯 เปลี่ยนจาก signInWithPopup เป็น Redirect ทันที ป้องกันแอป IG บล็อกหน้าต่าง
+        firebase.auth().signInWithRedirect(provider);
     });
 }
 
 if (loginFacebookBtn) {
     loginFacebookBtn.addEventListener('click', () => {
         const provider = new firebase.auth().FacebookAuthProvider();
-        firebase.auth().signInWithPopup(provider)
-            .then((result) => { handleAuthSuccess(result.user); })
-            .catch((error) => {
-                if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-                    firebase.auth().signInWithRedirect(provider);
-                } else {
-                    showErrorAlert("FACEBOOK AUTH ERROR", `ล็อกอินไม่สำเร็จ: ${error.message}`);
-                }
-            });
+        
+        // 🎯 ส่งไปล็อกอินฝั่ง Facebook แล้วดึงหน้ากลับออโต้
+        firebase.auth().signInWithRedirect(provider);
     });
 }
 
-firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-        handleAuthSuccess(user);
-        listenToMySavedCouponsVault(user.uid);
-    } else {
-        if (myCouponsList) myCouponsList.innerHTML = `<div style="color:#333; text-align:center; padding-top:60px; font-size:0.85rem;">⏳ กรุณาล็อกอินสมาชิกเพื่อเปิดใช้งานตู้เซฟ...</div>`;
-    }
-});
-
+// 📡 ระบบดักรับสายสัญญาณ Auth หลังจากหน้าจอรีไดเรกต์กลับมาหน้าหลัก
 firebase.auth().getRedirectResult()
-    .then((result) => { if (result && result.user) handleAuthSuccess(result.user); })
-    .catch((error) => { console.error("Redirect Auth Error:", error); });
+    .then((result) => { 
+        if (result && result.user) {
+            handleAuthSuccess(result.user); 
+        }
+    })
+    .catch((error) => { 
+        console.error("Redirect Auth Error:", error); 
+        // 🚨 ถ้าเกิดเออร์เรอร์ ให้พ่นกล่องแจ้งเตือนนีออนแดงดักทางทันที
+        showErrorAlert("AUTH ERROR", `รหัสข้อผิดพลาด: ${error.code}<br>ข้อความ: ${error.message}`);
+    });
+
