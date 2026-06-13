@@ -15,6 +15,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
+// ─── 💬 ELEMENT ZONE: CYBER GRAFFITI WALL ───
 const graffitiWall = document.getElementById('graffitiWall');
 const graffitiName = document.getElementById('graffitiName');
 const graffitiInput = document.getElementById('graffitiInput');
@@ -825,27 +826,8 @@ database.ref('udg_upcoming_gigs').on('value', (snapshot) => {
 });
 
 // =================================================================
-// ─── 🔐 MEMBER PORTAL & 🎰 INTEGRATED CS:GO ROULETTE ENGINE ───
-// =================================================================
-const authProviderModal = document.getElementById('authProviderModal');
-const openAuthModalBtn = document.getElementById('openAuthModalBtn');
-const closeAuthModalBtn = document.getElementById('closeAuthModalBtn');
-const loginGoogleBtn = document.getElementById('loginGoogleBtn');
-const loginFacebookBtn = document.getElementById('loginFacebookBtn');
-const userProfileDisplay = document.getElementById('userProfileDisplay');
-const authUserName = document.getElementById('authUserName');
-const userDropdownMenu = document.getElementById('userDropdownMenu');
-const signOutBtn = document.getElementById('signOutBtn');
-
-// =================================================================
 // ─── 🎰 มอเตอร์สุ่มตู้สไลด์ CS:GO ระบบเรดาร์วัดระยะสอดคล้องตามหน้าจอมือถือจริง ───
 // =================================================================
-const csgoStrip = document.getElementById('csgoStrip');
-const openCaseBtn = document.getElementById('openCaseBtn');
-const demoSpinBtn = document.getElementById('demoSpinBtn'); 
-const myCouponsList = document.getElementById('myCouponsList');
-const userVisibleRewardsPool = document.getElementById('userVisibleRewardsPool');
-
 let wheelItemsList = []; 
 let isCaseSpinning = false; 
 let preloadedImageCache = []; 
@@ -953,7 +935,7 @@ database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
     renderVisiblePool();
 });
 
-// 🎬 มอเตอร์ฟิสิกส์เรดาร์อัจฉริยะ: ตรวจวัดระยะกว้างของการ์ดจริงในมือถือลูกค้า ณ วินาทีนั้นแบบ Real-time
+// 🎬 มอเตอร์ฟิสิกส์ฉบับทลายบั๊กเลยช่อง: ตรวจวัดระยะขนาดกว้างของกล่องจริงบนจอมือถือแบบ Real-time 100%
 function corePhysicsCaseSpin(winnerItem) {
     return new Promise((resolve) => {
         if (!csgoStrip) return resolve();
@@ -963,29 +945,35 @@ function corePhysicsCaseSpin(winnerItem) {
         csgoStrip.innerHTML = '';
 
         const totalItemsInSpin = 60;   
-        const targetStopCardIndex = 45; // ตัวชี้ขาดผู้ชนะจอดสนิทที่ลำดับใบที่ 45 เสมอ
+        const targetStopCardIndex = 45; // ตัวชี้ขาดรางวัลจริงจอดที่ลำดับใบที่ 45
 
+        // วาดขบวนแถวรถไฟสล็อต
         for (let i = 0; i < totalItemsInSpin; i++) {
             let currentItem;
             if (i === targetStopCardIndex) {
-                currentItem = winnerItem; // บรรจุของรางวัลจริงลงล็อกเป้าหมายสีแดง
+                currentItem = winnerItem;
             } else {
                 currentItem = wheelItemsList[Math.floor(Math.random() * wheelItemsList.length)];
             }
             csgoStrip.appendChild(createItemCardNode(currentItem, i));
         }
 
-        // 📐 [สูตรทลายบั๊กเลยช่องบนมือถือ]: สั่งกวาดสายตาวัดหาขนาดกว้างจริงของหน้ากากตู้และการ์ดรางวัลในวินาทีนั้นบนเครื่องผู้ใช้งาน
+        // 📐 [สูตรลับปราบเซียนมือถือ]: สั่งให้เบราว์เซอร์ไปกวาดสายตาวัดระยะจริง ณ วินาทีนั้น
+        // ตรวจสอบว่าหน้าจอมือถือลูกค้าวาดกรอบตู้สุ่มกว้างกี่พิกเซล และตัวการ์ดสไลด์กว้างกี่พิกเซลกันแน่
         const currentWrapperWidth = csgoStrip.parentElement.getBoundingClientRect().width;
         const currentActualCardWidth = csgoStrip.children[0].getBoundingClientRect().width || 130;
         
+        // หาพิกัดขีดเป้าหมายสีแดงที่อยู่ตรงกลางตู้จริง
         const realCenterLine = currentWrapperWidth / 2;
         
-        // คุมระยะให้เส้นแดงผ่าศูนย์กลางภาพแบบพอดี (ความกว้างการ์ดจริง / 2) แรนดอมหลบมุมตกกระทบแคบๆ ช่วงระนาบมิลลิเมตร (+-3px)
+        // คำนวณขยับพิกัดให้เส้นแดงสับลงกลางใจรูปภาพของการ์ดใบที่ 45 แบบคม ๆ (ครึ่งการ์ดคือความกว้างจริง / 2)
+        // สาดค่าสุ่มแกว่งหลบความซ้ำซากในระยะมิลลิเมตรปลอดภัยเซฟตี้แคบ ๆ เพื่อไม่ให้ขอบการ์ดเลื่อนเลยช่อง
         const innerCardOffset = (currentActualCardWidth / 2) + (Math.floor(Math.random() * 6) - 3);
+        
+        // สรุปแกนสมการ X ดึงขบวนเลื่อนเทียบจอดตรงปกไม่ว่าจะเปิดบนอุปกรณ์ใดในโลก
         const finalStopX = -((targetStopCardIndex * currentActualCardWidth) + innerCardOffset - realCenterLine);
 
-        // รอตั้งหลัก HTML 80ms แล้วสั่งสะบัดสายพานลื่นไหล 6.5 วินาทีเข้าล็อกตรงปก
+        // รอเคลียร์ความจำหน้าจอเสร็จสมบูรณ์ 80ms แล้วสั่งสะบัดสายพานลื่นไหล 6.5 วินาที
         setTimeout(() => {
             csgoStrip.style.transition = 'transform 6.5s cubic-bezier(0.1, 0.85, 0.15, 1)';
             csgoStrip.style.transform = `translateX(${finalStopX}px)`;
@@ -1009,7 +997,7 @@ if (demoSpinBtn) {
 
         await corePhysicsCaseSpin(actualWinnerItem);
 
-        await showErrorAlert("🔬 DEMO SPIN RESULTS", `[โหมดทดลองหมุนเล่นเพื่อความบันเทิง]<br>กล่องสุ่มดร็อปได้ไอเท็มตัวอย่าง:<br><strong style="color:#00ffff; font-size:1.25rem;">[ ${actualWinnerItem.name} ]</strong><br><br><span style="color:#666; font-size:0.8rem;">*ซ่อมแซมสมการซ้ำซ้อนเรียบร้อย คราวนี้ภาพบนเป้าแดงกับข้อความแจ้งเตือนตรงปกแน่นอนครับน้า*</span>`, true);
+        await showErrorAlert("🔬 DEMO SPIN RESULTS", `[โหมดทดลองหมุนเล่นเพื่อความบันเทิง]<br>กล่องสุ่มดร็อปได้ไอเท็มตัวอย่าง:<br><strong style="color:#00ffff; font-size:1.25rem;">[ ${actualWinnerItem.name} ]</strong><br><br><span style="color:#666; font-size:0.8rem;">*แก้ไขสมการเรดาร์จับพิกเซล คราวนี้เปิดในแอป IG ขีดแดงก็ผ่ากลางตรงชิ้นแล้วครับน้า*</span>`, true);
 
         buildInitialCsgoStrip();
         isCaseSpinning = false;
@@ -1018,7 +1006,7 @@ if (demoSpinBtn) {
     });
 }
 
-// 🎰 ปุ่มเปิดกล่องลุ้นโชคจริง (ระบบล็อกสิทธิ์คูลดาวน์วันละครั้งพ่วงความปลอดภัยเดิม)
+// 🎰 ปุ่มเปิดกล่องลุ้นโชคจริง (ระบบล็อกเซสชันคูลดาวน์วันละครั้งพ่วงความปลอดภัยเดิม)
 if (openCaseBtn) {
     openCaseBtn.addEventListener('click', async () => {
         const currentUser = firebase.auth().currentUser;
@@ -1065,7 +1053,7 @@ if (openCaseBtn) {
             wonTimestamp: Date.now()
         });
 
-        await showErrorAlert("🏆 CASE UNBOXED COMPLETED", `ยินดีด้วยครับน้าบักหำทิว! ได้ของรางวัลตรงปกตรงใจ:<br><strong style="color:#fff000; font-size:1.3rem;">[ ${finalWinnerItem.name} ]</strong><br><br>รหัสรหัสตั๋ว CODE ลับยืนยันสิทธิ์: <strong style="color:#00ffff; font-family:monospace;">${randomSecretCode}</strong><br>ระบบอัปเดตใส่ตู้เซฟฝั่งขวาจอเรียบร้อย แคปหน้าจอส่งเคลมทางอินสตาแกรมได้เลยครับ! 🔥`, true);
+        await showErrorAlert("🏆 CASE UNBOXED COMPLETED", `ยินดีด้วยครับน้าบักหำทิว! ได้ของรางวัลตรงปกตรงใจ:<br><strong style="color:#fff000; font-size:1.3rem;">[ ${finalWinnerItem.name} ]</strong><br><br><span style="color: #ff3333; font-weight: bold;">[กรุณาแคปหน้าจอไว้เป็นหลักฐานทันที]</span><br><br>รหัสรหัสตั๋ว CODE ลับยืนยันสิทธิ์: <strong style="color:#00ffff; font-family:monospace;">${randomSecretCode}</strong><br>ระบบอัปเดตใส่ตู้เซฟฝั่งขวาจอเรียบร้อย แคปหน้าจอส่งเคลมทางอินสตาแกรมได้เลยครับ! 🔥`, true);
 
         buildInitialCsgoStrip();
         isCaseSpinning = false;
@@ -1074,8 +1062,10 @@ if (openCaseBtn) {
     });
 }
 
-// 🚪 เครื่องยนต์ล็อกอินยิงกระแสไฟตรงสะพานไฟ (ซ่อมแซมเสร็จสมบูรณ์แยกคีย์ closeAuthBtn)
+// 🚪 เครื่องยนต์ล็อกอินยิงกระแสไฟตรงสะพานไฟ (ซ่อมแซมเสร็จสมบูรณ์แยกคีย์ closeAuthBtn ดักทาง Crash)
 const closeAuthBtn = document.getElementById('closeAuthBtn'); 
+const authProviderModal = document.getElementById('authProviderModal');
+const openAuthModalBtn = document.getElementById('openAuthModalBtn');
 
 if (openAuthModalBtn && authProviderModal) {
     openAuthModalBtn.addEventListener('click', (e) => {
