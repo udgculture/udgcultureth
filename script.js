@@ -1152,7 +1152,7 @@ if (signOutBtn) {
 
 if (loginGoogleBtn) {
     loginGoogleBtn.addEventListener('click', () => {
-        const provider = new firebase.auth().GoogleAuthProvider();
+        const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
         
         // 🎯 เปลี่ยนจาก signInWithPopup เป็น Redirect ทันที ป้องกันแอป IG บล็อกหน้าต่าง
@@ -1162,7 +1162,7 @@ if (loginGoogleBtn) {
 
 if (loginFacebookBtn) {
     loginFacebookBtn.addEventListener('click', () => {
-        const provider = new firebase.auth().FacebookAuthProvider();
+        const provider = new firebase.auth.FacebookAuthProvider();
         
         // 🎯 ส่งไปล็อกอินฝั่ง Facebook แล้วดึงหน้ากลับออโต้
         firebase.auth().signInWithRedirect(provider);
@@ -1181,4 +1181,3 @@ firebase.auth().getRedirectResult()
         // 🚨 ถ้าเกิดเออร์เรอร์ ให้พ่นกล่องแจ้งเตือนนีออนแดงดักทางทันที
         showErrorAlert("AUTH ERROR", `รหัสข้อผิดพลาด: ${error.code}<br>ข้อความ: ${error.message}`);
     });
-
