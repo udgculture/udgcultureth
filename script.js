@@ -205,6 +205,7 @@ async function sprayGraffiti() {
         timestamp: Date.now() 
     });
 
+    incrementUserStat('graffiti');
     graffitiInput.value = ''; 
     isCooldown = true; 
     graffitiBtn.style.opacity = '0.5'; 
@@ -434,6 +435,7 @@ function submitTrackVote(trackId) {
     trackVoteRef.transaction((currentVotes) => { return (currentVotes || 0) + 1; }, (error, committed) => {
         if (committed) {
             localStorage.setItem(`last_vote_${trackId}`, todayStr);
+            incrementUserStat('votes');
             showErrorAlert('VOTE SUCCESS', '🔥 คะแนนถูกส่งเข้าระบบประจำสัปดาห์เรียบร้อยแล้ว ขอบคุณที่ช่วยดันชาร์ต UDG ครับ BRO!');
         }
     });
@@ -1108,6 +1110,7 @@ if (openCaseBtn) {
             ticketId: randomSecretCode,
             wonTimestamp: Date.now()
         });
+        incrementUserStat('cases');
 
         await showErrorAlert("🏆 CASE UNBOXED COMPLETED", `ยินดีด้วยครับน้าบักหำทิว! ได้ของรางวัลตรงปกตรงใจ:<br><strong style="color:#fff000; font-size:1.3rem;">[ ${finalWinnerItem.name} ]</strong><br><br><span style="color: #ff3333; font-weight: bold;">[กรุณาแคปหน้าจอไว้เป็นหลักฐานทันที]</span><br><br>รหัสรหัสตั๋ว CODE ลับยืนยันสิทธิ์: <strong style="color:#00ffff; font-family:monospace;">${randomSecretCode}</strong><br>ระบบอัปเดตใส่ตู้เซฟฝั่งขวาจอเรียบร้อย แคปหน้าจอส่งเคลมทางอินสตาแกรมได้เลยครับ! 🔥`, true);
 
