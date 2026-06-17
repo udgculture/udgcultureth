@@ -1423,3 +1423,297 @@ if(saveTagBtn) {
         }
     });
 }
+
+// =================================================================
+// ─── 🔴 DEMO DROPBOX ENGINE (ระบบตู้แดงหย่อนเพลงศิลปินหน้าใหม่) ───
+// =================================================================
+
+const demoDropboxModal = document.getElementById('demoDropboxModal');
+const openDemoDropboxBtn = document.getElementById('openDemoDropboxBtn');
+const closeDemoDropboxBtn = document.getElementById('closeDemoDropboxBtn');
+const submitDemoBtn = document.getElementById('submitDemoBtn');
+
+// ตัวแปรช่องกรอกข้อมูล
+const demoArtistName = document.getElementById('demoArtistName');
+const demoTrackTitle = document.getElementById('demoTrackTitle');
+const demoTrackLink = document.getElementById('demoTrackLink');
+const demoContact = document.getElementById('demoContact');
+
+// ปลุกหน้าต่าง Pop-up
+if (openDemoDropboxBtn && demoDropboxModal) {
+    openDemoDropboxBtn.addEventListener('click', () => {
+        demoDropboxModal.classList.add('active');
+    });
+}
+if (closeDemoDropboxBtn) {
+    closeDemoDropboxBtn.addEventListener('click', () => {
+        demoDropboxModal.classList.remove('active');
+    });
+}
+
+// ระบบประมวลผลตอนกดส่งเพลง
+if (submitDemoBtn) {
+    submitDemoBtn.addEventListener('click', async () => {
+        const artist = demoArtistName.value.trim();
+        const title = demoTrackTitle.value.trim();
+        const link = demoTrackLink.value.trim();
+        const contact = demoContact.value.trim();
+
+        // 1. ตรวจสอบข้อมูลว่างเปล่า (Empty Check)
+        if (!artist || !title || !link || !contact) {
+            showErrorAlert("INCOMPLETE DATA", "❌ กรุณากรอกข้อมูลให้ครบทุกช่องก่อนส่งเพลงเข้าตู้แดงครับน้า!");
+            return;
+        }
+
+        // 2. ตรวจสอบความถูกต้องของลิงก์ (URL Validation) - กรองเฉพาะ YouTube กับ SoundCloud
+        const isValidLink = link.includes('youtube.com') || link.includes('youtu.be') || link.includes('soundcloud.com');
+        if (!isValidLink) {
+            showErrorAlert("INVALID LINK", "❌ ระบบรองรับเฉพาะลิงก์จาก <strong>YouTube</strong> หรือ <strong>SoundCloud</strong> เท่านั้นครับ BRO!");
+            return;
+        }
+
+        // 3. ตรวจสอบโควต้าการส่ง (Cooldown Check) - 1 เพลง / 1 วัน
+        const todayStr = new Date().toDateString();
+        const lastDemoDate = localStorage.getItem('last_demo_submit');
+        if (lastDemoDate === todayStr) {
+            showErrorAlert("DAILY LIMIT REACHED", "❌ คุณส่งเพลงไปแล้วในวันนี้!<br>แอดมินขอเวลาฟังก่อนน้า พรุ่งนี้ค่อยหย่อนมาใหม่ครับ!");
+            return;
+        }
+
+        // 4. ดึงข้อมูล User (ถ้าล็อกอินอยู่) เพื่อเก็บเป็นเครดิต
+        const currentUser = firebase.auth().currentUser;
+        const submitterName = currentUser ? currentUser.displayName : "Guest_Artist";
+        const submitterUid = currentUser ? currentUser.uid : "Anonymous";
+
+        // 5. ส่งข้อมูลขึ้น Firebase Realtime Database
+        try {
+            submitDemoBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> SENDING...`;
+            submitDemoBtn.style.opacity = '0.5';
+            submitDemoBtn.style.pointerEvents = 'none';
+
+            await database.ref('udg_demo_dropbox').push({
+                artistName: artist,
+                trackTitle: title,
+                trackLink: link,
+                contactInfo: contact,
+                submittedBy: submitterName,
+                submitterUid: submitterUid,
+                timestamp: Date.now(),
+                status: 'pending' // สถานะรอแอดมินตรวจ
+            });
+
+            // 6. ส่งสำเร็จ: ล้างข้อมูลและแจ้งเตือน
+            localStorage.setItem('last_demo_submit', todayStr); // ล็อกสิทธิ์วันนี้
+            demoArtistName.value = '';
+            demoTrackTitle.value = '';
+            demoTrackLink.value = '';
+            demoContact.value = '';
+            
+            demoDropboxModal.classList.remove('active');
+            showErrorAlert("TRACK SUBMITTED! 🔥", "ส่งเพลงเข้าตู้แดง UDG เรียบร้อยแล้ว!<br>ถ้าเพลงเดือดโดนใจทีมงาน รอรับการติดต่อกลับหรือรอเห็นบน RADAR ได้เลยครับ!", true);
+
+        } catch (error) {
+            showErrorAlert("SYSTEM ERROR", "เกิดข้อผิดพลาดในการส่งเพลง: " + error.message);
+        } finally {
+            // คืนค่าปุ่มกลับมาเหมือนเดิม
+            submitDemoBtn.innerHTML = "SEND TRACK TO UDG";
+            submitDemoBtn.style.opacity = '1';
+            submitDemoBtn.style.pointerEvents = 'auto';
+        }
+    });
+}
+
+// =================================================================
+// ─── 🛒 MERCH PRE-ORDER ENGINE (ระบบสั่งของพรีออเดอร์ + ImgBB API) ───
+// =================================================================
+
+// นำ API Key ที่ได้จาก ImgBB มาใส่ตรงนี้ครับน้า 👇
+const IMGBB_API_KEY = "ba210b7b494a630b713c297b74f51d65"; 
+
+const merchModal = document.getElementById('merchModal');
+const openMerchBtn = document.getElementById('openMerchBtn');
+const closeMerchBtn = document.getElementById('closeMerchBtn');
+const submitOrderBtn = document.getElementById('submitOrderBtn');
+
+if (openMerchBtn && merchModal) openMerchBtn.addEventListener('click', () => merchModal.classList.add('active'));
+if (closeMerchBtn) closeMerchBtn.addEventListener('click', () => merchModal.classList.remove('active'));
+
+if (submitOrderBtn) {
+    submitOrderBtn.addEventListener('click', async () => {
+        const currentUser = firebase.auth().currentUser;
+        if (!currentUser) {
+            showErrorAlert("ACCESS DENIED", "❌ กรุณาล็อกอินเข้าสู่ระบบก่อนทำการสั่งซื้อสินค้าครับ!");
+            return;
+        }
+
+        const size = document.getElementById('orderSize').value;
+        const name = document.getElementById('orderName').value.trim();
+        const phone = document.getElementById('orderPhone').value.trim();
+        const address = document.getElementById('orderAddress').value.trim();
+        const slipFile = document.getElementById('orderSlip').files[0];
+
+        if (!size || !name || !phone || !address || !slipFile) {
+            showErrorAlert("INCOMPLETE FORM", "❌ กรุณากรอกข้อมูลให้ครบทุกช่อง และแนบรูปสลิปโอนเงินด้วยครับ!");
+            return;
+        }
+
+        try {
+            submitOrderBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> UPLOADING SLIP...`;
+            submitOrderBtn.style.pointerEvents = 'none';
+            submitOrderBtn.style.opacity = '0.5';
+
+            // 1. แพ็กรูปสลิปเตรียมส่งไป ImgBB
+            const formData = new FormData();
+            formData.append('image', slipFile);
+
+            // 2. ยิง API ส่งรูปไปฝากที่ ImgBB ฟรีๆ
+            const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                method: 'POST',
+                body: formData
+            });
+            const imgbbData = await imgbbResponse.json();
+
+            if (!imgbbData.success) {
+                throw new Error("อัปโหลดสลิปไม่สำเร็จ กรุณาลองใหม่ครับ");
+            }
+
+            const slipUrl = imgbbData.data.url; // 🎯 ได้ลิงก์รูปตรงๆ กลับมาแล้ว!
+
+            // 3. ส่งข้อมูลทั้งหมดลง Database ของเราแจ้งแอดมิน (ทำงานเหมือนเดิมเป๊ะ)
+            await database.ref('udg_merch_orders').push({
+                uid: currentUser.uid,
+                customerName: name,
+                phone: phone,
+                address: address,
+                size: size,
+                slipImageUrl: slipUrl, // ยัดลิงก์จาก ImgBB ลงคลาวด์เรา
+                status: 'PENDING',
+                timestamp: Date.now()
+            });
+
+            // ล้างฟอร์มและแจ้งผล
+            document.getElementById('orderSize').value = "";
+            document.getElementById('orderName').value = "";
+            document.getElementById('orderPhone').value = "";
+            document.getElementById('orderAddress').value = "";
+            document.getElementById('orderSlip').value = "";
+            
+            merchModal.classList.remove('active');
+            showErrorAlert("ORDER RECEIVED! 🎉", "สั่งซื้อสำเร็จ! ระบบได้รับสลิปของคุณแล้ว แอดมินจะทำการตรวจสอบยอดโอนและดำเนินการจัดส่งตามคิวครับ", true);
+
+        } catch (error) {
+            showErrorAlert("SYSTEM ERROR", "เกิดข้อผิดพลาด: " + error.message);
+        } finally {
+            submitOrderBtn.innerHTML = "CONFIRM ORDER & UPLOAD SLIP";
+            submitOrderBtn.style.pointerEvents = 'auto';
+            submitOrderBtn.style.opacity = '1';
+        }
+    });
+}
+
+// =================================================================
+// ─── 🤝 COLLAB WANTED BOARD ENGINE (ระบบประกาศหาคนทำเพลง) ───
+// =================================================================
+
+const liveCollabBoard = document.getElementById('live-collab-board');
+const collabModal = document.getElementById('collabModal');
+const openCollabModalBtn = document.getElementById('openCollabModalBtn');
+const closeCollabModalBtn = document.getElementById('closeCollabModalBtn');
+const submitCollabBtn = document.getElementById('submitCollabBtn');
+
+// 1. ดึงข้อมูลประกาศมาแสดงบนกระดาน
+database.ref('udg_collab_board').on('value', (snapshot) => {
+    if (!liveCollabBoard) return;
+    liveCollabBoard.innerHTML = '';
+    const ads = snapshot.val();
+    
+    if (!ads) {
+        liveCollabBoard.innerHTML = `<div style="padding:30px; color:#555; text-align:center; width:100%; grid-column: 1 / -1;">📭 ยังไม่มีประกาศหาทีมงานในขณะนี้... คุณสามารถเป็นคนแรกได้!</div>`;
+        return;
+    }
+
+    // แปลงข้อมูลและเรียงจากใหม่ไปเก่า
+    let adsArray = Object.keys(ads).map(key => ({ id: key, ...ads[key] }));
+    adsArray.sort((a, b) => b.timestamp - a.timestamp);
+
+    adsArray.forEach(ad => {
+        const dateStr = new Date(ad.timestamp).toLocaleDateString('th-TH', { month: 'short', day: 'numeric' });
+        const card = document.createElement('div');
+        card.className = 'collab-card';
+        
+        let roleIcon = "👽";
+        if(ad.role === "RAPPER") roleIcon = "🎤";
+        if(ad.role === "BEATMAKER") roleIcon = "🎹";
+        if(ad.role === "MIXING") roleIcon = "🎛️";
+        if(ad.role === "COVER_ART") roleIcon = "🎨";
+        if(ad.role === "MV_DIR") roleIcon = "🎬";
+
+        card.innerHTML = `
+            <span class="c-role-tag c-role-${ad.role}">${roleIcon} ${ad.role.replace('_', ' ')}</span>
+            <h4 class="collab-title">${ad.title}</h4>
+            <p class="collab-desc">${ad.desc}</p>
+            <div class="collab-contact"><i class="fa-solid fa-address-card"></i> ${ad.contact}</div>
+            <div class="collab-user">โพสต์โดย: ${ad.authorName} (${dateStr})</div>
+        `;
+        liveCollabBoard.appendChild(card);
+    });
+});
+
+// 2. ปลุกหน้าต่างลงประกาศ
+if (openCollabModalBtn && collabModal) {
+    openCollabModalBtn.addEventListener('click', () => {
+        const currentUser = firebase.auth().currentUser;
+        if (!currentUser) {
+            showErrorAlert("ACCESS DENIED", "❌ กรุณาล็อกอินเข้าสู่ระบบก่อนลงประกาศหาเพื่อนร่วมงานครับ!");
+            return;
+        }
+        collabModal.classList.add('active');
+    });
+}
+if (closeCollabModalBtn) closeCollabModalBtn.addEventListener('click', () => collabModal.classList.remove('active'));
+
+// 3. ระบบส่งข้อมูลประกาศ
+if (submitCollabBtn) {
+    submitCollabBtn.addEventListener('click', async () => {
+        const currentUser = firebase.auth().currentUser;
+        const role = document.getElementById('collabRole').value;
+        const title = document.getElementById('collabTitle').value.trim();
+        const desc = document.getElementById('collabDesc').value.trim();
+        const contact = document.getElementById('collabContact').value.trim();
+
+        if (!role || !title || !desc || !contact) {
+            showErrorAlert("INCOMPLETE FORM", "❌ กรุณากรอกข้อมูลให้ครบทุกช่องเพื่อความชัดเจนครับน้า!");
+            return;
+        }
+
+        try {
+            submitCollabBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> PUBLISHING...`;
+            submitCollabBtn.style.pointerEvents = 'none';
+
+            await database.ref('udg_collab_board').push({
+                uid: currentUser.uid,
+                authorName: currentUser.displayName || "Anonymous",
+                role: role,
+                title: title,
+                desc: desc,
+                contact: contact,
+                timestamp: Date.now()
+            });
+
+            // ล้างฟอร์ม
+            document.getElementById('collabRole').value = "";
+            document.getElementById('collabTitle').value = "";
+            document.getElementById('collabDesc').value = "";
+            document.getElementById('collabContact').value = "";
+            
+            collabModal.classList.remove('active');
+            showErrorAlert("PUBLISHED! 🔥", "ลงประกาศเรียบร้อยแล้ว! ขอให้เจอทีมงานเดือดๆ มาร่วมทำเพลงเร็วๆ นี้นะครับ", true);
+
+        } catch (error) {
+            showErrorAlert("SYSTEM ERROR", "เกิดข้อผิดพลาด: " + error.message);
+        } finally {
+            submitCollabBtn.innerHTML = "PUBLISH AD";
+            submitCollabBtn.style.pointerEvents = 'auto';
+        }
+    });
+}

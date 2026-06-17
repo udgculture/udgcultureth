@@ -8,7 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <link rel="stylesheet" href="admin-css.css">
 </head>
 <body>
@@ -31,16 +33,21 @@
         </div>
     </div>
 
-    <!-- 🎛️ แผงแท็บเมนูหลักส่วนกลาง -->
+   <!-- 🎛️ แผงแท็บเมนูหลักส่วนกลาง (PRO VERSION) -->
     <div class="tabs-container" id="adminTabsMenu" style="display: none;">
-        <button type="button" class="tab-trigger-btn active" data-target="newsPanelBox"><i class="fa-solid fa-sliders"></i>📰 CONTENT</button>
-        <button type="button" class="tab-trigger-btn" data-target="musicPanelBox"><i class="fa-solid fa-music"></i>🎵 MUSIC</button>
-        <button type="button" class="tab-trigger-btn" data-target="artistPanelBox"><i class="fa-solid fa-user-shield"></i>🎤 ARTISTS</button>
-        <button type="button" class="tab-trigger-btn" data-target="adPanelBox" style="border-color:#39ff14; color:#39ff14;"><i class="fa-solid fa-rectangle-ad"></i>💸 ADS</button>
-        <button type="button" class="tab-trigger-btn" data-target="archivePanelBox" style="border-color:#cc00ff; color:#cc00ff;"><i class="fa-solid fa-box-archive"></i>🗳️ ARCHIVE</button>
-        <button type="button" class="tab-trigger-btn" data-target="logoPanelBox" style="border-color:#fff000; color:#fff000;"><i class="fa-solid fa-handshake"></i>🤝 LOGOS</button>
-        <button type="button" class="tab-trigger-btn" data-target="gigPanelBox" style="border-color:#00ffaa; color:#00ffaa;"><i class="fa-solid fa-calendar-days"></i>📅 GIGS</button>
-        <button type="button" class="tab-trigger-btn" data-target="wheelPanelBox" style="border-color:#ff007f; color:#ff007f;"><i class="fa-solid fa-ferry"></i>🎡 WHEEL</button>
+        <button type="button" class="tab-trigger-btn active" data-target="overviewPanelBox"><i class="fa-solid fa-satellite-dish"></i> OVERVIEW</button>
+        <button type="button" class="tab-trigger-btn" data-target="newsPanelBox"><i class="fa-solid fa-newspaper"></i> CONTENT</button>
+        <!-- <button type="button" class="tab-trigger-btn active" data-target="newsPanelBox"><i class="fa-solid fa-newspaper"></i> CONTENT</button> -->
+        <button type="button" class="tab-trigger-btn" data-target="musicPanelBox"><i class="fa-solid fa-music"></i> MUSIC</button>
+        <button type="button" class="tab-trigger-btn" data-target="artistPanelBox"><i class="fa-solid fa-user-shield"></i> ARTISTS</button>
+        <button type="button" class="tab-trigger-btn" data-target="adPanelBox"><i class="fa-solid fa-rectangle-ad"></i> ADS</button>
+        <button type="button" class="tab-trigger-btn" data-target="archivePanelBox"><i class="fa-solid fa-box-archive"></i> ARCHIVE</button>
+        <button type="button" class="tab-trigger-btn" data-target="logoPanelBox"><i class="fa-solid fa-handshake"></i> LOGOS</button>
+        <button type="button" class="tab-trigger-btn" data-target="gigPanelBox"><i class="fa-solid fa-calendar-days"></i> GIGS</button>
+        <button type="button" class="tab-trigger-btn" data-target="collabPanelBox"><i class="fa-solid fa-handshake"></i> COLLABS</button>
+        <button type="button" class="tab-trigger-btn" data-target="wheelPanelBox"><i class="fa-solid fa-box-open"></i> WHEEL</button>
+        <button type="button" class="tab-trigger-btn" data-target="demoPanelBox"><i class="fa-solid fa-inbox"></i> DEMOS</button>
+        <button type="button" class="tab-trigger-btn" data-target="orderPanelBox"><i class="fa-solid fa-cart-shopping"></i> ORDERS</button>
     </div>
 
     <!-- 📰 [แท็บที่ 1] CONTENT NEWS CONTROL -->
@@ -58,7 +65,14 @@
         </div>
         <div class="form-group" id="subTagGroup"><label>SUB TAG</label><input type="text" id="adminNewsSubTag" value="NEWS" oninput="updateLivePreview()"></div>
         <div class="form-group"><label id="titleLabel">TITLE</label><input type="text" id="adminNewsTitle" oninput="updateLivePreview()"></div>
-        <div class="form-group"><label>IMAGE URL</label><input type="text" id="adminNewsImg" value="image/ขาวใส.png" oninput="updateLivePreview()"></div>
+       <div class="form-group">
+            <label>IMAGE (กดเลือกรูปจากเครื่อง หรือวางลิงก์เอง)</label>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="file" id="adminNewsImgFile" accept="image/*" style="background: #111; padding: 10px; border: 1px dashed #ff3333; border-radius: 4px; color: #aaa; cursor: pointer; font-size: 0.85rem;">
+                <input type="text" id="adminNewsImg" value="image/ขาวใส.png" oninput="updateLivePreview()" placeholder="ลิงก์รูปจะปรากฏที่นี่อัตโนมัติหลังอัปโหลดเสร็จ">
+            </div>
+            <span id="newsUploadStatus" style="font-size: 0.8rem; font-family: 'Space Grotesk', sans-serif; display: none; margin-top: 5px;"></span>
+        </div>
         <div class="form-group"><label id="excerptLabel">EXCERPT</label><textarea id="adminNewsExcerpt" rows="4" oninput="updateLivePreview()"></textarea></div>
         <div class="form-group" id="radarUrlGroup" style="display: none;"><label>FOLLOW LINK URL</label><input type="text" id="adminRadarUrl" value="#"></div>
         <div class="preview-zone-wrapper">
@@ -71,7 +85,44 @@
         <button type="button" class="post-btn" id="adminPostNewsBtn"><i class="fa-solid fa-paper-plane"></i> UPDATE LIVE WEBSITE</button>
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
+<!-- 📊 [แท็บที่ 0] ADMIN COMMAND CENTER -->
+    <div class="admin-box" id="overviewPanelBox" style="display: none; border-color: #00aaff; box-shadow: 0 0 30px rgba(0, 170, 255, 0.05);">
+        <h2><i class="fa-solid fa-satellite-dish" style="color: #00aaff;"></i> COMMAND CENTER</h2>
+        <p style="color: #555; font-size: 0.85rem;">ศูนย์บัญชาการหลัก: สรุปสถิติความเคลื่อนไหวของระบบ UDG แบบเรียลไทม์</p>
 
+        <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px;">
+            
+            <!-- การ์ด 1: คนออนไลน์ -->
+            <div style="background: #111; padding: 25px; border-radius: 8px; border-top: 3px solid #39ff14; text-align: center; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);">
+                <i class="fa-solid fa-users" style="color: #39ff14; font-size: 2rem; margin-bottom: 10px;"></i>
+                <h3 style="color: #aaa; font-size: 0.9rem; margin-bottom: 5px; font-family: 'Space Grotesk', sans-serif;">STREET ONLINE</h3>
+                <strong id="dashOnline" style="color: #fff; font-size: 2.5rem; font-family: 'Space Grotesk', sans-serif; text-shadow: 0 0 10px rgba(57, 255, 20, 0.3);">0</strong>
+            </div>
+
+            <!-- การ์ด 2: ตู้แดงรอตรวจ -->
+            <div style="background: #111; padding: 25px; border-radius: 8px; border-top: 3px solid #ff4500; text-align: center; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);">
+                <i class="fa-solid fa-inbox" style="color: #ff4500; font-size: 2rem; margin-bottom: 10px;"></i>
+                <h3 style="color: #aaa; font-size: 0.9rem; margin-bottom: 5px; font-family: 'Space Grotesk', sans-serif;">PENDING DEMOS</h3>
+                <strong id="dashDemos" style="color: #fff; font-size: 2.5rem; font-family: 'Space Grotesk', sans-serif; text-shadow: 0 0 10px rgba(255, 69, 0, 0.3);">0</strong>
+            </div>
+
+            <!-- การ์ด 3: พ่นสีทั้งหมด -->
+            <div style="background: #111; padding: 25px; border-radius: 8px; border-top: 3px solid #00ffff; text-align: center; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);">
+                <i class="fa-solid fa-spray-can" style="color: #00ffff; font-size: 2rem; margin-bottom: 10px;"></i>
+                <h3 style="color: #aaa; font-size: 0.9rem; margin-bottom: 5px; font-family: 'Space Grotesk', sans-serif;">TOTAL GRAFFITI</h3>
+                <strong id="dashGraffiti" style="color: #fff; font-size: 2.5rem; font-family: 'Space Grotesk', sans-serif; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">0</strong>
+            </div>
+
+            <!-- การ์ด 4: กล่องที่ถูกเปิด -->
+            <div style="background: #111; padding: 25px; border-radius: 8px; border-top: 3px solid #ff007f; text-align: center; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);">
+                <i class="fa-solid fa-box-open" style="color: #ff007f; font-size: 2rem; margin-bottom: 10px;"></i>
+                <h3 style="color: #aaa; font-size: 0.9rem; margin-bottom: 5px; font-family: 'Space Grotesk', sans-serif;">CASES OPENED</h3>
+                <strong id="dashCases" style="color: #fff; font-size: 2.5rem; font-family: 'Space Grotesk', sans-serif; text-shadow: 0 0 10px rgba(255, 0, 127, 0.3);">0</strong>
+            </div>
+
+        </div>
+        <a href="index.html" class="back-link" style="margin-top: 30px;">&larr; กลับไปหน้าเว็บหลัก</a>
+    </div>
     <!-- 🎵 [แท็บที่ 2] MUSIC TRACKS CONTROL -->
     <div class="admin-box admin-box-cyan" id="musicPanelBox" style="display: none;">
         <h2><i class="fa-solid fa-music" style="color: #00ffff;"></i> UDG MUSIC TRACKS MANAGER</h2>
@@ -107,7 +158,15 @@
         <p style="color: #555; font-size: 0.85rem;">เพิ่มสปอนเซอร์ของลูกค้าหลายเจ้า ระบบจะสลับหมุนเวียนบนหน้าเว็บหลักให้ทุก 10 วินาที</p>
         <div class="form-group"><label style="color: #39ff14;">SPONSOR NAME</label><input type="text" id="newAdTitle"></div>
         <div class="form-group"><label style="color: #39ff14;">AD DESCRIPTION</label><input type="text" id="newAdDesc"></div>
-        <div class="form-group"><label style="color: #39ff14;">AD IMAGE URL</label><input type="text" id="newAdImage"></div>
+        <!-- 📸 ระบบอัปโหลดรูปโฆษณา -->
+        <div class="form-group">
+            <label style="color: #39ff14;">AD IMAGE (อัปโหลดรูป หรือวางลิงก์)</label>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="file" id="newAdImgFile" accept="image/*" style="background: #111; padding: 10px; border: 1px dashed #39ff14; border-radius: 4px; color: #aaa; cursor: pointer; font-size: 0.85rem;">
+                <input type="text" id="newAdImage" placeholder="ลิงก์รูปจะปรากฏที่นี่อัตโนมัติ">
+            </div>
+            <span id="adUploadStatus" style="font-size: 0.8rem; font-family: 'Space Grotesk', sans-serif; display: none; margin-top: 5px;"></span>
+        </div>
         <div class="form-group"><label style="color: #39ff14;">TARGET LINK URL</label><input type="text" id="newAdUrl" value="#"></div>
         <button type="button" class="post-btn" id="addAdBtn" style="background: linear-gradient(45deg, #39ff14, #00ff88); color: #000;"><i class="fa-solid fa-cloud-arrow-up"></i> PUBLISH LIVE ADVERTISEMENT</button>
         <table class="artist-list-table">
@@ -134,7 +193,15 @@
         <h2><i class="fa-solid fa-handshake" style="color: #fff000;"></i> UDG CULTURE PARTNERS LOGOS</h2>
         <p style="color: #555; font-size: 0.85rem;">เพิ่มหรือถอดถอนรูปภาพโลโก้สปอนเซอร์/ค่ายเพลงพันธมิตร หมุนเวียนแถบสไลด์แนวนอนด้านล่างเว็บ</p>
         <div class="form-group"><label style="color: #fff000;">PARTNER / BRAND NAME</label><input type="text" id="newPartnerName"></div>
-        <div class="form-group"><label style="color: #fff000;">LOGO IMAGE URL</label><input type="text" id="newPartnerImg" oninput="updateLogoPreview()"></div>
+        <!-- 📸 ระบบอัปโหลดรูปโลโก้ -->
+        <div class="form-group">
+            <label style="color: #fff000;">LOGO IMAGE (อัปโหลดรูป หรือวางลิงก์)</label>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="file" id="newPartnerImgFile" accept="image/*" style="background: #111; padding: 10px; border: 1px dashed #fff000; border-radius: 4px; color: #aaa; cursor: pointer; font-size: 0.85rem;">
+                <input type="text" id="newPartnerImg" oninput="updateLogoPreview()" placeholder="ลิงก์รูปจะปรากฏที่นี่อัตโนมัติ">
+            </div>
+            <span id="logoUploadStatus" style="font-size: 0.8rem; font-family: 'Space Grotesk', sans-serif; display: none; margin-top: 5px;"></span>
+        </div>
         <div class="logo-preview-box">
             <div class="logo-preview-item"><img id="mockupPartnerLogo" src="image/ขาวใส.png" alt="Logo Preview"></div>
             <span style="font-size: 0.72rem; color: #fff000; align-self: center; font-family: monospace;">&larr; LIVE LOGO MOCKUP</span>
@@ -165,9 +232,14 @@
             <label style="color: #00ffaa;">EVENT TITLE (ชื่อคอนเสิร์ต/ชื่องานปาร์ตี้)</label>
             <input type="text" id="newGigTitle" placeholder="เช่น: BANGKOK OUTLAWS 2026">
         </div>
+        <!-- 📸 ระบบอัปโหลดรูปโปสเตอร์งาน -->
         <div class="form-group">
-            <label style="color: #00ffaa;">GIG POSTER IMAGE URL (ลิงก์โปสเตอร์งาน)</label>
-            <input type="text" id="newGigImg" placeholder="ลิงก์รูปภาพโปสเตอร์ .png / .jpg ...">
+            <label style="color: #00ffaa;">GIG POSTER IMAGE (อัปโหลดโปสเตอร์ หรือวางลิงก์)</label>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="file" id="newGigImgFile" accept="image/*" style="background: #111; padding: 10px; border: 1px dashed #00ffaa; border-radius: 4px; color: #aaa; cursor: pointer; font-size: 0.85rem;">
+                <input type="text" id="newGigImg" placeholder="ลิงก์รูปโปสเตอร์จะปรากฏที่นี่อัตโนมัติ">
+            </div>
+            <span id="gigUploadStatus" style="font-size: 0.8rem; font-family: 'Space Grotesk', sans-serif; display: none; margin-top: 5px;"></span>
         </div>
         <div class="form-group">
             <label style="color: #00ffaa;">LOCATION VENUE (ชื่อสถานที่จัดงาน)</label>
@@ -206,11 +278,15 @@
             <input type="text" id="newWheelName" placeholder="เช่น: DISCOUNT10% หรือ เสื้อยืดค่าย UDG ฟรี">
         </div>
         
+       <!-- 📸 ระบบอัปโหลดรูปไอเท็มของรางวัล -->
         <div class="form-group">
-            <label style="color: #ff007f;">REWARD IMAGE URL (ลิงก์รูปภาพไอเท็มคัสตอม)</label>
-            <input type="text" id="newWheelImg" placeholder="ใส่ลิงก์รูปภาพ .png / .jpg ... (ปล่อยว่างไว้จะเป็นรูปค่ายอัตโนมัติ)">
+            <label style="color: #ff007f;">REWARD IMAGE (อัปโหลดรูปไอเท็ม หรือวางลิงก์)</label>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="file" id="newWheelImgFile" accept="image/*" style="background: #111; padding: 10px; border: 1px dashed #ff007f; border-radius: 4px; color: #aaa; cursor: pointer; font-size: 0.85rem;">
+                <input type="text" id="newWheelImg" placeholder="ปล่อยว่างไว้ระบบจะดึงรูปโลโก้ค่ายมาใช้แทน">
+            </div>
+            <span id="wheelUploadStatus" style="font-size: 0.8rem; font-family: 'Space Grotesk', sans-serif; display: none; margin-top: 5px;"></span>
         </div>
-
         <div class="form-group">
             <label style="color: #ff007f;">DROP RATE CHANCE (%)</label>
             <input type="number" id="newWheelRate" placeholder="เช่น: 10 (หมายถึงโอกาสดร็อป 10%)" min="0" max="100">
@@ -257,7 +333,59 @@
 
         <a href="index.html" class="back-link" style="margin-top: 30px;">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
-
+<!-- 📥 [แท็บที่ 9] DEMO DROPBOX DESK -->
+    <div class="admin-box" id="demoPanelBox" style="display: none; border-color: #ff4500; box-shadow: 0 0 30px rgba(255, 69, 0, 0.05);">
+        <h2><i class="fa-solid fa-inbox" style="color: #ff4500;"></i> UDG DEMO DROPBOX DESK</h2>
+        <p style="color: #555; font-size: 0.85rem;">กล่องรับจดหมาย: รายชื่อเพลงที่ศิลปินหน้าใหม่ส่งเข้ามาจากหน้าเว็บหลัก (สามารถกดฟังและลบทิ้งได้เมื่อตรวจเสร็จ)</p>
+        
+        <table class="artist-list-table" style="margin-top: 25px;">
+            <thead>
+                <tr>
+                    <th style="background: #111; color: #ff4500;">ศิลปิน / ชื่อเพลง</th>
+                    <th style="background: #111; color: #ff4500;">ช่องทางติดต่อ</th>
+                    <th style="background: #111; color: #ff4500; text-align: center;">จัดการ</th>
+                </tr>
+            </thead>
+            <tbody id="demo-list-tbody">
+                <tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังกวาดสายสัญญาณเช็คตู้จดหมาย...</td></tr>
+            </tbody>
+        </table>
+        <a href="index.html" class="back-link" style="margin-top: 30px;">&larr; กลับไปหน้าเว็บหลัก</a>
+    </div>
+    <div class="admin-box" id="orderPanelBox" style="display: none; border-color: #ffaa00; box-shadow: 0 0 30px rgba(255, 170, 0, 0.05);">
+        <h2><i class="fa-solid fa-cart-shopping" style="color: #ffaa00;"></i> MERCH ORDERS & SLIP VERIFICATION</h2>
+        <p style="color: #555; font-size: 0.85rem;">โต๊ะเช็กบิล: ตรวจสอบที่อยู่ ไซส์เสื้อ และเปิดดูสลิปเทียบกับแอปธนาคาร ถ้ายอดเข้าจริงค่อยกด "VERIFIED"</p>
+        
+        <table class="artist-list-table" style="margin-top: 25px; width: 100%;">
+            <thead>
+                <tr>
+                    <th style="background: #111; color: #ffaa00;">ลูกค้า / ไซส์ / เวลาสั่ง</th>
+                    <th style="background: #111; color: #ffaa00;">ที่อยู่จัดส่ง</th>
+                    <th style="background: #111; color: #ffaa00; text-align: center;">สลิป & สถานะ</th>
+                </tr>
+            </thead>
+            <tbody id="order-list-tbody">
+                <tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังโหลดรายการสั่งซื้อ...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- 🤝 [แท็บ] COLLAB BOARD DESK -->
+    <div class="admin-box" id="collabPanelBox" style="display: none; border-color: #ffaa00; box-shadow: 0 0 30px rgba(255, 170, 0, 0.05);">
+        <h2><i class="fa-solid fa-handshake" style="color: #ffaa00;"></i> COLLAB WANTED BOARD DESK</h2>
+        <p style="color: #555; font-size: 0.85rem;">จัดการบอร์ดประกาศหาคนทำเพลง (แอดมินสามารถลบโพสต์ขยะ หรือโพสต์ที่ได้คนครบแล้วทิ้งได้)</p>
+        <table class="artist-list-table" style="margin-top: 25px; width: 100%;">
+            <thead>
+                <tr>
+                    <th style="background: #111; color: #ffaa00;">ตำแหน่ง / หัวข้อ / รายละเอียด</th>
+                    <th style="background: #111; color: #ffaa00;">ผู้ลงประกาศ / ติดต่อ</th>
+                    <th style="background: #111; color: #ffaa00; text-align: center;">จัดการ</th>
+                </tr>
+            </thead>
+            <tbody id="collab-admin-tbody">
+                <tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังโหลดรายการประกาศ...</td></tr>
+            </tbody>
+        </table>
+    </div>
     <script src="admin-js.js"></script>
 </body>
 </html>

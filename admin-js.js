@@ -18,9 +18,8 @@ function checkGateLogin() {
 
 function unlockCentralPanel() {
     document.getElementById("gateOverlay").style.display = "none";
-    // 🎯 แก้ไขบั๊กปลั๊กหลุดหน้าประตู: บังคับให้เมนูด้านบนแสดงผลแบบ flex เพื่อให้ตรงสัดส่วน Layout CSS
     document.getElementById("adminTabsMenu").style.display = "flex";
-    switchTabMenu("newsPanelBox");
+    switchTabMenu("overviewPanelBox"); // <--- เปลี่ยนจาก newsPanelBox เป็นอันนี้ครับ
 }
 
 function kickUserToHome() { window.location.href = "index.html"; }
@@ -557,4 +556,283 @@ if (adminSearchInput) {
     adminSearchInput.addEventListener('input', (e) => {
         renderFilteredUserRewards(e.target.value);
     });
+}
+
+// =================================================================
+// ─── 📥 DEMO DROPBOX ENGINE (แผงหลังบ้านตู้แดงรับเพลง) ───
+// =================================================================
+const demoTbody = document.getElementById('demo-list-tbody');
+
+database.ref('udg_demo_dropbox').on('value', (snapshot) => {
+    if (!demoTbody) return;
+    demoTbody.innerHTML = '';
+    const demos = snapshot.val();
+    
+    if (!demos) {
+        demoTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center; padding: 20px;">📭 ตู้จดหมายว่างเปล่า: ยังไม่มีศิลปินหน้าใหม่หย่อนเพลงเข้ามาครับน้า</td></tr>`;
+        return;
+    }
+
+    // วนลูปดึงข้อมูลมาเรียงในตาราง
+    Object.keys(demos).forEach(key => {
+        const item = demos[key];
+        const dateStr = new Date(item.timestamp).toLocaleString('th-TH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <strong style="color:#fff; font-size:1.1rem;">${item.trackTitle}</strong><br>
+                <span style="color:#ffaa00; font-size:0.85rem;"><i class="fa-solid fa-microphone"></i> ${item.artistName}</span><br>
+                <span style="color:#555; font-size:0.75rem; font-family:monospace;">ส่งเมื่อ: ${dateStr}</span>
+            </td>
+            <td>
+                <span style="color:#aaa; font-size:0.85rem;">${item.contactInfo}</span><br>
+                <span style="color:#00ffff; font-size:0.7rem; font-family:monospace;">ส่งโดย User: ${item.submittedBy}</span>
+            </td>
+            <td style="text-align: center; vertical-align: middle;">
+                <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+                    <a href="${item.trackLink}" target="_blank" style="background:#111; color:#39ff14; border:1px solid #39ff14; padding:5px 10px; border-radius:4px; font-size:0.75rem; font-weight:bold; text-decoration:none; display:inline-block; width:100px;">
+                        <i class="fa-solid fa-play"></i> เปิดฟัง
+                    </a>
+                    <button type="button" class="delete-artist-btn" style="color:#ff3333; font-weight:800; background:rgba(255,51,51,0.03); border:1px solid rgba(255,51,51,0.2); padding:5px 10px; border-radius:4px; cursor:pointer; width:100px;" onclick="deleteDemoTrack('${key}')">
+                        <i class="fa-solid fa-trash-can"></i> ลบทิ้ง
+                    </button>
+                </div>
+            </td>
+        `;
+        demoTbody.appendChild(tr);
+    });
+});
+
+// ฟังก์ชันลบจดหมายเพลงเมื่อแอดมินจัดการเสร็จแล้ว
+function deleteDemoTrack(key) {
+    if (confirm("🚨 แจ้งเตือนแอดมิน: คุณฟังเพลงนี้และต้องการลบออกจากกล่องข้อความแล้วใช่หรือไม่?")) {
+        database.ref(`udg_demo_dropbox/${key}`).remove()
+            .then(() => { alert("🔥 ล้างกล่องจดหมายเรียบร้อยครับน้า!"); })
+            .catch((err) => { alert("❌ เกิดข้อผิดพลาดในการลบ: " + err.message); });
+    }
+}
+
+// =================================================================
+// ─── 📊 ADMIN COMMAND CENTER ENGINE (หน้าจอสรุปสถิติเรียลไทม์) ───
+// =================================================================
+const dashOnline = document.getElementById('dashOnline');
+const dashDemos = document.getElementById('dashDemos');
+const dashGraffiti = document.getElementById('dashGraffiti');
+const dashCases = document.getElementById('dashCases');
+
+// 1. สแกนนับจำนวนคนกำลังออนไลน์ (STREET ONLINE)
+database.ref('online_users').on('value', (snapshot) => {
+    if (dashOnline) dashOnline.innerText = snapshot.numChildren() || 0;
+});
+
+// 2. สแกนนับ Demo เพลงที่รอตรวจ (PENDING DEMOS)
+database.ref('udg_demo_dropbox').on('value', (snapshot) => {
+    if (dashDemos) dashDemos.innerText = snapshot.numChildren() || 0;
+});
+
+// 3. กวาดนับข้อความพ่นสีรวมทั้งหมดจากทุกห้อง (TOTAL GRAFFITI)
+database.ref('graffiti_rooms').on('value', (snapshot) => {
+    let totalMessages = 0;
+    const rooms = snapshot.val();
+    if (rooms) {
+        Object.keys(rooms).forEach(room => {
+            totalMessages += Object.keys(rooms[room]).length;
+        });
+    }
+    if (dashGraffiti) dashGraffiti.innerText = totalMessages;
+});
+
+// 4. กวาดประวัตินับจำนวนกล่องที่ถูกเปิดไปแล้วทั้งหมด (CASES OPENED)
+database.ref('users_rewards_vault').on('value', (snapshot) => {
+    let totalCases = 0;
+    const vaults = snapshot.val();
+    if (vaults) {
+        Object.keys(vaults).forEach(uid => {
+            totalCases += Object.keys(vaults[uid]).length;
+        });
+    }
+    if (dashCases) dashCases.innerText = totalCases;
+});
+
+// =================================================================
+// ─── 🛒 ADMIN MERCH ORDERS ENGINE (ระบบหลังบ้านจัดการออเดอร์) ───
+// =================================================================
+const orderTbody = document.getElementById('order-list-tbody');
+
+database.ref('udg_merch_orders').on('value', (snapshot) => {
+    if (!orderTbody) return;
+    orderTbody.innerHTML = '';
+    const orders = snapshot.val();
+    
+    if (!orders) {
+        orderTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center; padding: 20px;">📦 ยังไม่มีออเดอร์เข้ามาครับน้า</td></tr>`;
+        return;
+    }
+
+    // แปลง object เป็น array แล้วเรียงตามเวลาล่าสุด
+    let ordersArray = Object.keys(orders).map(key => ({ key: key, ...orders[key] }));
+    ordersArray.sort((a, b) => b.timestamp - a.timestamp);
+
+    ordersArray.forEach(item => {
+        const dateStr = new Date(item.timestamp).toLocaleString('th-TH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        
+        let statusBadge = item.status === 'VERIFIED' 
+            ? `<span style="background: rgba(57, 255, 20, 0.1); color: #39ff14; padding: 4px 8px; border: 1px solid #39ff14; border-radius: 4px; font-weight: bold; font-size: 0.75rem;">✅ จ่ายแล้ว</span>`
+            : `<span style="background: rgba(255, 51, 51, 0.1); color: #ff3333; padding: 4px 8px; border: 1px solid #ff3333; border-radius: 4px; font-weight: bold; font-size: 0.75rem;">⏳ รอตรวจสลิป</span>`;
+
+        let actionButton = item.status === 'VERIFIED'
+            ? `<button onclick="deleteOrder('${item.key}')" style="background: #111; border: 1px solid #ff3333; color: #ff3333; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.7rem; margin-top: 8px;"><i class="fa-solid fa-trash"></i> ลบออเดอร์</button>`
+            : `<button onclick="verifyOrderPayment('${item.key}')" style="background: #ffaa00; border: none; color: #000; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-top: 8px;"><i class="fa-solid fa-check"></i> ยืนยันยอดเข้าจริง</button>`;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <strong style="color:#fff; font-size:1.05rem;">${item.customerName}</strong><br>
+                <span style="color:#ff007f; font-weight: bold; font-size: 0.9rem;">SIZE: ${item.size}</span><br>
+                <span style="color:#555; font-size:0.75rem; font-family:monospace;"><i class="fa-solid fa-phone"></i> ${item.phone}</span><br>
+                <span style="color:#555; font-size:0.7rem; font-family:monospace;">${dateStr}</span>
+            </td>
+            <td>
+                <p style="color:#ccc; font-size:0.85rem; line-height: 1.4; margin: 0; max-width: 250px;">${item.address}</p>
+            </td>
+            <td style="text-align: center; vertical-align: middle;">
+                <div style="display: flex; flex-direction: column; gap: 5px; align-items: center;">
+                    ${statusBadge}
+                    <a href="${item.slipImageUrl}" target="_blank" style="color: #00ffff; text-decoration: underline; font-size: 0.8rem; margin-top: 5px;"><i class="fa-solid fa-image"></i> เปิดดูรูปสลิป</a>
+                    ${actionButton}
+                </div>
+            </td>
+        `;
+        orderTbody.appendChild(tr);
+    });
+});
+
+function verifyOrderPayment(key) {
+    if (confirm("น้าเช็กแอปธนาคารแล้วใช่ไหมว่ายอดโอนเงินเข้าจริง? ถ้ายืนยันแล้วระบบจะปรับสถานะเป็น จ่ายแล้ว ทันที")) {
+        database.ref(`udg_merch_orders/${key}`).update({ status: 'VERIFIED' });
+    }
+}
+
+function deleteOrder(key) {
+    if (confirm("ต้องการลบออเดอร์นี้ออกจากระบบใช่หรือไม่? (แพ็กของส่งเสร็จแล้วค่อยลบนะน้า)")) {
+        database.ref(`udg_merch_orders/${key}`).remove();
+    }
+}
+
+// =================================================================
+// ─── 📸 ADMIN AUTO IMAGE UPLOADER (ระบบแปลงรูปเป็นลิงก์อัตโนมัติผ่าน ImgBB) ───
+// =================================================================
+
+// 🔑 ก๊อปปี้ API Key ของ ImgBB ที่น้าสมัครไว้มาใส่ตรงนี้ครับ
+const ADMIN_IMGBB_API_KEY = "ba210b7b494a630b713c297b74f51d65"; 
+
+function setupImgbbAutoUploader(fileInputId, urlInputId, statusTextId, previewCallback) {
+    const fileInput = document.getElementById(fileInputId);
+    const urlInput = document.getElementById(urlInputId);
+    const statusText = document.getElementById(statusTextId);
+
+    if (!fileInput || !urlInput) return;
+
+    fileInput.addEventListener('change', async function() {
+        const file = this.files[0];
+        if (!file) return;
+
+        // แสดงสถานะกำลังอัปโหลด
+        if (statusText) {
+            statusText.style.display = 'block';
+            statusText.style.color = '#ffaa00';
+            statusText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> UPLOADING TO CLOUD...';
+        }
+        urlInput.disabled = true; // ล็อกช่องลิงก์ไว้กันแอดมินพิมพ์แทรก
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            // ยิงไฟล์ขึ้น ImgBB
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${ADMIN_IMGBB_API_KEY}`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                // ได้ลิงก์มาแล้ว จับยัดลงช่อง Input ทันที
+                urlInput.value = data.data.url;
+                
+                // สั่งให้ Live Preview อัปเดตรูปโชว์แอดมิน
+                if (previewCallback) previewCallback(); 
+                
+                if (statusText) {
+                    statusText.style.color = '#39ff14';
+                    statusText.innerHTML = '<i class="fa-solid fa-circle-check"></i> UPLOAD SUCCESS!';
+                    setTimeout(() => { statusText.style.display = 'none'; }, 4000);
+                }
+            } else {
+                throw new Error("เซิร์ฟเวอร์ ImgBB ปฏิเสธการรับรูปภาพ");
+            }
+        } catch (error) {
+            alert("❌ อัปโหลดรูปภาพล้มเหลว: " + error.message);
+            if (statusText) statusText.style.display = 'none';
+        } finally {
+            urlInput.disabled = false;
+            this.value = ''; // เคลียร์ไฟล์ที่เลือกออก เผื่อกดเลือกรูปใหม่
+        }
+    });
+}
+
+// 🎯 สั่งเปิดใช้งานระบบอัปโหลดกับช่อง "ลงข่าวสาร (NEWS)"
+setupImgbbAutoUploader('adminNewsImgFile', 'adminNewsImg', 'newsUploadStatus', updateLivePreview);
+// 🎯 ปลุกระบบอัปโหลดรูปอัตโนมัติให้ทำงานในแท็บอื่นๆ ด้วย
+setupImgbbAutoUploader('newAdImgFile', 'newAdImage', 'adUploadStatus');
+setupImgbbAutoUploader('newPartnerImgFile', 'newPartnerImg', 'logoUploadStatus', updateLogoPreview); // มีอัปเดต Preview ด้วย
+setupImgbbAutoUploader('newGigImgFile', 'newGigImg', 'gigUploadStatus');
+setupImgbbAutoUploader('newWheelImgFile', 'newWheelImg', 'wheelUploadStatus');
+
+// =================================================================
+// ─── 🤝 ADMIN COLLAB BOARD ENGINE (หลังบ้านจัดการบอร์ดประกาศ) ───
+// =================================================================
+const collabAdminTbody = document.getElementById('collab-admin-tbody');
+
+database.ref('udg_collab_board').on('value', (snapshot) => {
+    if (!collabAdminTbody) return;
+    collabAdminTbody.innerHTML = '';
+    const ads = snapshot.val();
+    
+    if (!ads) {
+        collabAdminTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center; padding: 20px;">📭 ยังไม่มีประกาศในระบบครับ</td></tr>`;
+        return;
+    }
+
+    let adsArray = Object.keys(ads).map(key => ({ key: key, ...ads[key] }));
+    adsArray.sort((a, b) => b.timestamp - a.timestamp);
+
+    adsArray.forEach(item => {
+        const dateStr = new Date(item.timestamp).toLocaleString('th-TH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <span style="color:#ffaa00; font-size:0.75rem; font-weight:bold;">[${item.role}]</span> <strong style="color:#fff;">${item.title}</strong><br>
+                <p style="color:#aaa; font-size:0.8rem; line-height:1.4; margin-top:4px;">${item.desc}</p>
+            </td>
+            <td>
+                <span style="color:#00ffff; font-size:0.85rem;"><i class="fa-solid fa-user"></i> ${item.authorName}</span><br>
+                <span style="color:#39ff14; font-size:0.8rem; font-family:monospace;">${item.contact}</span><br>
+                <span style="color:#555; font-size:0.7rem;">${dateStr}</span>
+            </td>
+            <td style="text-align: center; vertical-align: middle;">
+                <button onclick="deleteCollabAd('${item.key}')" style="background: #111; border: 1px solid #ff3333; color: #ff3333; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.75rem; font-weight:bold;">
+                    <i class="fa-solid fa-trash"></i> ลบทิ้ง
+                </button>
+            </td>
+        `;
+        collabAdminTbody.appendChild(tr);
+    });
+});
+
+function deleteCollabAd(key) {
+    if (confirm("🚨 ต้องการลบประกาศนี้ออกจากบอร์ดใช่หรือไม่?")) {
+        database.ref(`udg_collab_board/${key}`).remove();
+    }
 }

@@ -151,54 +151,67 @@ body {
     color: #fff; 
 }
 
-/* 🎛️ 🎯 เมนูสับเปลี่ยนแท็บด่วนหลังบ้าน */
+/* 🎛️ 🎯 เมนูสับเปลี่ยนแท็บด่วนหลังบ้าน (PRO UI) */
 .tabs-container {
-    display: none;
     width: 100%;
-    max-width: 650px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)) !important;
-    gap: 6px;
-    margin-top: 10px;
+    max-width: 1000px; /* ขยายให้กว้างขึ้น ดูเป็นหน้าแดชบอร์ดโปรๆ */
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 15px;
+    background: #090909;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid #151515;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
 .tab-trigger-btn {
-    background: #0d0d0d;
+    background: #111;
     border: 1px solid #222;
-    color: #666;
-    padding: 12px 4px;
+    color: #777;
+    padding: 10px 20px;
     font-family: 'Space Grotesk', 'Kanit', sans-serif;
     font-weight: 800;
-    font-size: 0.72rem;
+    font-size: 0.85rem;
     border-radius: 6px;
     cursor: pointer;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 1px;
 }
 
-.tab-trigger-btn i { font-size: 0.95rem; }
+.tab-trigger-btn i { font-size: 1.1rem; }
 
-.tab-trigger-btn[data-target="newsPanelBox"].active { border-color: #ff3333; color: #ff3333; box-shadow: 0 0 12px rgba(255, 51, 51, 0.15); background: rgba(255, 51, 51, 0.02); }
-.tab-trigger-btn[data-target="musicPanelBox"].active { border-color: #00ffff; color: #00ffff; box-shadow: 0 0 12px rgba(0, 255, 255, 0.15); background: rgba(0, 255, 255, 0.02); }
-.tab-trigger-btn[data-target="artistPanelBox"].active { border-color: #ffaa00; color: #ffaa00; box-shadow: 0 0 12px rgba(255, 170, 0, 0.15); background: rgba(255, 170, 0, 0.02); }
-.tab-trigger-btn[data-target="adPanelBox"].active { border-color: #39ff14; color: #39ff14; box-shadow: 0 0 12px rgba(57, 255, 20, 0.15); background: rgba(57, 255, 20, 0.02); }
-.tab-trigger-btn[data-target="archivePanelBox"].active { border-color: #cc00ff; color: #cc00ff; box-shadow: 0 0 12px rgba(204, 0, 255, 0.15); background: rgba(204, 0, 255, 0.02); }
-.tab-trigger-btn[data-target="logoPanelBox"].active { border-color: #fff000; color: #fff000; box-shadow: 0 0 12px rgba(255, 240, 0, 0.15); background: rgba(255, 240, 0, 0.02); }
-.tab-trigger-btn[data-target="gigPanelBox"].active { border-color: #00ffaa; color: #00ffaa; box-shadow: 0 0 12px rgba(0, 255, 170, 0.15); background: rgba(0, 255, 170, 0.02); }
-.tab-trigger-btn[data-target="wheelPanelBox"].active { border-color: #ff007f !important; color: #ff007f !important; box-shadow: 0 0 12px rgba(255, 0, 127, 0.15) !important; background: rgba(255, 0, 127, 0.02) !important; }
+.tab-trigger-btn:hover {
+    background: #1a1a1a;
+    color: #ccc;
+    border-color: #444;
+}
 
-/* โครงสร้างหลักกล่องควบคุมแต่ละส่วน */
+/* 🎯 โทนสีแสงนีออนตอนกดใช้งาน (Active States แบบคลีนๆ ไม่รกตา) */
+.tab-trigger-btn[data-target="newsPanelBox"].active { border-color: #ff3333; color: #fff; background: rgba(255, 51, 51, 0.1); box-shadow: 0 0 15px rgba(255, 51, 51, 0.3); }
+.tab-trigger-btn[data-target="musicPanelBox"].active { border-color: #00ffff; color: #fff; background: rgba(0, 255, 255, 0.1); box-shadow: 0 0 15px rgba(0, 255, 255, 0.3); }
+.tab-trigger-btn[data-target="artistPanelBox"].active { border-color: #ffaa00; color: #fff; background: rgba(255, 170, 0, 0.1); box-shadow: 0 0 15px rgba(255, 170, 0, 0.3); }
+.tab-trigger-btn[data-target="adPanelBox"].active { border-color: #39ff14; color: #fff; background: rgba(57, 255, 20, 0.1); box-shadow: 0 0 15px rgba(57, 255, 20, 0.3); }
+.tab-trigger-btn[data-target="archivePanelBox"].active { border-color: #cc00ff; color: #fff; background: rgba(204, 0, 255, 0.1); box-shadow: 0 0 15px rgba(204, 0, 255, 0.3); }
+.tab-trigger-btn[data-target="logoPanelBox"].active { border-color: #fff000; color: #fff; background: rgba(255, 240, 0, 0.1); box-shadow: 0 0 15px rgba(255, 240, 0, 0.3); }
+.tab-trigger-btn[data-target="gigPanelBox"].active { border-color: #00ffaa; color: #fff; background: rgba(0, 255, 170, 0.1); box-shadow: 0 0 15px rgba(0, 255, 170, 0.3); }
+.tab-trigger-btn[data-target="wheelPanelBox"].active { border-color: #ff007f; color: #fff; background: rgba(255, 0, 127, 0.1); box-shadow: 0 0 15px rgba(255, 0, 127, 0.3); }
+.tab-trigger-btn[data-target="demoPanelBox"].active { border-color: #ff4500; color: #fff; background: rgba(255, 69, 0, 0.1); box-shadow: 0 0 15px rgba(255, 69, 0, 0.3); }
+
+/* ขยายขนาดกล่องคอนเทนต์ด้านล่างให้สมดุลกับแถบเมนู */
 .admin-box {
     display: none;
     background: #0a0a0a;
     border: 1px solid #ff3333;
     border-radius: 8px;
-    padding: 30px;
+    padding: 40px;
     width: 100%;
-    max-width: 600px;
+    max-width: 1000px; /* อัปเกรดจาก 600px ให้มีพื้นที่ใช้งานเยอะขึ้น */
     box-shadow: 0 0 30px rgba(255, 51, 51, 0.1);
 }
 .admin-box-glow { border-color: #ffaa00; box-shadow: 0 0 30px rgba(255, 170, 0, 0.05); }
@@ -413,3 +426,7 @@ select:focus, input:focus, textarea:focus {
     transform: scale(1.05);
     text-decoration: none !important;
 }
+
+.tab-trigger-btn[data-target="orderPanelBox"].active { border-color: #ffaa00 !important; color: #000 !important; box-shadow: 0 0 15px rgba(255, 170, 0, 0.5) !important; background: #ffaa00 !important; }
+.tab-trigger-btn[data-target="overviewPanelBox"].active { border-color: #00aaff !important; color: #fff !important; box-shadow: 0 0 15px rgba(0, 170, 255, 0.3) !important; background: rgba(0, 170, 255, 0.1) !important; }
+.tab-trigger-btn[data-target="demoPanelBox"].active { border-color: #ff4500 !important; color: #ff4500 !important; box-shadow: 0 0 12px rgba(255, 69, 0, 0.15) !important; background: rgba(255, 69, 0, 0.02) !important; }
