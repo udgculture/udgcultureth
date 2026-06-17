@@ -1337,3 +1337,86 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// =================================================================
+// ─── 🎒 📊 🎨 PROFILE DASHBOARD ENGINE (MY VAULT, STATS, EDIT TAG) ───
+// =================================================================
+
+// 1. ซ่อน Dropdown เวลากดลิงก์ Vault
+const vaultLinkBtn = document.getElementById('vaultLinkBtn');
+if(vaultLinkBtn) vaultLinkBtn.addEventListener('click', () => { if(userDropdownMenu) userDropdownMenu.style.display = 'none'; });
+
+// 2. ระบบเก็บสถิติ (เรียกใช้ตอนกดโหวต, พ่นสี, เปิดกล่อง)
+function incrementUserStat(statName) {
+    // เซฟลงเครื่องเผื่อไว้ก่อน
+    let currentVal = parseInt(localStorage.getItem(`udg_stat_${statName}`) || '0');
+    localStorage.setItem(`udg_stat_${statName}`, currentVal + 1);
+
+    // เซฟลง Cloud ถ้าล็อกอินอยู่
+    const currentUser = firebase.auth().currentUser;
+    if (currentUser) {
+        database.ref(`users_stats/${currentUser.uid}/${statName}`).transaction((current) => (current || 0) + 1);
+    }
+}
+
+// 3. ปลุกระบบ MY STATS 
+const statsModal = document.getElementById('statsModal');
+const openStatsBtn = document.getElementById('openStatsBtn');
+const closeStatsBtn = document.getElementById('closeStatsBtn');
+
+if (openStatsBtn && statsModal) {
+    openStatsBtn.addEventListener('click', async () => {
+        if(userDropdownMenu) userDropdownMenu.style.display = 'none';
+        
+        let votes = parseInt(localStorage.getItem('udg_stat_votes') || '0');
+        let graffiti = parseInt(localStorage.getItem('udg_stat_graffiti') || '0');
+        let cases = parseInt(localStorage.getItem('udg_stat_cases') || '0');
+
+        const currentUser = firebase.auth().currentUser;
+        if (currentUser) {
+            const snap = await database.ref(`users_stats/${currentUser.uid}`).once('value');
+            const data = snap.val();
+            if (data) {
+                votes = data.votes || votes;
+                graffiti = data.graffiti || graffiti;
+                cases = data.cases || cases;
+            }
+        }
+
+        document.getElementById('statVotes').innerText = votes;
+        document.getElementById('statGraffiti').innerText = graffiti;
+        document.getElementById('statCases').innerText = cases;
+
+        statsModal.classList.add('active');
+    });
+}
+if(closeStatsBtn) closeStatsBtn.addEventListener('click', () => statsModal.classList.remove('active'));
+
+// 4. ปลุกระบบ EDIT TAG
+const editTagModal = document.getElementById('editTagModal');
+const openEditTagBtn = document.getElementById('openEditTagBtn');
+const closeEditTagBtn = document.getElementById('closeEditTagBtn');
+const editTagNameInput = document.getElementById('editTagNameInput');
+const saveTagBtn = document.getElementById('saveTagBtn');
+
+if (openEditTagBtn && editTagModal) {
+    openEditTagBtn.addEventListener('click', () => {
+        if(userDropdownMenu) userDropdownMenu.style.display = 'none';
+        editTagNameInput.value = localStorage.getItem('savedGraffitiName') || (graffitiName ? graffitiName.value : "");
+        editTagModal.classList.add('active');
+    });
+}
+if(closeEditTagBtn) closeEditTagBtn.addEventListener('click', () => editTagModal.classList.remove('active'));
+
+if(saveTagBtn) {
+    saveTagBtn.addEventListener('click', () => {
+        let newName = editTagNameInput.value.trim();
+        if(newName !== "") {
+            let finalName = newName.startsWith('@') ? newName : '@' + newName;
+            localStorage.setItem('savedGraffitiName', finalName);
+            if(graffitiName) graffitiName.value = finalName;
+            showErrorAlert("TAG UPDATED", `อัปเดตฉายาเป็น <strong style="color:#ff007f;">${finalName}</strong> เรียบร้อยแล้ว! เตรียมลุยกำแพงได้เลย 🎨`, true);
+            editTagModal.classList.remove('active');
+        }
+    });
+}
