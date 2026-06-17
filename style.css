@@ -1950,3 +1950,13 @@ footer {
     transform: scale(1.1) translateY(-2px);
     filter: drop-shadow(0 0 12px var(--accent-color));
 }
+
+#loadMoreNewsContainer {
+    width: 100%;
+    clear: both;
+    padding: 10px 0 40px 0;
+}
+
+#loadMoreNewsBtn:active {
+    transform: scale(0.98);
+}

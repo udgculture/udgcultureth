@@ -554,12 +554,13 @@ if (playerPlayBtn) {
 }
 
 // =================================================================
-// ─── 📰 🔥 CENTRAL APP FEED: ระบบดูดฟีดข่าวสาร ───
+// ─── 📰 🔥 CENTRAL APP FEED: ระบบดูดฟีดข่าวสาร (แก้ไขบั๊กปุ่มกด + มือถือแสดง 3 ข่าว) ───
 // =================================================================
 const liveNewsGrid = document.getElementById('live-news-grid');
 const liveFeaturedCard = document.getElementById('live-featured-card');
 const liveRadarGrid = document.getElementById('live-radar-grid');
 
+// ฟังก์ชันดูดข่าว Feature
 database.ref('udg_homepage_slots/featured_card').on('value', (snapshot) => {
     if (!liveFeaturedCard) return;
     const data = snapshot.val();
@@ -582,6 +583,7 @@ database.ref('udg_homepage_slots/featured_card').on('value', (snapshot) => {
         </div>`;
 });
 
+// ฟังก์ชันดูดข่าว Radar
 let radarDataCard1 = null; let radarDataCard2 = null;
 function renderRadarZone() {
     if (!liveRadarGrid) return; liveRadarGrid.innerHTML = '';
@@ -603,20 +605,34 @@ function renderRadarZone() {
         liveRadarGrid.appendChild(cardBox);
     });
 }
-
 database.ref('udg_homepage_slots/radar_card_1').on('value', (snapshot) => { radarDataCard1 = snapshot.val(); renderRadarZone(); });
 database.ref('udg_homepage_slots/radar_card_2').on('value', (snapshot) => { radarDataCard2 = snapshot.val(); renderRadarZone(); });
 
-database.ref('udg_news_drops').on('value', (snapshot) => {
-    if (!liveNewsGrid) return; liveNewsGrid.innerHTML = '';
-    const allNewsData = snapshot.val();
-    if (!allNewsData) {
+
+// 🎯 ระบบฟีดข่าวสารหลัก (มีปุ่ม Load More และ Responsive มือถือ 3 / คอม 6)
+let globalNewsList = []; 
+let showAllNews = false; 
+
+function renderNewsFeed() {
+    if (!liveNewsGrid) return;
+    liveNewsGrid.innerHTML = '';
+
+    if (globalNewsList.length === 0) {
         liveNewsGrid.innerHTML = `<div style="padding:40px; color:#444; text-align:center; grid-column:1/-1; font-size:0.95rem; font-weight:300; letter-spacing:0.5px;">📰 NO CONTENT CURRENTLY AVAILABLE. SPECIAL UPDATES COMING SOON.</div>`;
+        if (document.getElementById('loadMoreNewsContainer')) {
+            document.getElementById('loadMoreNewsContainer').style.display = 'none';
+        }
         return;
     }
-    let newsList = Object.keys(allNewsData).map(key => { return { newsId: key, ...allNewsData[key] }; });
-    newsList.sort((a, b) => b.timestamp - a.timestamp);
-    newsList.forEach(news => {
+
+    // เช็คขนาดหน้าจอ: ถ้าเป็นมือถือแสดง 3 ข่าว, คอมพิวเตอร์แสดง 6 ข่าว
+    const isMobile = window.innerWidth <= 768;
+    const initialLimit = isMobile ? 3 : 6;
+
+    // เลือกจำนวนข้อมูลที่จะเอามาแสดงผล
+    const visibleNews = showAllNews ? globalNewsList : globalNewsList.slice(0, initialLimit);
+
+    visibleNews.forEach(news => {
         const articleCard = document.createElement('article');
         articleCard.className = 'news-card';
         articleCard.innerHTML = `
@@ -629,6 +645,46 @@ database.ref('udg_news_drops').on('value', (snapshot) => {
             </div>`;
         liveNewsGrid.appendChild(articleCard);
     });
+
+    // ควบคุมการแสดงผลปุ่ม "แสดงข่าวเพิ่มเติม"
+    const loadMoreContainer = document.getElementById('loadMoreNewsContainer');
+    if (loadMoreContainer) {
+        if (globalNewsList.length > initialLimit && !showAllNews) {
+            loadMoreContainer.style.display = 'block'; 
+        } else {
+            loadMoreContainer.style.display = 'none'; 
+        }
+    }
+}
+
+database.ref('udg_news_drops').on('value', (snapshot) => {
+    const allNewsData = snapshot.val();
+    globalNewsList = []; 
+    
+    if (allNewsData) {
+        globalNewsList = Object.keys(allNewsData).map(key => { return { newsId: key, ...allNewsData[key] }; });
+        globalNewsList.sort((a, b) => b.timestamp - a.timestamp); 
+    }
+    
+    renderNewsFeed(); 
+});
+
+// ดักจับการคลิกปุ่ม Load More ข่าว
+document.addEventListener('DOMContentLoaded', () => {
+    const loadMoreBtn = document.getElementById('loadMoreNewsBtn');
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', () => {
+            showAllNews = true; 
+            renderNewsFeed(); 
+        });
+    }
+});
+
+// ตรวจจับการย่อ/ขยาย หรือหมุนหน้าจอโทรศัพท์
+window.addEventListener('resize', () => {
+    if (!showAllNews) { 
+        renderNewsFeed(); 
+    }
 });
 
 async function deleteNewsItemByAdmin(newsId) {
@@ -1066,7 +1122,6 @@ if (openCaseBtn) {
 // 🚪 เครื่องยนต์ล็อกอิน (ฉบับ Popup ทลายบั๊กข้ามโดเมน 100% + กันคลิกเบิ้ล)
 // =================================================================
 
-// 1. ประกาศตัวแปรรับค่า ID ให้ชัวร์ก่อนเรียกใช้งาน
 const closeAuthBtn = document.getElementById('closeAuthBtn');
 const authProviderModal = document.getElementById('authProviderModal');
 const openAuthModalBtn = document.getElementById('openAuthModalBtn');
@@ -1077,7 +1132,7 @@ const userProfileDisplay = document.getElementById('userProfileDisplay');
 const loginGoogleBtn = document.getElementById('loginGoogleBtn');
 const loginFacebookBtn = document.getElementById('loginFacebookBtn');
 
-let isLoginProcessing = false; // 🔒 สลักล็อกป้องกันการคลิกเบิ้ล
+let isLoginProcessing = false; 
 
 if (openAuthModalBtn && authProviderModal) {
     openAuthModalBtn.addEventListener('click', (e) => {
@@ -1134,7 +1189,6 @@ function handleAuthSuccess(userObj) {
         graffitiName.value = displayName.replace(/\s+/g, ''); 
     }
 
-    // โหลดตู้เซฟคูปองออโต้เมื่อล็อกอินเสร็จ
     listenToMySavedCouponsVault(userObj.uid);
 
     setTimeout(() => { if (authProviderModal) authProviderModal.classList.remove('active'); }, 1200);
@@ -1156,7 +1210,6 @@ if (signOutBtn) {
             if (graffitiName) graffitiName.value = "";
             if (userProfileDisplay) userProfileDisplay.style.display = "none";
             
-            // ล้างข้อมูลตู้เซฟตอนกดออก
             if (myCouponsList) {
                  myCouponsList.innerHTML = `<div style="color:#333; text-align:center; padding-top:100px; font-size:0.85rem;">🎁 ตู้เซฟของคุณยังว่างเปล่า<br>กดเปิดกล่องสุ่มสไลด์เพื่อลุ้นรับคูปองกันน้า BRO!</div>`;
             }
@@ -1168,7 +1221,6 @@ if (signOutBtn) {
     });
 }
 
-// 1. ปุ่มล็อกอิน Google (เพิ่มระบบ Fail-safe ป้องกันปุ่มค้าง)
 if (loginGoogleBtn) {
     loginGoogleBtn.addEventListener('click', async (e) => {
         e.preventDefault();
@@ -1180,7 +1232,6 @@ if (loginGoogleBtn) {
         loginGoogleBtn.style.opacity = '0.5';
         loginGoogleBtn.style.pointerEvents = 'none';
 
-        // ⏱️ ระบบตัดการทำงานหาก Pop-up ค้างเกิน 60 วินาที
         const failSafeTimer = setTimeout(() => {
             if (isLoginProcessing) {
                 isLoginProcessing = false;
@@ -1202,7 +1253,6 @@ if (loginGoogleBtn) {
             clearTimeout(failSafeTimer);
             console.error("Auth Error:", error);
             
-            // 🚨 ดักจับกรณีเบราว์เซอร์บล็อก Pop-up แจ้งเตือนผู้ใช้ทันที
             if (error.code === 'auth/popup-blocked') {
                 showErrorAlert("POP-UP BLOCKED", "เบราว์เซอร์ของคุณบล็อกหน้าต่างเข้าสู่ระบบ!<br>กรุณากดอนุญาต Pop-up ที่มุมขวาบนของช่อง URL");
             } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
@@ -1217,7 +1267,6 @@ if (loginGoogleBtn) {
     });
 }
 
-// 2. ปุ่มล็อกอิน Facebook (เพิ่มระบบ Fail-safe ป้องกันปุ่มค้าง)
 if (loginFacebookBtn) {
     loginFacebookBtn.addEventListener('click', async (e) => {
         e.preventDefault();
@@ -1263,12 +1312,28 @@ if (loginFacebookBtn) {
     });
 }
 
-// 4. 📡 เรดาร์จับสัญญาณล็อกอินถาวร (เปิดหน้าเว็บปุ๊บรู้ปั๊บ)
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         console.log("🔥 USER ALREADY LOGGED IN:", user.displayName);
-        handleAuthSuccess(user); // จะไปเรียกให้โหลดตู้เซฟคูปองด้วย
+        handleAuthSuccess(user); 
     } else {
         console.log("👀 NO USER LOGGED IN.");
     }
+});
+
+// =================================================================
+// ─── 🧭 NAVIGATION BAR: ระบบเปลี่ยนสีเมนู Active ตอนกดคลิก ───
+// =================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            // 1. ล้างคลาส active สีฟ้าออกจากทุกเมนูก่อน
+            navLinks.forEach(item => item.classList.remove('active'));
+            
+            // 2. แปะคลาส active สีฟ้าให้กับเมนูที่เราเพิ่งกดลงไป
+            this.classList.add('active');
+        });
+    });
 });
