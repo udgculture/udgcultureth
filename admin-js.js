@@ -123,40 +123,83 @@ function successAction() {
     updateLivePreview();
 }
 
-// 🎵 [ระบบแท็บที่ 2] จัดการตู้เซ็ตเพลงโหวตประจำสัปดาห์
+// 🎵 [ระบบแท็บที่ 2] จัดการตู้เซ็ตเพลงโหวตประจำเดือน (แก้ไขให้ตรงกับหน้าบ้าน)
 const trackTbody = document.getElementById('track-list-tbody');
-function getAdminCurrentWeekKey() {
-    const d = new Date(); const day = d.getDay(); const hours = d.getHours(); let target = new Date(d);
-    let diff = (day >= 5) ? (day - 5) : (day + 2);
-    if (day === 5 && hours < 10) { diff = -7; } else if (day === 5 && hours >= 10) { diff = 0; } else { diff = diff * -1; }
-    target.setDate(d.getDate() + diff); target.setHours(10, 0, 0, 0);
-    const yyyy = target.getFullYear(); const mm = String(target.getMonth() + 1).padStart(2, '0'); const dd = String(target.getDate()).padStart(2, '0');
-    return `week_${yyyy}_${mm}_${dd}`;
+
+// เปลี่ยนฟังก์ชันหาวันที่ให้เป็นแบบรายเดือน (เหมือนใน script.js)
+function getAdminCurrentMonthKey() {
+    const d = new Date();
+    let yyyy = d.getFullYear();
+    let mm = d.getMonth() + 1;
+    let dd = d.getDate();
+    let hh = d.getHours();
+    let min = d.getMinutes();
+
+    // ดักวันที่ 1 เวลา 00:00 น.
+    if (dd === 1 && hh === 0 && min === 0) {
+        let prev = new Date(d.getTime() - 60000);
+        yyyy = prev.getFullYear();
+        mm = prev.getMonth() + 1;
+    }
+    mm = String(mm).padStart(2, '0');
+    return `month_${yyyy}_${mm}`;
 }
 
-function listenToCurrentWeekTracks() {
-    const currentWeekId = getAdminCurrentWeekKey();
-    database.ref(`udg_weekly_tracks_vault/${currentWeekId}`).on('value', (s) => {
+function listenToCurrentMonthTracks() {
+    const currentMonthId = getAdminCurrentMonthKey();
+    // เปลี่ยน path เป็น udg_monthly_tracks_vault ให้ตรงกับหน้าบ้าน
+    database.ref(`udg_monthly_tracks_vault/${currentMonthId}`).on('value', (s) => {
         if (!trackTbody) return;
-        trackTbody.innerHTML = ''; const weeklyTracks = s.val();
-        if (!weeklyTracks) { trackTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center;">🎵 เซ็ตโหวตสัปดาห์นี้ยังว่างเปล่า สาดเพลงโฆษณาค่ายชุดใหม่บรรทัดบนได้เลยครับน้าบักหำทิว!</td></tr>`; return; }
-        Object.keys(weeklyTracks).forEach(key => {
-            const track = weeklyTracks[key]; const tr = document.createElement('tr');
-            tr.innerHTML = `<td><strong>${track.title}</strong><br><span style="color:#555; font-size:0.75rem;">${track.artist}</span></td><td style="color:#00ffff; font-family:monospace;">${track.ytId}</td><td><button class="delete-artist-btn" onclick="removeTrackFromCurrentWeek('${key}')">// REMOVE</button></td>`;
+        trackTbody.innerHTML = ''; 
+        const monthlyTracks = s.val();
+        
+        if (!monthlyTracks) { 
+            trackTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center;">🎵 เซ็ตโหวตเดือนนี้ยังว่างเปล่า สาดเพลงเซ็ตใหม่บรรทัดบนได้เลยครับน้า!</td></tr>`; 
+            return; 
+        }
+        
+        Object.keys(monthlyTracks).forEach(key => {
+            const track = monthlyTracks[key]; 
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td><strong>${track.title}</strong><br><span style="color:#555; font-size:0.75rem;">${track.artist}</span></td><td style="color:#00ffff; font-family:monospace;">${track.ytId}</td><td><button class="delete-artist-btn" onclick="removeTrackFromCurrentMonth('${key}')">// REMOVE</button></td>`;
             trackTbody.appendChild(tr);
         });
     });
 }
-listenToCurrentWeekTracks();
+listenToCurrentMonthTracks();
 
 document.getElementById('addTrackBtn').addEventListener('click', () => {
-    const currentWeekId = getAdminCurrentWeekKey(); const title = document.getElementById('newTrackTitle').value.trim(); const artist = document.getElementById('newTrackArtist').value.trim(); const ytId = document.getElementById('newTrackYtId').value.trim();
+    const currentMonthId = getAdminCurrentMonthKey(); 
+    const title = document.getElementById('newTrackTitle').value.trim(); 
+    const artist = document.getElementById('newTrackArtist').value.trim(); 
+    const ytId = document.getElementById('newTrackYtId').value.trim();
+    
     if (!title || !artist || !ytId) { alert("❌ กรุณากรอกรายละเอียดช่องเพลงให้ครบถ้วนก่อนครับน้า!"); return; }
+    
     const trackRandomId = "track_" + Date.now();
-    database.ref(`udg_weekly_tracks_vault/${currentWeekId}/${trackRandomId}`).set({ id: trackRandomId, title: title, artist: artist, ytId: ytId }, (err) => { if (!err) { document.getElementById('newTrackTitle').value = ''; document.getElementById('newTrackArtist').value = ''; document.getElementById('newTrackYtId').value = ''; alert(`🔥 สาดเพลงใหม่สำเร็จแล้วครับน้า!`); } });
+    // เปลี่ยน path บันทึกข้อมูลเป็น udg_monthly_tracks_vault
+    database.ref(`udg_monthly_tracks_vault/${currentMonthId}/${trackRandomId}`).set({ 
+        id: trackRandomId, 
+        title: title, 
+        artist: artist, 
+        ytId: ytId 
+    }, (err) => { 
+        if (!err) { 
+            document.getElementById('newTrackTitle').value = ''; 
+            document.getElementById('newTrackArtist').value = ''; 
+            document.getElementById('newTrackYtId').value = ''; 
+            alert(`🔥 สาดเพลงใหม่สำเร็จแล้วครับน้า!`); 
+        } 
+    });
 });
-function removeTrackFromCurrentWeek(trackKey) { const currentWeekId = getAdminCurrentWeekKey(); if (confirm("คุณต้องการถอดเพลงนี้ออกใช่หรือไม่?")) database.ref(`udg_weekly_tracks_vault/${currentWeekId}/${trackKey}`).remove(); }
 
+function removeTrackFromCurrentMonth(trackKey) { 
+    const currentMonthId = getAdminCurrentMonthKey(); 
+    if (confirm("คุณต้องการถอดเพลงนี้ออกใช่หรือไม่?")) {
+        // เปลี่ยน path การลบข้อมูลเป็น udg_monthly_tracks_vault
+        database.ref(`udg_monthly_tracks_vault/${currentMonthId}/${trackKey}`).remove(); 
+    }
+}
 // 🎤 [ระบบแท็บที่ 3] มอบสิทธิ์คีย์แร็ปเปอร์พ่นสีทอง
 const tbody = document.getElementById('artist-list-tbody');
 database.ref('udg_artist_credentials').on('value', (s) => {

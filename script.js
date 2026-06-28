@@ -12,7 +12,11 @@ const firebaseConfig = {
   databaseURL: "https://udg-caht-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+} else {
+    firebase.app();
+}
 const database = firebase.database();
 
 // =================================================================
@@ -346,14 +350,14 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // =================================================================
-// ─── 🗳️ 🎵 CENTRAL WEEKLY SET CHART ENGINE ───
+// ─── 🗳️ 🎵 CENTRAL MONTHLY SET CHART ENGINE (รีเซ็ตทุกวันที่ 1) ───
 // =================================================================
 const liveChartDisplay = document.getElementById('live-chart-display');
 const modalVotingList = document.getElementById('modal-voting-list');
 const voteSearchInput = document.getElementById('voteSearchInput');
 
 let musicTracksData = {}; 
-let globalCurrentWeekVotes = {};
+let globalCurrentMonthVotes = {};
 let ytPlayer = null; 
 let updateTimerInterval = null;
 
@@ -372,37 +376,40 @@ window.onYouTubeIframeAPIReady = function() {
     });
 };
 
-function getWeekIdentifier(dateObj) {
+// 🎯 ฟังก์ชันหา Identifier ประจำเดือน (รีเซ็ตวันที่ 1 เวลา 00:01 น.)
+function getMonthIdentifier(dateObj) {
     const d = new Date(dateObj);
-    const day = d.getDay();
-    const hours = d.getHours();
-    let target = new Date(d);
-    let diff = (day >= 5) ? (day - 5) : (day + 2);
-    if (day === 5 && hours < 10) { diff = -7; } 
-    else if (day === 5 && hours >= 10) { diff = 0; } 
-    else { diff = diff * -1; }
-    target.setDate(d.getDate() + diff);
-    target.setHours(10, 0, 0, 0);
-    const yyyy = target.getFullYear();
-    const mm = String(target.getMonth() + 1).padStart(2, '0');
-    const dd = String(target.getDate()).padStart(2, '0');
-    return `week_${yyyy}_${mm}_${dd}`;
+    let yyyy = d.getFullYear();
+    let mm = d.getMonth() + 1;
+    let dd = d.getDate();
+    let hh = d.getHours();
+    let min = d.getMinutes();
+
+    // หากเป็นวันที่ 1 เวลา 00:00 น. พอดี ให้ถือว่าเป็นของเดือนก่อนหน้า (เพราะเราจะรีเซ็ตตอน 00:01 น.)
+    if (dd === 1 && hh === 0 && min === 0) {
+        let prev = new Date(d.getTime() - 60000); // ถอยกลับไป 1 นาที
+        yyyy = prev.getFullYear();
+        mm = prev.getMonth() + 1;
+    }
+
+    mm = String(mm).padStart(2, '0');
+    return `month_${yyyy}_${mm}`;
 }
 
-function renderModalVotingStation(currentWeekVotes, filterText = "") {
+function renderModalVotingStation(currentMonthVotes, filterText = "") {
     if (!modalVotingList) return;
     modalVotingList.innerHTML = '';
     const query = filterText.toLowerCase().trim();
     
     const trackKeys = Object.keys(musicTracksData);
     if (trackKeys.length === 0) {
-        modalVotingList.innerHTML = `<div style="color:#555; text-align:center; padding:20px; font-size:0.9rem;">🎵 วันศุกร์สัปดาห์ใหม่เริ่มขึ้นแล้ว!<br>รอแอดมินสาดเพลงเซ็ตโหวตประจำสัปดาห์นี้เข้าสู่ระบบครับน้า BRO!</div>`;
+        modalVotingList.innerHTML = `<div style="color:#555; text-align:center; padding:20px; font-size:0.9rem;">🎵 เดือนใหม่เริ่มขึ้นแล้ว!<br>รอแอดมินสาดเพลงเซ็ตโหวตประจำเดือนนี้เข้าสู่ระบบครับน้า BRO!</div>`;
         return;
     }
 
     trackKeys.forEach(trackKey => {
         const track = musicTracksData[trackKey];
-        const votes = currentWeekVotes[track.id] ? currentWeekVotes[track.id] : 0;
+        const votes = currentMonthVotes[track.id] ? currentMonthVotes[track.id] : 0;
         if (query !== "" && !track.title.toLowerCase().includes(query) && !track.artist.toLowerCase().includes(query)) return;
         
         const voteRow = document.createElement('div');
@@ -424,46 +431,49 @@ function renderModalVotingStation(currentWeekVotes, filterText = "") {
 
 function submitTrackVote(trackId) {
     const now = new Date();
-    const weekId = getWeekIdentifier(now); 
+    const monthId = getMonthIdentifier(now); 
     const todayStr = now.toDateString();
+    
     const lastVoteDate = localStorage.getItem(`last_vote_${trackId}`);
     if (lastVoteDate === todayStr) {
         showErrorAlert('VOTE LIMIT!', '❌ YOU ALREADY VOTED TODAY!<br>(น้ากดโหวตเพลงนี้ไปแล้ววันนี้ พรุ่งนี้ค่อยมาดันแต้มใหม่นะครับ BRO!)');
         return;
     }
-    const trackVoteRef = database.ref(`weekly_music_votes/${weekId}/${trackId}`);
+    
+    // ดันคะแนนโหวตลงระบบฐานข้อมูลประจำเดือน
+    const trackVoteRef = database.ref(`monthly_music_votes/${monthId}/${trackId}`);
     trackVoteRef.transaction((currentVotes) => { return (currentVotes || 0) + 1; }, (error, committed) => {
         if (committed) {
             localStorage.setItem(`last_vote_${trackId}`, todayStr);
             incrementUserStat('votes');
-            showErrorAlert('VOTE SUCCESS', '🔥 คะแนนถูกส่งเข้าระบบประจำสัปดาห์เรียบร้อยแล้ว ขอบคุณที่ช่วยดันชาร์ต UDG ครับ BRO!');
+            showErrorAlert('VOTE SUCCESS', '🔥 คะแนนถูกส่งเข้าระบบประจำเดือนเรียบร้อยแล้ว ขอบคุณที่ช่วยดันชาร์ต UDG ครับ BRO!');
         }
     });
 }
 
-function setupWeeklySetMusicEngine() {
-    const currentWeekId = getWeekIdentifier(new Date());
+function setupMonthlySetMusicEngine() {
+    const currentMonthId = getMonthIdentifier(new Date());
 
-    database.ref(`udg_weekly_tracks_vault/${currentWeekId}`).on('value', (trackSnapshot) => {
-        const weeklyTracks = trackSnapshot.val();
-        musicTracksData = weeklyTracks ? weeklyTracks : {}; 
+    database.ref(`udg_monthly_tracks_vault/${currentMonthId}`).on('value', (trackSnapshot) => {
+        const monthlyTracks = trackSnapshot.val();
+        musicTracksData = monthlyTracks ? monthlyTracks : {}; 
 
-        database.ref(`weekly_music_votes/${currentWeekId}`).on('value', (voteSnapshot) => {
-            const currentWeekVotes = voteSnapshot.val() ? voteSnapshot.val() : {};
-            globalCurrentWeekVotes = currentWeekVotes;
+        database.ref(`monthly_music_votes/${currentMonthId}`).on('value', (voteSnapshot) => {
+            const currentMonthVotes = voteSnapshot.val() ? voteSnapshot.val() : {};
+            globalCurrentMonthVotes = currentMonthVotes;
             
-            if (voteSearchInput) { renderModalVotingStation(currentWeekVotes, voteSearchInput.value); } 
-            else { renderModalVotingStation(currentWeekVotes, ""); }
+            if (voteSearchInput) { renderModalVotingStation(currentMonthVotes, voteSearchInput.value); } 
+            else { renderModalVotingStation(currentMonthVotes, ""); }
 
             let sortedList = Object.keys(musicTracksData).map(key => {
                 const track = musicTracksData[key];
-                return { ...track, votes: currentWeekVotes[track.id] ? currentWeekVotes[track.id] : 0 };
+                return { ...track, votes: currentMonthVotes[track.id] ? currentMonthVotes[track.id] : 0 };
             });
             
             if (liveChartDisplay) {
                 liveChartDisplay.innerHTML = '';
                 if (sortedList.length === 0) {
-                    liveChartDisplay.innerHTML = `<div style="padding:20px; color:#444; text-align:center; font-size:0.85rem;">⏳ WAITING FOR THIS WEEK'S MUSIC SET DROPS...</div>`;
+                    liveChartDisplay.innerHTML = `<div style="padding:20px; color:#444; text-align:center; font-size:0.85rem;">⏳ WAITING FOR THIS MONTH'S MUSIC SET DROPS...</div>`;
                     return;
                 }
                 sortedList.sort((a, b) => b.votes - a.votes);
@@ -486,10 +496,10 @@ function setupWeeklySetMusicEngine() {
     });
 }
 
-setupWeeklySetMusicEngine();
+setupMonthlySetMusicEngine();
 
 if (voteSearchInput) {
-    voteSearchInput.addEventListener('input', (e) => { renderModalVotingStation(globalCurrentWeekVotes, e.target.value); });
+    voteSearchInput.addEventListener('input', (e) => { renderModalVotingStation(globalCurrentMonthVotes, e.target.value); });
 }
 
 const voteModal = document.getElementById('voteModal');
@@ -499,7 +509,7 @@ const closeVoteModalBtn = document.getElementById('closeVoteModalBtn');
 if (openVoteModalBtn && voteModal && closeVoteModalBtn) {
     openVoteModalBtn.addEventListener('click', () => {
         if (voteSearchInput) voteSearchInput.value = ""; 
-        renderModalVotingStation(globalCurrentWeekVotes, ""); 
+        renderModalVotingStation(globalCurrentMonthVotes, ""); 
         voteModal.classList.add('active');
         if (voteSearchInput) { setTimeout(() => voteSearchInput.focus(), 100); }
     });
@@ -556,7 +566,7 @@ if (playerPlayBtn) {
 }
 
 // =================================================================
-// ─── 📰 🔥 CENTRAL APP FEED: ระบบดูดฟีดข่าวสาร (แก้ไขบั๊กปุ่มกด + มือถือแสดง 3 ข่าว) ───
+// ─── 📰 🔥 CENTRAL APP FEED: ระบบดูดฟีดข่าวสาร และค้นหาข่าว ───
 // =================================================================
 const liveNewsGrid = document.getElementById('live-news-grid');
 const liveFeaturedCard = document.getElementById('live-featured-card');
@@ -611,11 +621,11 @@ database.ref('udg_homepage_slots/radar_card_1').on('value', (snapshot) => { rada
 database.ref('udg_homepage_slots/radar_card_2').on('value', (snapshot) => { radarDataCard2 = snapshot.val(); renderRadarZone(); });
 
 
-// 🎯 ระบบฟีดข่าวสารหลัก (มีปุ่ม Load More และ Responsive มือถือ 3 / คอม 6)
+// 🎯 ระบบฟีดข่าวสารหลัก (มีระบบกรองค้นหา และปุ่ม Load More)
 let globalNewsList = []; 
 let showAllNews = false; 
 
-function renderNewsFeed() {
+function renderNewsFeed(searchQuery = "") {
     if (!liveNewsGrid) return;
     liveNewsGrid.innerHTML = '';
 
@@ -627,12 +637,29 @@ function renderNewsFeed() {
         return;
     }
 
-    // เช็คขนาดหน้าจอ: ถ้าเป็นมือถือแสดง 3 ข่าว, คอมพิวเตอร์แสดง 6 ข่าว
+    // ระบบกรองข่าวจากคำค้นหา
+    const query = searchQuery.toLowerCase().trim();
+    let filteredNews = globalNewsList;
+    
+    if (query !== "") {
+        filteredNews = globalNewsList.filter(news => 
+            (news.title && news.title.toLowerCase().includes(query)) || 
+            (news.excerpt && news.excerpt.toLowerCase().includes(query)) ||
+            (news.tag && news.tag.toLowerCase().includes(query))
+        );
+    }
+
+    if (filteredNews.length === 0) {
+        liveNewsGrid.innerHTML = `<div style="padding:40px; color:#666; text-align:center; grid-column:1/-1;">ไม่พบข่าวสารที่ค้นหา: "${searchQuery}"</div>`;
+        if (document.getElementById('loadMoreNewsContainer')) {
+            document.getElementById('loadMoreNewsContainer').style.display = 'none';
+        }
+        return;
+    }
+
     const isMobile = window.innerWidth <= 768;
     const initialLimit = isMobile ? 3 : 6;
-
-    // เลือกจำนวนข้อมูลที่จะเอามาแสดงผล
-    const visibleNews = showAllNews ? globalNewsList : globalNewsList.slice(0, initialLimit);
+    const visibleNews = showAllNews ? filteredNews : filteredNews.slice(0, initialLimit);
 
     visibleNews.forEach(news => {
         const articleCard = document.createElement('article');
@@ -648,10 +675,9 @@ function renderNewsFeed() {
         liveNewsGrid.appendChild(articleCard);
     });
 
-    // ควบคุมการแสดงผลปุ่ม "แสดงข่าวเพิ่มเติม"
     const loadMoreContainer = document.getElementById('loadMoreNewsContainer');
     if (loadMoreContainer) {
-        if (globalNewsList.length > initialLimit && !showAllNews) {
+        if (filteredNews.length > initialLimit && !showAllNews) {
             loadMoreContainer.style.display = 'block'; 
         } else {
             loadMoreContainer.style.display = 'none'; 
@@ -668,8 +694,18 @@ database.ref('udg_news_drops').on('value', (snapshot) => {
         globalNewsList.sort((a, b) => b.timestamp - a.timestamp); 
     }
     
-    renderNewsFeed(); 
+    const newsSearchInput = document.getElementById('newsSearchInput');
+    renderNewsFeed(newsSearchInput ? newsSearchInput.value : ""); 
 });
+
+// 📌 ดักจับการพิมพ์ค้นหาข่าว
+const newsSearchInput = document.getElementById('newsSearchInput');
+if (newsSearchInput) {
+    newsSearchInput.addEventListener('input', (e) => {
+        showAllNews = true; 
+        renderNewsFeed(e.target.value);
+    });
+}
 
 // ดักจับการคลิกปุ่ม Load More ข่าว
 document.addEventListener('DOMContentLoaded', () => {
@@ -677,7 +713,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loadMoreBtn) {
         loadMoreBtn.addEventListener('click', () => {
             showAllNews = true; 
-            renderNewsFeed(); 
+            const currentQuery = newsSearchInput ? newsSearchInput.value : "";
+            renderNewsFeed(currentQuery); 
         });
     }
 });
@@ -685,7 +722,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ตรวจจับการย่อ/ขยาย หรือหมุนหน้าจอโทรศัพท์
 window.addEventListener('resize', () => {
     if (!showAllNews) { 
-        renderNewsFeed(); 
+        const currentQuery = newsSearchInput ? newsSearchInput.value : "";
+        renderNewsFeed(currentQuery); 
     }
 });
 
@@ -904,7 +942,6 @@ function buildInitialCsgoStrip() {
     }
 }
 
-// 🎯 บังคับฝังสีขอบล่างนีออนให้ล็อกตามชื่อมูลค่าของรางวัลจริง 
 function createItemCardNode(item, index) {
     const card = document.createElement('div');
     let rarityClass = 'rarity-common';
@@ -995,7 +1032,6 @@ database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
     renderVisiblePool();
 });
 
-// 🎬 มอเตอร์ฟิสิกส์ฉบับทลายบั๊กเลยช่อง: ตรวจวัดระยะขนาดกว้างของกล่องจริงบนจอมือถือแบบ Real-time 100%
 function corePhysicsCaseSpin(winnerItem) {
     return new Promise((resolve) => {
         if (!csgoStrip) return resolve();
@@ -1005,9 +1041,8 @@ function corePhysicsCaseSpin(winnerItem) {
         csgoStrip.innerHTML = '';
 
         const totalItemsInSpin = 60;   
-        const targetStopCardIndex = 45; // ตัวชี้ขาดรางวัลจริงจอดที่ลำดับใบที่ 45
+        const targetStopCardIndex = 45; 
 
-        // วาดขบวนแถวรถไฟสล็อต
         for (let i = 0; i < totalItemsInSpin; i++) {
             let currentItem;
             if (i === targetStopCardIndex) {
@@ -1018,20 +1053,12 @@ function corePhysicsCaseSpin(winnerItem) {
             csgoStrip.appendChild(createItemCardNode(currentItem, i));
         }
 
-        // 📐 [สูตรลับปราบเซียนมือถือ]: สั่งให้เบราว์เซอร์ไปกวาดสายตาวัดระยะจริง ณ วินาทีนั้น
         const currentWrapperWidth = csgoStrip.parentElement.getBoundingClientRect().width;
         const currentActualCardWidth = csgoStrip.children[0].getBoundingClientRect().width || 130;
-        
-        // หาพิกัดขีดเป้าหมายสีแดงที่อยู่ตรงกลางตู้จริง
         const realCenterLine = currentWrapperWidth / 2;
-        
-        // คำนวณขยับพิกัดให้เส้นแดงสับลงกลางใจรูปภาพของการ์ดใบที่ 45 แบบคม ๆ
         const innerCardOffset = (currentActualCardWidth / 2) + (Math.floor(Math.random() * 6) - 3);
-        
-        // สรุปแกนสมการ X ดึงขบวนเลื่อนเทียบจอดตรงปกไม่ว่าจะเปิดบนอุปกรณ์ใดในโลก
         const finalStopX = -((targetStopCardIndex * currentActualCardWidth) + innerCardOffset - realCenterLine);
 
-        // รอเคลียร์ความจำหน้าจอเสร็จสมบูรณ์ 80ms แล้วสั่งสะบัดสายพานลื่นไหล 6.5 วินาที
         setTimeout(() => {
             csgoStrip.style.transition = 'transform 6.5s cubic-bezier(0.1, 0.85, 0.15, 1)';
             csgoStrip.style.transform = `translateX(${finalStopX}px)`;
@@ -1041,7 +1068,6 @@ function corePhysicsCaseSpin(winnerItem) {
     });
 }
 
-// 🔬 ปุ่มทดลองสุ่ม (TEST SPIN)
 if (demoSpinBtn) {
     demoSpinBtn.addEventListener('click', async () => {
         if (isCaseSpinning || wheelItemsList.length === 0) return;
@@ -1064,7 +1090,6 @@ if (demoSpinBtn) {
     });
 }
 
-// 🎰 ปุ่มเปิดกล่องลุ้นโชคจริง (ระบบล็อกเซสชันคูลดาวน์วันละครั้งพ่วงความปลอดภัยเดิม)
 if (openCaseBtn) {
     openCaseBtn.addEventListener('click', async () => {
         const currentUser = firebase.auth().currentUser;
@@ -1122,9 +1147,8 @@ if (openCaseBtn) {
 }
 
 // =================================================================
-// 🚪 เครื่องยนต์ล็อกอิน (ฉบับ Popup ทลายบั๊กข้ามโดเมน 100% + กันคลิกเบิ้ล)
+// 🚪 เครื่องยนต์ล็อกอิน 
 // =================================================================
-
 const closeAuthBtn = document.getElementById('closeAuthBtn');
 const authProviderModal = document.getElementById('authProviderModal');
 const openAuthModalBtn = document.getElementById('openAuthModalBtn');
@@ -1332,10 +1356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     navLinks.forEach(link => {
         link.addEventListener('click', function() {
-            // 1. ล้างคลาส active สีฟ้าออกจากทุกเมนูก่อน
             navLinks.forEach(item => item.classList.remove('active'));
-            
-            // 2. แปะคลาส active สีฟ้าให้กับเมนูที่เราเพิ่งกดลงไป
             this.classList.add('active');
         });
     });
@@ -1344,25 +1365,19 @@ document.addEventListener('DOMContentLoaded', () => {
 // =================================================================
 // ─── 🎒 📊 🎨 PROFILE DASHBOARD ENGINE (MY VAULT, STATS, EDIT TAG) ───
 // =================================================================
-
-// 1. ซ่อน Dropdown เวลากดลิงก์ Vault
 const vaultLinkBtn = document.getElementById('vaultLinkBtn');
 if(vaultLinkBtn) vaultLinkBtn.addEventListener('click', () => { if(userDropdownMenu) userDropdownMenu.style.display = 'none'; });
 
-// 2. ระบบเก็บสถิติ (เรียกใช้ตอนกดโหวต, พ่นสี, เปิดกล่อง)
 function incrementUserStat(statName) {
-    // เซฟลงเครื่องเผื่อไว้ก่อน
     let currentVal = parseInt(localStorage.getItem(`udg_stat_${statName}`) || '0');
     localStorage.setItem(`udg_stat_${statName}`, currentVal + 1);
 
-    // เซฟลง Cloud ถ้าล็อกอินอยู่
     const currentUser = firebase.auth().currentUser;
     if (currentUser) {
         database.ref(`users_stats/${currentUser.uid}/${statName}`).transaction((current) => (current || 0) + 1);
     }
 }
 
-// 3. ปลุกระบบ MY STATS 
 const statsModal = document.getElementById('statsModal');
 const openStatsBtn = document.getElementById('openStatsBtn');
 const closeStatsBtn = document.getElementById('closeStatsBtn');
@@ -1395,7 +1410,6 @@ if (openStatsBtn && statsModal) {
 }
 if(closeStatsBtn) closeStatsBtn.addEventListener('click', () => statsModal.classList.remove('active'));
 
-// 4. ปลุกระบบ EDIT TAG
 const editTagModal = document.getElementById('editTagModal');
 const openEditTagBtn = document.getElementById('openEditTagBtn');
 const closeEditTagBtn = document.getElementById('closeEditTagBtn');
@@ -1427,19 +1441,16 @@ if(saveTagBtn) {
 // =================================================================
 // ─── 🔴 DEMO DROPBOX ENGINE (ระบบตู้แดงหย่อนเพลงศิลปินหน้าใหม่) ───
 // =================================================================
-
 const demoDropboxModal = document.getElementById('demoDropboxModal');
 const openDemoDropboxBtn = document.getElementById('openDemoDropboxBtn');
 const closeDemoDropboxBtn = document.getElementById('closeDemoDropboxBtn');
 const submitDemoBtn = document.getElementById('submitDemoBtn');
 
-// ตัวแปรช่องกรอกข้อมูล
 const demoArtistName = document.getElementById('demoArtistName');
 const demoTrackTitle = document.getElementById('demoTrackTitle');
 const demoTrackLink = document.getElementById('demoTrackLink');
 const demoContact = document.getElementById('demoContact');
 
-// ปลุกหน้าต่าง Pop-up
 if (openDemoDropboxBtn && demoDropboxModal) {
     openDemoDropboxBtn.addEventListener('click', () => {
         demoDropboxModal.classList.add('active');
@@ -1451,7 +1462,6 @@ if (closeDemoDropboxBtn) {
     });
 }
 
-// ระบบประมวลผลตอนกดส่งเพลง
 if (submitDemoBtn) {
     submitDemoBtn.addEventListener('click', async () => {
         const artist = demoArtistName.value.trim();
@@ -1459,20 +1469,17 @@ if (submitDemoBtn) {
         const link = demoTrackLink.value.trim();
         const contact = demoContact.value.trim();
 
-        // 1. ตรวจสอบข้อมูลว่างเปล่า (Empty Check)
         if (!artist || !title || !link || !contact) {
             showErrorAlert("INCOMPLETE DATA", "❌ กรุณากรอกข้อมูลให้ครบทุกช่องก่อนส่งเพลงเข้าตู้แดงครับน้า!");
             return;
         }
 
-        // 2. ตรวจสอบความถูกต้องของลิงก์ (URL Validation) - กรองเฉพาะ YouTube กับ SoundCloud
         const isValidLink = link.includes('youtube.com') || link.includes('youtu.be') || link.includes('soundcloud.com');
         if (!isValidLink) {
             showErrorAlert("INVALID LINK", "❌ ระบบรองรับเฉพาะลิงก์จาก <strong>YouTube</strong> หรือ <strong>SoundCloud</strong> เท่านั้นครับ BRO!");
             return;
         }
 
-        // 3. ตรวจสอบโควต้าการส่ง (Cooldown Check) - 1 เพลง / 1 วัน
         const todayStr = new Date().toDateString();
         const lastDemoDate = localStorage.getItem('last_demo_submit');
         if (lastDemoDate === todayStr) {
@@ -1480,12 +1487,10 @@ if (submitDemoBtn) {
             return;
         }
 
-        // 4. ดึงข้อมูล User (ถ้าล็อกอินอยู่) เพื่อเก็บเป็นเครดิต
         const currentUser = firebase.auth().currentUser;
         const submitterName = currentUser ? currentUser.displayName : "Guest_Artist";
         const submitterUid = currentUser ? currentUser.uid : "Anonymous";
 
-        // 5. ส่งข้อมูลขึ้น Firebase Realtime Database
         try {
             submitDemoBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> SENDING...`;
             submitDemoBtn.style.opacity = '0.5';
@@ -1499,11 +1504,10 @@ if (submitDemoBtn) {
                 submittedBy: submitterName,
                 submitterUid: submitterUid,
                 timestamp: Date.now(),
-                status: 'pending' // สถานะรอแอดมินตรวจ
+                status: 'pending'
             });
 
-            // 6. ส่งสำเร็จ: ล้างข้อมูลและแจ้งเตือน
-            localStorage.setItem('last_demo_submit', todayStr); // ล็อกสิทธิ์วันนี้
+            localStorage.setItem('last_demo_submit', todayStr); 
             demoArtistName.value = '';
             demoTrackTitle.value = '';
             demoTrackLink.value = '';
@@ -1515,7 +1519,6 @@ if (submitDemoBtn) {
         } catch (error) {
             showErrorAlert("SYSTEM ERROR", "เกิดข้อผิดพลาดในการส่งเพลง: " + error.message);
         } finally {
-            // คืนค่าปุ่มกลับมาเหมือนเดิม
             submitDemoBtn.innerHTML = "SEND TRACK TO UDG";
             submitDemoBtn.style.opacity = '1';
             submitDemoBtn.style.pointerEvents = 'auto';
@@ -1526,8 +1529,6 @@ if (submitDemoBtn) {
 // =================================================================
 // ─── 🛒 MERCH PRE-ORDER ENGINE (ระบบสั่งของพรีออเดอร์ + ImgBB API) ───
 // =================================================================
-
-// นำ API Key ที่ได้จาก ImgBB มาใส่ตรงนี้ครับน้า 👇
 const IMGBB_API_KEY = "ba210b7b494a630b713c297b74f51d65"; 
 
 const merchModal = document.getElementById('merchModal');
@@ -1562,11 +1563,9 @@ if (submitOrderBtn) {
             submitOrderBtn.style.pointerEvents = 'none';
             submitOrderBtn.style.opacity = '0.5';
 
-            // 1. แพ็กรูปสลิปเตรียมส่งไป ImgBB
             const formData = new FormData();
             formData.append('image', slipFile);
 
-            // 2. ยิง API ส่งรูปไปฝากที่ ImgBB ฟรีๆ
             const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
                 method: 'POST',
                 body: formData
@@ -1577,21 +1576,19 @@ if (submitOrderBtn) {
                 throw new Error("อัปโหลดสลิปไม่สำเร็จ กรุณาลองใหม่ครับ");
             }
 
-            const slipUrl = imgbbData.data.url; // 🎯 ได้ลิงก์รูปตรงๆ กลับมาแล้ว!
+            const slipUrl = imgbbData.data.url; 
 
-            // 3. ส่งข้อมูลทั้งหมดลง Database ของเราแจ้งแอดมิน (ทำงานเหมือนเดิมเป๊ะ)
             await database.ref('udg_merch_orders').push({
                 uid: currentUser.uid,
                 customerName: name,
                 phone: phone,
                 address: address,
                 size: size,
-                slipImageUrl: slipUrl, // ยัดลิงก์จาก ImgBB ลงคลาวด์เรา
+                slipImageUrl: slipUrl, 
                 status: 'PENDING',
                 timestamp: Date.now()
             });
 
-            // ล้างฟอร์มและแจ้งผล
             document.getElementById('orderSize').value = "";
             document.getElementById('orderName').value = "";
             document.getElementById('orderPhone').value = "";
@@ -1614,14 +1611,12 @@ if (submitOrderBtn) {
 // =================================================================
 // ─── 🤝 COLLAB WANTED BOARD ENGINE (ระบบประกาศหาคนทำเพลง) ───
 // =================================================================
-
 const liveCollabBoard = document.getElementById('live-collab-board');
 const collabModal = document.getElementById('collabModal');
 const openCollabModalBtn = document.getElementById('openCollabModalBtn');
 const closeCollabModalBtn = document.getElementById('closeCollabModalBtn');
 const submitCollabBtn = document.getElementById('submitCollabBtn');
 
-// 1. ดึงข้อมูลประกาศมาแสดงบนกระดาน
 database.ref('udg_collab_board').on('value', (snapshot) => {
     if (!liveCollabBoard) return;
     liveCollabBoard.innerHTML = '';
@@ -1632,11 +1627,10 @@ database.ref('udg_collab_board').on('value', (snapshot) => {
         return;
     }
 
-    // แปลงข้อมูลและเรียงจากใหม่ไปเก่า
     let adsArray = Object.keys(ads).map(key => ({ id: key, ...ads[key] }));
     adsArray.sort((a, b) => b.timestamp - a.timestamp);
 
-    adsArray.forEach(ad => {
+ adsArray.forEach(ad => {
         const dateStr = new Date(ad.timestamp).toLocaleDateString('th-TH', { month: 'short', day: 'numeric' });
         const card = document.createElement('div');
         card.className = 'collab-card';
@@ -1648,8 +1642,16 @@ database.ref('udg_collab_board').on('value', (snapshot) => {
         if(ad.role === "COVER_ART") roleIcon = "🎨";
         if(ad.role === "MV_DIR") roleIcon = "🎬";
 
+        // 🖼️ ถ้าระบบมีรูปภาพ ให้สร้างแท็ก HTML รูปภาพเตรียมไว้
+        let imageRender = "";
+        if (ad.imageUrl && ad.imageUrl !== "") {
+            imageRender = `<div style="width: 100%; height: 160px; margin-bottom: 15px; border-radius: 4px; overflow: hidden; border: 1px solid #333;"><img src="${ad.imageUrl}" style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.9);" alt="Collab Image"></div>`;
+        }
+
+        // แทรก imageRender ลงไปในการ์ด
         card.innerHTML = `
             <span class="c-role-tag c-role-${ad.role}">${roleIcon} ${ad.role.replace('_', ' ')}</span>
+            ${imageRender}
             <h4 class="collab-title">${ad.title}</h4>
             <p class="collab-desc">${ad.desc}</p>
             <div class="collab-contact"><i class="fa-solid fa-address-card"></i> ${ad.contact}</div>
@@ -1659,7 +1661,6 @@ database.ref('udg_collab_board').on('value', (snapshot) => {
     });
 });
 
-// 2. ปลุกหน้าต่างลงประกาศ
 if (openCollabModalBtn && collabModal) {
     openCollabModalBtn.addEventListener('click', () => {
         const currentUser = firebase.auth().currentUser;
@@ -1672,7 +1673,6 @@ if (openCollabModalBtn && collabModal) {
 }
 if (closeCollabModalBtn) closeCollabModalBtn.addEventListener('click', () => collabModal.classList.remove('active'));
 
-// 3. ระบบส่งข้อมูลประกาศ
 if (submitCollabBtn) {
     submitCollabBtn.addEventListener('click', async () => {
         const currentUser = firebase.auth().currentUser;
@@ -1680,6 +1680,9 @@ if (submitCollabBtn) {
         const title = document.getElementById('collabTitle').value.trim();
         const desc = document.getElementById('collabDesc').value.trim();
         const contact = document.getElementById('collabContact').value.trim();
+        
+        // 🎯 ดึงไฟล์รูปภาพที่เลือกมา
+        const imageFile = document.getElementById('collabImage').files[0];
 
         if (!role || !title || !desc || !contact) {
             showErrorAlert("INCOMPLETE FORM", "❌ กรุณากรอกข้อมูลให้ครบทุกช่องเพื่อความชัดเจนครับน้า!");
@@ -1689,7 +1692,30 @@ if (submitCollabBtn) {
         try {
             submitCollabBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> PUBLISHING...`;
             submitCollabBtn.style.pointerEvents = 'none';
+            submitCollabBtn.style.opacity = '0.5';
 
+            let imageUrl = "";
+
+            // 📸 ถ้าน้าแนบรูปมา ให้ยิงขึ้น ImgBB ก่อน
+            if (imageFile) {
+                const formData = new FormData();
+                formData.append('image', imageFile);
+                
+                // ใช้ API Key เดิมที่มีอยู่ในระบบ
+                const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=ba210b7b494a630b713c297b74f51d65`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const imgbbData = await imgbbResponse.json();
+                
+                if (imgbbData.success) {
+                    imageUrl = imgbbData.data.url; // ได้ลิงก์รูปมาแล้ว
+                } else {
+                    throw new Error("อัปโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่ครับ");
+                }
+            }
+
+            // 💾 ส่งข้อมูลทั้งหมดลง Firebase Realtime Database
             await database.ref('udg_collab_board').push({
                 uid: currentUser.uid,
                 authorName: currentUser.displayName || "Anonymous",
@@ -1697,14 +1723,16 @@ if (submitCollabBtn) {
                 title: title,
                 desc: desc,
                 contact: contact,
+                imageUrl: imageUrl, // แทรกตัวเลปรลิงก์รูปที่ได้มา
                 timestamp: Date.now()
             });
 
-            // ล้างฟอร์ม
+            // เคลียร์ฟอร์ม
             document.getElementById('collabRole').value = "";
             document.getElementById('collabTitle').value = "";
             document.getElementById('collabDesc').value = "";
             document.getElementById('collabContact').value = "";
+            document.getElementById('collabImage').value = "";
             
             collabModal.classList.remove('active');
             showErrorAlert("PUBLISHED! 🔥", "ลงประกาศเรียบร้อยแล้ว! ขอให้เจอทีมงานเดือดๆ มาร่วมทำเพลงเร็วๆ นี้นะครับ", true);
@@ -1714,6 +1742,7 @@ if (submitCollabBtn) {
         } finally {
             submitCollabBtn.innerHTML = "PUBLISH AD";
             submitCollabBtn.style.pointerEvents = 'auto';
+            submitCollabBtn.style.opacity = '1';
         }
     });
 }
