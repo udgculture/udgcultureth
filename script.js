@@ -1248,97 +1248,40 @@ if (signOutBtn) {
     });
 }
 
+// ==========================================
+// 🔴 เข้าสู่ระบบด้วย GOOGLE (ระบบ Redirect)
+// ==========================================
 if (loginGoogleBtn) {
-    loginGoogleBtn.addEventListener('click', async (e) => {
+    loginGoogleBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        if (isLoginProcessing) return; 
-        
-        isLoginProcessing = true;
-        const originalText = loginGoogleBtn.innerHTML;
-        loginGoogleBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังเชื่อมต่อ...`;
+        // โชว์สถานะโหลดปุ๊บ สั่ง Redirect เปลี่ยนหน้าทันที
+        loginGoogleBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังเปลี่ยนหน้า...`;
         loginGoogleBtn.style.opacity = '0.5';
         loginGoogleBtn.style.pointerEvents = 'none';
 
-        const failSafeTimer = setTimeout(() => {
-            if (isLoginProcessing) {
-                isLoginProcessing = false;
-                loginGoogleBtn.innerHTML = originalText;
-                loginGoogleBtn.style.opacity = '1';
-                loginGoogleBtn.style.pointerEvents = 'auto';
-                showErrorAlert("TIMEOUT", "หมดเวลาเชื่อมต่อ! กรุณาตรวจสอบว่าเบราว์เซอร์ได้บล็อกหน้าต่าง Pop-up ไว้หรือไม่");
-            }
-        }, 60000);
-
-        try {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
-            const result = await firebase.auth().signInWithPopup(provider);
-            clearTimeout(failSafeTimer);
-            console.log("🔥 GOOGLE LOGIN SUCCESS:", result.user.displayName);
-            handleAuthSuccess(result.user);
-        } catch (error) {
-            clearTimeout(failSafeTimer);
-            console.error("Auth Error:", error);
-            
-            if (error.code === 'auth/popup-blocked') {
-                showErrorAlert("POP-UP BLOCKED", "เบราว์เซอร์ของคุณบล็อกหน้าต่างเข้าสู่ระบบ!<br>กรุณากดอนุญาต Pop-up ที่มุมขวาบนของช่อง URL");
-            } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-                showErrorAlert("SYSTEM ERROR", `ล็อกอินล้มเหลว: ${error.message}`);
-            }
-        } finally {
-            isLoginProcessing = false;
-            loginGoogleBtn.innerHTML = originalText;
-            loginGoogleBtn.style.opacity = '1';
-            loginGoogleBtn.style.pointerEvents = 'auto';
-        }
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        // สับสวิตช์มาใช้ signInWithRedirect แทน signInWithPopup
+        firebase.auth().signInWithRedirect(provider);
     });
 }
 
+// ==========================================
+// 🔵 เข้าสู่ระบบด้วย FACEBOOK (ระบบ Redirect)
+// ==========================================
 if (loginFacebookBtn) {
-    loginFacebookBtn.addEventListener('click', async (e) => {
+    loginFacebookBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        if (isLoginProcessing) return; 
-        
-        isLoginProcessing = true;
-        const originalText = loginFacebookBtn.innerHTML;
-        loginFacebookBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังเชื่อมต่อ...`;
+        // โชว์สถานะโหลดปุ๊บ สั่ง Redirect เปลี่ยนหน้าทันที
+        loginFacebookBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังเปลี่ยนหน้า...`;
         loginFacebookBtn.style.opacity = '0.5';
         loginFacebookBtn.style.pointerEvents = 'none';
 
-        const failSafeTimer = setTimeout(() => {
-            if (isLoginProcessing) {
-                isLoginProcessing = false;
-                loginFacebookBtn.innerHTML = originalText;
-                loginFacebookBtn.style.opacity = '1';
-                loginFacebookBtn.style.pointerEvents = 'auto';
-                showErrorAlert("TIMEOUT", "หมดเวลาเชื่อมต่อ! กรุณาตรวจสอบว่าเบราว์เซอร์ได้บล็อกหน้าต่าง Pop-up ไว้หรือไม่");
-            }
-        }, 60000);
-
-        try {
-            const provider = new firebase.auth.FacebookAuthProvider();
-            const result = await firebase.auth().signInWithPopup(provider);
-            clearTimeout(failSafeTimer);
-            console.log("🔥 FACEBOOK LOGIN SUCCESS:", result.user.displayName);
-            handleAuthSuccess(result.user);
-        } catch (error) {
-            clearTimeout(failSafeTimer);
-            console.error("Auth Error:", error);
-            
-            if (error.code === 'auth/popup-blocked') {
-                showErrorAlert("POP-UP BLOCKED", "เบราว์เซอร์ของคุณบล็อกหน้าต่างเข้าสู่ระบบ!<br>กรุณากดอนุญาต Pop-up ที่มุมขวาบนของช่อง URL");
-            } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-                showErrorAlert("SYSTEM ERROR", `ล็อกอินล้มเหลว: ${error.message}`);
-            }
-        } finally {
-            isLoginProcessing = false;
-            loginFacebookBtn.innerHTML = originalText;
-            loginFacebookBtn.style.opacity = '1';
-            loginFacebookBtn.style.pointerEvents = 'auto';
-        }
+        const provider = new firebase.auth.FacebookAuthProvider();
+        // สับสวิตช์มาใช้ signInWithRedirect แทน signInWithPopup
+        firebase.auth().signInWithRedirect(provider);
     });
 }
-
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         console.log("🔥 USER ALREADY LOGGED IN:", user.displayName);
@@ -1746,3 +1689,34 @@ if (submitCollabBtn) {
         }
     });
 }
+
+// =================================================================
+// 🛡️ ดักจับผลลัพธ์และ Error หลังจาก Redirect กลับมาที่เว็บ
+// =================================================================
+firebase.auth().getRedirectResult().then((result) => {
+    if (result.credential) {
+        console.log("🔥 REDIRECT LOGIN SUCCESS!");
+        // ไม่ต้องสั่งอะไรเพิ่ม เพราะ onAuthStateChanged จะทำงานต่อเอง
+    }
+}).catch((error) => {
+    console.error("Redirect Auth Error:", error);
+    
+    // ดัก Error กรณีอีเมลชนกัน (เช่น ใช้อีเมลเดียวกันสมัครทั้งเฟซและกูเกิล)
+    if (error.code === 'auth/account-exists-with-different-credential') {
+        showErrorAlert("EMAIL CONFLICT", "❌ อีเมลนี้ถูกใช้ไปแล้วด้วยช่องทางอื่น!<br>กรุณาเลือกล็อกอินด้วยช่องทางที่คุณเคยสมัครไว้ครับ");
+    } else {
+        showErrorAlert("LOGIN ERROR", `เกิดข้อผิดพลาดในการเข้าสู่ระบบ: ${error.message}`);
+    }
+    
+    // รีเซ็ตปุ่มกลับมาสภาพเดิม
+    if (loginGoogleBtn) {
+        loginGoogleBtn.innerHTML = `<i class="fa-brands fa-google"></i> CONTINUE WITH GOOGLE`;
+        loginGoogleBtn.style.opacity = '1';
+        loginGoogleBtn.style.pointerEvents = 'auto';
+    }
+    if (loginFacebookBtn) {
+        loginFacebookBtn.innerHTML = `<i class="fa-brands fa-facebook"></i> CONTINUE WITH FACEBOOK`;
+        loginFacebookBtn.style.opacity = '1';
+        loginFacebookBtn.style.pointerEvents = 'auto';
+    }
+});
