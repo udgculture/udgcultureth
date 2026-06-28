@@ -1248,40 +1248,104 @@ if (signOutBtn) {
     });
 }
 
-// ==========================================
-// 🔴 เข้าสู่ระบบด้วย GOOGLE (ระบบ Redirect)
-// ==========================================
+// =================================================================
+// 🚪 เครื่องยนต์ล็อกอิน (HYBRID: PC ใช้ Popup / Mobile ใช้ Redirect)
+// =================================================================
+// ตัวแปรเช็คว่าเป็นมือถือหรือไม่
+const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+// ฟังก์ชันสำหรับรีเซ็ตปุ่มกลับเป็นเหมือนเดิม
+function resetAuthButtons() {
+    if (loginGoogleBtn) {
+        loginGoogleBtn.innerHTML = `<i class="fa-brands fa-google"></i> CONTINUE WITH GOOGLE`;
+        loginGoogleBtn.style.opacity = '1';
+        loginGoogleBtn.style.pointerEvents = 'auto';
+    }
+    if (loginFacebookBtn) {
+        loginFacebookBtn.innerHTML = `<i class="fa-brands fa-facebook"></i> CONTINUE WITH FACEBOOK`;
+        loginFacebookBtn.style.opacity = '1';
+        loginFacebookBtn.style.pointerEvents = 'auto';
+    }
+}
+
+// 🔴 ล็อกอินด้วย GOOGLE
 if (loginGoogleBtn) {
-    loginGoogleBtn.addEventListener('click', (e) => {
+    loginGoogleBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        // โชว์สถานะโหลดปุ๊บ สั่ง Redirect เปลี่ยนหน้าทันที
-        loginGoogleBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังเปลี่ยนหน้า...`;
+        loginGoogleBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังเชื่อมต่อ...`;
         loginGoogleBtn.style.opacity = '0.5';
         loginGoogleBtn.style.pointerEvents = 'none';
 
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
-        // สับสวิตช์มาใช้ signInWithRedirect แทน signInWithPopup
-        firebase.auth().signInWithRedirect(provider);
+
+        if (isMobileDevice) {
+            // บนมือถือ: สั่งเปลี่ยนหน้าเว็บ (Redirect)
+            firebase.auth().signInWithRedirect(provider);
+        } else {
+            // บนคอมพิวเตอร์: เด้งหน้าต่าง Pop-up
+            try {
+                const result = await firebase.auth().signInWithPopup(provider);
+                handleAuthSuccess(result.user);
+            } catch (error) {
+                console.error(error);
+                resetAuthButtons();
+                if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+                    showErrorAlert("LOGIN ERROR", `ล็อกอินล้มเหลว: ${error.message}`);
+                }
+            }
+        }
     });
 }
 
-// ==========================================
-// 🔵 เข้าสู่ระบบด้วย FACEBOOK (ระบบ Redirect)
-// ==========================================
+// 🔵 ล็อกอินด้วย FACEBOOK
 if (loginFacebookBtn) {
-    loginFacebookBtn.addEventListener('click', (e) => {
+    loginFacebookBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        // โชว์สถานะโหลดปุ๊บ สั่ง Redirect เปลี่ยนหน้าทันที
-        loginFacebookBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังเปลี่ยนหน้า...`;
+        loginFacebookBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังเชื่อมต่อ...`;
         loginFacebookBtn.style.opacity = '0.5';
         loginFacebookBtn.style.pointerEvents = 'none';
 
         const provider = new firebase.auth.FacebookAuthProvider();
-        // สับสวิตช์มาใช้ signInWithRedirect แทน signInWithPopup
-        firebase.auth().signInWithRedirect(provider);
+
+        if (isMobileDevice) {
+            // บนมือถือ: สั่งเปลี่ยนหน้าเว็บ (Redirect)
+            firebase.auth().signInWithRedirect(provider);
+        } else {
+            // บนคอมพิวเตอร์: เด้งหน้าต่าง Pop-up
+            try {
+                const result = await firebase.auth().signInWithPopup(provider);
+                handleAuthSuccess(result.user);
+            } catch (error) {
+                console.error(error);
+                resetAuthButtons();
+                if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+                    showErrorAlert("LOGIN ERROR", `ล็อกอินล้มเหลว: ${error.message}`);
+                }
+            }
+        }
     });
 }
+
+// =================================================================
+// 🛡️ ดักจับผลลัพธ์หลังจาก Redirect กลับมาที่เว็บ (สำหรับมือถือ)
+// =================================================================
+firebase.auth().getRedirectResult().then((result) => {
+    if (result.user) {
+        console.log("🔥 REDIRECT LOGIN SUCCESS:", result.user.displayName);
+        handleAuthSuccess(result.user); // บังคับให้ UI อัปเดตทันที
+    }
+    resetAuthButtons();
+}).catch((error) => {
+    resetAuthButtons();
+    console.error("Redirect Auth Error:", error);
+    if (error.code === 'auth/account-exists-with-different-credential') {
+        showErrorAlert("EMAIL CONFLICT", "❌ อีเมลนี้ถูกใช้ไปแล้วด้วยช่องทางอื่น!<br>กรุณาเข้าสู่ระบบด้วยช่องทางแรกที่คุณเคยสมัครไว้ครับ");
+    } else {
+        showErrorAlert("LOGIN ERROR", `เกิดข้อผิดพลาดในการเข้าสู่ระบบ: ${error.message}`);
+    }
+});
+
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         console.log("🔥 USER ALREADY LOGGED IN:", user.displayName);
