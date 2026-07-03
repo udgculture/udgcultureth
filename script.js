@@ -1746,3 +1746,264 @@ if (submitCollabBtn) {
         }
     });
 }
+
+// =================================================================
+// ─── 💿 ⭐ ALBUM DISCUSSIONS, CHAT & RATING SYSTEM ENGINE ───
+// =================================================================
+const liveAlbumGrid = document.getElementById('live-album-grid');
+const albumChatModal = document.getElementById('albumChatModal');
+const closeAlbumChatBtn = document.getElementById('closeAlbumChatBtn');
+const albumChatWall = document.getElementById('albumChatWall');
+const albumChatInput = document.getElementById('albumChatInput');
+const sendAlbumChatBtn = document.getElementById('sendAlbumChatBtn');
+const interactiveStars = document.querySelectorAll('#interactiveStars i');
+
+let currentActiveAlbumId = null;
+let currentAlbumChatRef = null;
+let currentAlbumRatingRef = null;
+
+let globalAlbumsData = {};
+let globalAlbumRatingsData = {};
+
+// 1. ดึงข้อมูลอัลบั้มจาก Firebase
+database.ref('udg_albums').on('value', (snapshot) => {
+    globalAlbumsData = snapshot.val() || {};
+    
+    // 💡 หากฐานข้อมูลว่าง ให้สร้างอัลบั้มจำลอง (Mockup) สำหรับทดสอบระบบ
+    if (Object.keys(globalAlbumsData).length === 0) {
+        globalAlbumsData = {
+            
+        };
+    }
+    buildAlbumGridUI();
+});
+
+// 2. ดึงข้อมูลเรทติ้งดาวทั้งหมด
+database.ref('udg_album_ratings').on('value', (snapshot) => {
+    globalAlbumRatingsData = snapshot.val() || {};
+    buildAlbumGridUI(); 
+});
+
+// ฟังก์ชันแปลงคะแนนตัวเลขเป็น HTML ไอคอนดาว
+function getStarsHTML(score) {
+    let html = '';
+    for (let i = 1; i <= 5; i++) {
+        if (score >= i) html += '<i class="fa-solid fa-star"></i>';
+        else if (score >= i - 0.5) html += '<i class="fa-solid fa-star-half-stroke"></i>';
+        else html += '<i class="fa-regular fa-star"></i>';
+    }
+    return html;
+}
+
+// ฟังก์ชันสร้างการ์ดอัลบั้มบนหน้าหลัก
+function buildAlbumGridUI() {
+    if (!liveAlbumGrid) return;
+    liveAlbumGrid.innerHTML = '';
+    
+    Object.keys(globalAlbumsData).forEach(key => {
+        const album = { id: key, ...globalAlbumsData[key] };
+        const ratings = globalAlbumRatingsData[key];
+        
+        // คำนวณค่าเฉลี่ยดาว
+        let totalScore = 0, count = 0;
+        if (ratings) {
+            Object.values(ratings).forEach(r => { totalScore += r.score; count++; });
+        }
+        const avgScore = count > 0 ? (totalScore / count).toFixed(1) : 0;
+
+        const card = document.createElement('div');
+        card.className = 'album-card';
+        card.onclick = () => openAlbumModal(album);
+        
+        card.innerHTML = `
+            <div class="album-card-cover"><img src="${album.coverUrl || 'image/ขาวใส.png'}" alt="Cover"></div>
+            <h4>${album.title}</h4>
+            <p>${album.artist}</p>
+            <div class="album-card-rating">
+                ${getStarsHTML(avgScore)} 
+                <span class="rating-count">(${count})</span>
+            </div>
+        `;
+        liveAlbumGrid.appendChild(card);
+    });
+}
+
+// 3. เปิดหน้าต่าง Modal แชทและรีวิว
+function openAlbumModal(album) {
+    currentActiveAlbumId = album.id;
+    
+    // อัปเดตข้อมูลฝั่งซ้าย
+    document.getElementById('modalAlbumCover').src = album.coverUrl || 'image/ขาวใส.png';
+    document.getElementById('modalAlbumTitle').innerText = album.title;
+    document.getElementById('modalAlbumArtist').innerText = album.artist;
+    document.getElementById('modalAlbumDesc').innerText = album.desc || 'ไม่มีคำอธิบาย';
+    
+    albumChatModal.classList.add('active');
+    
+    // โหลดฟีดแชท และตั้งค่าระบบดาวแบบเรียลไทม์
+    loadAlbumComments(album.id);
+    setupRealtimeModalRating(album.id);
+}
+
+// ปิด Modal
+if (closeAlbumChatBtn) {
+    closeAlbumChatBtn.addEventListener('click', () => {
+        albumChatModal.classList.remove('active');
+        if (currentAlbumChatRef) currentAlbumChatRef.off();
+        if (currentAlbumRatingRef) currentAlbumRatingRef.off();
+    });
+}
+
+// 4. ระบบวิเคราะห์และดักฟังเรทติ้งดาวแบบ Real-time บน Modal
+function setupRealtimeModalRating(albumId) {
+    if (currentAlbumRatingRef) currentAlbumRatingRef.off();
+    currentAlbumRatingRef = database.ref(`udg_album_ratings/${albumId}`);
+    
+    currentAlbumRatingRef.on('value', snap => {
+        const ratings = snap.val();
+        let total = 0, count = 0, myScore = 0;
+        const currentUser = firebase.auth().currentUser;
+
+        if (ratings) {
+            Object.keys(ratings).forEach(uid => {
+                total += ratings[uid].score;
+                count++;
+                if (currentUser && uid === currentUser.uid) myScore = ratings[uid].score;
+            });
+        }
+
+        const avg = count > 0 ? (total / count).toFixed(1) : 0;
+        
+        // อัปเดต UI ดาวเฉลี่ย
+        document.getElementById('modalAvgRating').innerHTML = `
+            <span class="stars-container">${getStarsHTML(avg)}</span>
+            <span class="rating-text">${avg} (${count} รีวิว)</span>
+        `;
+
+        // อัปเดตดาวส่วนตัวของผู้ใช้ (รีเซ็ตไฮไลท์ตามคะแนนที่เคยให้)
+        interactiveStars.forEach(s => {
+            if (s.getAttribute('data-val') <= myScore) s.className = 'fa-solid fa-star active';
+            else s.className = 'fa-regular fa-star';
+        });
+    });
+}
+
+// เอฟเฟกต์เมาส์ชี้ดาว
+if (interactiveStars) {
+    interactiveStars.forEach(star => {
+        star.addEventListener('mouseover', function() {
+            const val = this.getAttribute('data-val');
+            interactiveStars.forEach(s => {
+                if (s.getAttribute('data-val') <= val) s.classList.add('hovered');
+                else s.classList.remove('hovered');
+            });
+        });
+        star.addEventListener('mouseout', function() {
+            interactiveStars.forEach(s => s.classList.remove('hovered'));
+        });
+        star.addEventListener('click', function() {
+            const val = this.getAttribute('data-val');
+            submitAlbumRating(val);
+        });
+    });
+}
+
+// ส่งคะแนนดาวขึ้นเซิร์ฟเวอร์
+async function submitAlbumRating(score) {
+    const currentUser = firebase.auth().currentUser;
+    if (!currentUser) {
+        showErrorAlert("LOGIN REQUIRED", "❌ กรุณาล็อกอินเข้าสู่ระบบก่อนให้เรทติ้งอัลบั้มครับน้า!");
+        return;
+    }
+    if (!currentActiveAlbumId) return;
+
+    try {
+        await database.ref(`udg_album_ratings/${currentActiveAlbumId}/${currentUser.uid}`).set({
+            score: parseInt(score),
+            timestamp: Date.now()
+        });
+    } catch (e) {
+        showErrorAlert("SYSTEM ERROR", "เกิดข้อผิดพลาดในการโหวต: " + e.message);
+    }
+}
+
+// 5. โหลดคอมเมนต์อัลบั้ม
+function loadAlbumComments(albumId) {
+    albumChatWall.innerHTML = '<div style="text-align:center; color:#555; margin-top:20px;">⏳ ดึงข้อมูลแชท...</div>';
+    
+    if (currentAlbumChatRef) currentAlbumChatRef.off();
+    currentAlbumChatRef = database.ref(`udg_album_comments/${albumId}`);
+    
+    currentAlbumChatRef.on('value', (snapshot) => {
+        albumChatWall.innerHTML = '';
+        const comments = snapshot.val();
+        
+        if (!comments) {
+            albumChatWall.innerHTML = '<div style="text-align:center; color:#555; margin-top:40px; font-size:0.85rem;">💭 ยังไม่มีใครรีวิวอัลบั้มนี้ เริ่มเปิดประเด็นได้เลย!</div>';
+            return;
+        }
+
+        const currentUser = firebase.auth().currentUser;
+        const currentUid = currentUser ? currentUser.uid : null;
+
+        Object.keys(comments).forEach(key => {
+            const c = comments[key];
+            const dateStr = new Date(c.timestamp).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + " น.";
+            const isMine = (currentUid && c.uid === currentUid) ? 'my-msg' : '';
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `album-msg ${isMine}`;
+            msgDiv.innerHTML = `
+                <div class="album-msg-header">
+                    <span class="album-msg-user">${c.username}</span>
+                    <span class="album-msg-time">${dateStr}</span>
+                </div>
+                <div class="album-msg-text">${c.text}</div>
+            `;
+            albumChatWall.appendChild(msgDiv);
+        });
+        
+        albumChatWall.scrollTop = albumChatWall.scrollHeight;
+    });
+}
+
+// 6. ส่งข้อความรีวิว/แชท
+async function postAlbumComment() {
+    const text = albumChatInput.value.trim();
+    if (!text || !currentActiveAlbumId) return;
+
+    const currentUser = firebase.auth().currentUser;
+    const username = currentUser ? currentUser.displayName : (localStorage.getItem('savedGraffitiName') || 'Guest');
+    const uid = currentUser ? currentUser.uid : 'anonymous';
+
+    if (username === 'Guest') {
+        showErrorAlert("LOGIN REQUIRED", "กรุณาล็อกอิน หรือตั้งฉายาที่กำแพงแชทหลักก่อนแสดงความเห็นครับน้า!");
+        return;
+    }
+
+    sendAlbumChatBtn.disabled = true;
+    sendAlbumChatBtn.style.opacity = '0.5';
+
+    try {
+        await database.ref(`udg_album_comments/${currentActiveAlbumId}`).push({
+            username: username,
+            uid: uid,
+            text: text,
+            timestamp: Date.now()
+        });
+        albumChatInput.value = '';
+    } catch (error) {
+        showErrorAlert("ERROR", "ส่งข้อความไม่สำเร็จ: " + error.message);
+    } finally {
+        sendAlbumChatBtn.disabled = false;
+        sendAlbumChatBtn.style.opacity = '1';
+        albumChatInput.focus();
+    }
+}
+
+if (sendAlbumChatBtn) sendAlbumChatBtn.addEventListener('click', postAlbumComment);
+if (albumChatInput) {
+    albumChatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') postAlbumComment();
+    });
+}

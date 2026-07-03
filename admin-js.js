@@ -879,3 +879,99 @@ function deleteCollabAd(key) {
         database.ref(`udg_collab_board/${key}`).remove();
     }
 }
+
+// =================================================================
+// ─── 💿 ADMIN ALBUM DISCUSSIONS ENGINE (หลังบ้านจัดการอัลบั้ม) ───
+// =================================================================
+const albumAdminTbody = document.getElementById('album-admin-tbody');
+
+// 1. ดึงข้อมูลอัลบั้มโชว์ในตารางแอดมิน
+database.ref('udg_albums').on('value', (snapshot) => {
+    if (!albumAdminTbody) return;
+    albumAdminTbody.innerHTML = '';
+    const albums = snapshot.val();
+    
+    if (!albums) {
+        albumAdminTbody.innerHTML = `<tr><td colspan="3" style="color:#555; text-align:center; padding: 20px;">💿 ยังไม่มีอัลบั้มในระบบครับ สาดแผ่นใหม่ด้านบนได้เลย!</td></tr>`;
+        return;
+    }
+
+    let albumsArray = Object.keys(albums).map(key => ({ key: key, ...albums[key] }));
+    albumsArray.sort((a, b) => b.timestamp - a.timestamp);
+
+    albumsArray.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <strong style="color:#ff00ff; font-size:1.05rem;">${item.title}</strong><br>
+                <span style="color:#aaa; font-size:0.85rem;"><i class="fa-solid fa-microphone"></i> ${item.artist}</span>
+            </td>
+            <td style="text-align: center; vertical-align: middle;">
+                <div style="width:50px; height:50px; border-radius:4px; overflow:hidden; border:1px solid #333; display: inline-block;">
+                    <img src="${item.coverUrl}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='image/ขาวใส.png'">
+                </div>
+            </td>
+            <td style="text-align: center; vertical-align: middle;">
+                <button onclick="deleteAlbumData('${item.key}')" style="background: #111; border: 1px solid #ff3333; color: #ff3333; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.75rem; font-weight:bold;">
+                    <i class="fa-solid fa-trash"></i> ลบทิ้ง
+                </button>
+            </td>
+        `;
+        albumAdminTbody.appendChild(tr);
+    });
+});
+
+// 2. ปลุกระบบอัปโหลดรูป ImgBB ออโต้ ให้ช่องอัปโหลดปกอัลบั้ม
+setupImgbbAutoUploader('newAlbumImgFile', 'newAlbumImg', 'albumUploadStatus');
+
+// 3. ปุ่มกดเพิ่มอัลบั้มขึ้นคลาวด์
+const addAlbumBtn = document.getElementById('addAlbumBtn');
+if (addAlbumBtn) {
+    addAlbumBtn.addEventListener('click', () => {
+        const title = document.getElementById('newAlbumTitle').value.trim();
+        const artist = document.getElementById('newAlbumArtist').value.trim();
+        const desc = document.getElementById('newAlbumDesc').value.trim();
+        const coverUrl = document.getElementById('newAlbumImg').value.trim();
+
+        if (!title || !artist || !coverUrl) {
+            alert("❌ แจ้งเตือนแอดมิน: กรุณากรอกชื่ออัลบั้ม, ชื่อศิลปิน และอัปโหลดปกให้ครบถ้วนก่อนครับน้า!");
+            return;
+        }
+
+        database.ref('udg_albums').push({
+            title: title,
+            artist: artist,
+            desc: desc,
+            coverUrl: coverUrl,
+            timestamp: Date.now()
+        }, (error) => {
+            if (!error) {
+                document.getElementById('newAlbumTitle').value = '';
+                document.getElementById('newAlbumArtist').value = '';
+                document.getElementById('newAlbumDesc').value = '';
+                document.getElementById('newAlbumImg').value = '';
+                alert(`🔥 อัปโหลดอัลบั้ม "${title}" ขึ้นหน้าจอหลักให้แฟนคลับรีวิวเรียบร้อยครับ!`);
+            } else {
+                alert("❌ เกิดข้อผิดพลาด: " + error.message);
+            }
+        });
+    });
+}
+
+// 4. ฟังก์ชันลบทิ้ง (ล้างบางทั้งอัลบั้ม แชท และคะแนนดาว)
+function deleteAlbumData(albumKey) {
+    if (confirm("🚨 คำเตือนขั้นเด็ดขาด: คุณต้องการลบอัลบั้มนี้ใช่หรือไม่?\n\n(หากกดยืนยัน ระบบจะทำลายแชทรีวิว และคะแนนดาวทั้งหมดของอัลบั้มนี้ทิ้งแบบถาวร!)")) {
+        database.ref(`udg_albums/${albumKey}`).remove()
+            .then(() => {
+                // ลบถังแชทคอมเมนต์ที่ผูกกับรหัสอัลบั้ม
+                database.ref(`udg_album_comments/${albumKey}`).remove();
+                // ลบถังคะแนนดาวที่ผูกกับรหัสอัลบั้ม
+                database.ref(`udg_album_ratings/${albumKey}`).remove();
+                
+                alert("🔥 ทำลายข้อมูลอัลบั้ม แชท และเรทติ้งดาว เรียบร้อยครับน้าบักหำทิว!");
+            })
+            .catch((err) => {
+                alert("❌ เกิดข้อผิดพลาด: " + err.message);
+            });
+    }
+}

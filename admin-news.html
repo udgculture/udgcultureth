@@ -41,6 +41,7 @@
         <button type="button" class="tab-trigger-btn" data-target="musicPanelBox"><i class="fa-solid fa-music"></i> MUSIC</button>
         <button type="button" class="tab-trigger-btn" data-target="artistPanelBox"><i class="fa-solid fa-user-shield"></i> ARTISTS</button>
         <button type="button" class="tab-trigger-btn" data-target="adPanelBox"><i class="fa-solid fa-rectangle-ad"></i> ADS</button>
+        <button type="button" class="tab-trigger-btn" data-target="albumPanelBox"><i class="fa-solid fa-compact-disc"></i> ALBUMS</button>
         <button type="button" class="tab-trigger-btn" data-target="archivePanelBox"><i class="fa-solid fa-box-archive"></i> ARCHIVE</button>
         <button type="button" class="tab-trigger-btn" data-target="logoPanelBox"><i class="fa-solid fa-handshake"></i> LOGOS</button>
         <button type="button" class="tab-trigger-btn" data-target="gigPanelBox"><i class="fa-solid fa-calendar-days"></i> GIGS</button>
@@ -385,6 +386,33 @@
                 <tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังโหลดรายการประกาศ...</td></tr>
             </tbody>
         </table>
+    </div>
+    <!-- 💿 [แท็บใหม่] ALBUMS DISCUSSIONS DESK -->
+    <div class="admin-box admin-box-pink" id="albumPanelBox" style="display: none;">
+        <h2><i class="fa-solid fa-compact-disc" style="color: #ff00ff;"></i> UDG ALBUMS DISCUSSIONS DESK</h2>
+        <p style="color: #555; font-size: 0.85rem;">เพิ่ม ลบ ปกอัลบั้มสำหรับให้แฟนคลับเข้ามารีวิวและให้คะแนนดาว</p>
+        
+        <div class="form-group"><label style="color: #ff00ff;">ALBUM TITLE (ชื่ออัลบั้ม)</label><input type="text" id="newAlbumTitle"></div>
+        <div class="form-group"><label style="color: #ff00ff;">ARTIST (ชื่อศิลปิน)</label><input type="text" id="newAlbumArtist"></div>
+        <div class="form-group"><label style="color: #ff00ff;">DESCRIPTION (คำอธิบายสั้นๆ)</label><textarea id="newAlbumDesc" rows="3"></textarea></div>
+        
+        <!-- 📸 ระบบอัปโหลดปกอัลบั้ม -->
+        <div class="form-group">
+            <label style="color: #ff00ff;">ALBUM COVER (รูปปกอัลบั้ม)</label>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="file" id="newAlbumImgFile" accept="image/*" style="background: #111; padding: 10px; border: 1px dashed #ff00ff; border-radius: 4px; color: #aaa; cursor: pointer; font-size: 0.85rem;">
+                <input type="text" id="newAlbumImg" placeholder="ลิงก์รูปปกอัลบั้มจะปรากฏที่นี่อัตโนมัติ">
+            </div>
+            <span id="albumUploadStatus" style="font-size: 0.8rem; font-family: 'Space Grotesk', sans-serif; display: none; margin-top: 5px;"></span>
+        </div>
+        
+        <button type="button" class="post-btn" id="addAlbumBtn" style="background: linear-gradient(45deg, #ff00ff, #cc00ff); color: #fff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);"><i class="fa-solid fa-circle-plus"></i> PUBLISH ALBUM</button>
+        
+        <table class="artist-list-table" style="margin-top: 30px;">
+            <thead><tr><th>อัลบั้ม / ศิลปิน</th><th>รูปปก</th><th>จัดการ</th></tr></thead>
+            <tbody id="album-admin-tbody"><tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังโหลด...</td></tr></tbody>
+        </table>
+        <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
     <script src="admin-js.js"></script>
 </body>

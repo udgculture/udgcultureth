@@ -430,3 +430,12 @@ select:focus, input:focus, textarea:focus {
 .tab-trigger-btn[data-target="orderPanelBox"].active { border-color: #ffaa00 !important; color: #000 !important; box-shadow: 0 0 15px rgba(255, 170, 0, 0.5) !important; background: #ffaa00 !important; }
 .tab-trigger-btn[data-target="overviewPanelBox"].active { border-color: #00aaff !important; color: #fff !important; box-shadow: 0 0 15px rgba(0, 170, 255, 0.3) !important; background: rgba(0, 170, 255, 0.1) !important; }
 .tab-trigger-btn[data-target="demoPanelBox"].active { border-color: #ff4500 !important; color: #ff4500 !important; box-shadow: 0 0 12px rgba(255, 69, 0, 0.15) !important; background: rgba(255, 69, 0, 0.02) !important; }
+
+/* 💿 ALBUM DESK STYLES */
+.admin-box-pink { border-color: #ff00ff; box-shadow: 0 0 30px rgba(255, 0, 255, 0.05); }
+.tab-trigger-btn[data-target="albumPanelBox"].active { 
+    border-color: #ff00ff !important; 
+    color: #fff !important; 
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.3) !important; 
+    background: rgba(255, 0, 255, 0.1) !important; 
+}
