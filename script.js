@@ -2007,3 +2007,91 @@ if (albumChatInput) {
         if (e.key === 'Enter') postAlbumComment();
     });
 }
+
+// =================================================================
+// ─── 🔊 YOUTUBE-STYLE VOLUME & VIDEO TOGGLE ENGINE ───
+// =================================================================
+const playerMuteBtn = document.getElementById('player-mute-btn');
+const playerVolumeSlider = document.getElementById('player-volume-slider');
+const playerToggleVideo = document.getElementById('player-toggle-video');
+const videoPopupContainer = document.getElementById('video-popup-container');
+
+let isMuted = false;
+let previousVolume = 100; // จำค่าเสียงล่าสุดไว้ตอนกด Unmute
+
+// ฟังก์ชันสลับไอคอนลำโพงให้ตรงกับระดับเสียง
+function updateVolumeIcon(vol) {
+    if (!playerMuteBtn) return;
+    const icon = playerMuteBtn.querySelector('i');
+    
+    if (vol === 0 || isMuted) {
+        icon.className = 'fa-solid fa-volume-xmark';
+        icon.style.color = '#ff3333'; // เสียงหายให้เป็นสีแดงเตือน
+    } else if (vol < 50) {
+        icon.className = 'fa-solid fa-volume-low';
+        icon.style.color = '#fff';
+    } else {
+        icon.className = 'fa-solid fa-volume-high';
+        icon.style.color = '#fff';
+    }
+}
+
+// 1. กดที่ลำโพงเพื่อ Mute / Unmute (ปิด/เปิดเสียง)
+if (playerMuteBtn) {
+    playerMuteBtn.addEventListener('click', () => {
+        if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
+            if (isMuted) {
+                // เปิดเสียงกลับเป็นค่าเดิมก่อนปิด
+                isMuted = false;
+                ytPlayer.unMute();
+                ytPlayer.setVolume(previousVolume);
+                if (playerVolumeSlider) playerVolumeSlider.value = previousVolume;
+                updateVolumeIcon(previousVolume);
+            } else {
+                // ปิดเสียง (Mute)
+                isMuted = true;
+                previousVolume = ytPlayer.getVolume() > 0 ? ytPlayer.getVolume() : 100;
+                ytPlayer.mute();
+                if (playerVolumeSlider) playerVolumeSlider.value = 0;
+                updateVolumeIcon(0);
+            }
+        }
+    });
+}
+
+// 2. ลากแถบสไลด์เพื่อปรับระดับเสียง
+if (playerVolumeSlider) {
+    playerVolumeSlider.addEventListener('input', (e) => {
+        const vol = parseInt(e.target.value);
+        if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
+            ytPlayer.setVolume(vol);
+            
+            if (vol > 0) {
+                isMuted = false;
+                if (ytPlayer.isMuted()) ytPlayer.unMute();
+            } else {
+                isMuted = true;
+            }
+            
+            updateVolumeIcon(vol);
+            if (vol > 0) previousVolume = vol; 
+        }
+    });
+}
+
+// 3. ฟังก์ชันสลับซ่อน/โชว์วิดีโอ 
+if (playerToggleVideo) {
+    playerToggleVideo.addEventListener('click', () => {
+        if (videoPopupContainer) {
+            videoPopupContainer.classList.toggle('show');
+            
+            if (videoPopupContainer.classList.contains('show')) {
+                playerToggleVideo.innerHTML = '<i class="fa-solid fa-video-slash"></i>';
+                playerToggleVideo.style.color = 'var(--accent-color)';
+            } else {
+                playerToggleVideo.innerHTML = '<i class="fa-solid fa-video"></i>';
+                playerToggleVideo.style.color = '#fff';
+            }
+        }
+    });
+}

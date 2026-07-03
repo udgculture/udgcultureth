@@ -402,14 +402,33 @@
                 <p id="player-artist">UNDERGROUND CULTURE TH</p>
             </div>
         </div>
-        <div class="player-controls">
-            <div id="yt-hidden-stream" style="display: none;"></div>
-            <button type="button" id="player-play-btn" class="p-control-btn"><i class="fa-solid fa-play"></i></button>
+
+        <!-- 🎬 กล่องแสดงวิดีโอแบบ Pop-up (ซ่อนไว้เป็นค่าเริ่มต้น) -->
+        <div id="video-popup-container" class="video-popup-hidden">
+            <div id="yt-hidden-stream"></div>
+        </div>
+<div class="player-controls">
+            <!-- 🔊 ปุ่มควบคุมเสียงสไตล์ YouTube (ชี้แล้วแถบเลื่อนจะโผล่) -->
+            <div class="volume-container" id="volume-container">
+                <button type="button" id="player-mute-btn" class="p-control-btn" title="ปิด/เปิดเสียง">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <div class="volume-slider-wrap">
+                    <input type="range" id="player-volume-slider" min="0" max="100" value="100">
+                </div>
+            </div>
+            
             <span class="player-divider">|</span>
+            
+            <!-- ปุ่มเล่นเพลง และ ปิด/เปิดวิดีโอ -->
+            <button type="button" id="player-play-btn" class="p-control-btn" title="เล่น/หยุด"><i class="fa-solid fa-pause"></i></button>
+            <button type="button" id="player-toggle-video" class="p-control-btn" title="แสดงวิดีโอ"><i class="fa-solid fa-video"></i></button>
+            
+            <span class="player-divider">|</span>
+            
             <span id="player-time-display" style="font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; color: #555;">00:00</span>
         </div>
     </div>
-
     <!-- 🔐 หน้าต่างยืนยันตัวตนแร็ปเปอร์ (โมดอลนีออนส้ม) -->
     <div id="artistModal" class="artist-modal-overlay">
         <div class="artist-modal-box">
