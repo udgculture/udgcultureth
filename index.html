@@ -12,12 +12,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" media="print" onload="this.media='all'">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
     
-    <!-- ดึงไฟล์หลังบ้านสำรองเวอร์ชันดั้งเดิมมาใช้รันคำสั่ง -->
-<!-- 🎯 เวอร์ชันซ่อมแซมสมบูรณ์: แทรกตัวเชื่อมระบบดักจับสิทธิ์ความปลอดภัย Auth เพิ่มเข้าไป -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-
+<script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     
     <link rel="stylesheet" href="style.css">
     
@@ -103,7 +100,7 @@
         </div>
     </header>
 <div class="ad-container">
-    <a href="#" id="live-ad-banner" class="ad-banner ad-fade-engine" target="_blank">
+    <a href="#" id="live-ad-banner" class="ad-banner" target="_blank">
         <span class="ad-label">
             <i class="fa-solid fa-rectangle-ad"></i> SPONSOR 
             <span id="ad-timer-countdown" style="color: var(--accent-color); font-family: monospace; margin-left: 5px;">8s</span>
@@ -652,6 +649,7 @@
             </button>
         </div>
     </div>
-    <script src="script.js"></script>
+    
+    <script defer src="script.js"></script>
 </body>
 </html>

@@ -342,11 +342,11 @@ onlineCountRef.on('value', (snapshot) => {
     countElement.innerText = currentOnline > 0 ? currentOnline : 1;
 });
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', () => {
     setTimeout(() => {
         const loader = document.getElementById('web-loader');
         if (loader) loader.classList.add('fade-out');
-    }, 1000);
+    }, 500);
 });
 
 // =================================================================
@@ -412,17 +412,23 @@ function renderModalVotingStation(currentMonthVotes, filterText = "") {
         const votes = currentMonthVotes[track.id] ? currentMonthVotes[track.id] : 0;
         if (query !== "" && !track.title.toLowerCase().includes(query) && !track.artist.toLowerCase().includes(query)) return;
         
-        const voteRow = document.createElement('div');
+       const voteRow = document.createElement('div');
         voteRow.className = 'vote-station-item';
-        voteRow.style.removeAttribute = 'margin-bottom'; 
         voteRow.innerHTML = `
-            <div class="track-info">
-                <h4 style="color: #fff; font-size: 0.95rem; margin:0;">${track.title}</h4>
-                <p style="color: #555; font-size: 0.75rem; margin:0; font-family:'Space Grotesk',sans-serif;">${track.artist}</p>
+            <div class="track-left-group">
+                <button type="button" class="vote-play-btn" onclick="triggerPlayerFromChart('${track.id}')" title="Play Track">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+                <div class="track-info">
+                    <h4 class="track-title-text">${track.title}</h4>
+                    <p class="track-artist-text">${track.artist}</p>
+                </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <button type="button" class="vote-up-btn" onclick="submitTrackVote('${track.id}')">🔥 VOTE UP</button>
-                <span class="vote-total-badge">${votes} PTS</span>
+            <div class="track-right-group">
+                <span class="vote-total-badge">${votes} <span style="font-size:0.65rem; color:#888;">PTS</span></span>
+                <button type="button" class="vote-up-btn" onclick="submitTrackVote('${track.id}')">
+                    <i class="fa-solid fa-fire"></i> VOTE
+                </button>
             </div>
         `;
         modalVotingList.appendChild(voteRow);
@@ -664,8 +670,8 @@ function renderNewsFeed(searchQuery = "") {
     visibleNews.forEach(news => {
         const articleCard = document.createElement('article');
         articleCard.className = 'news-card';
-        articleCard.innerHTML = `
-            <div class="news-img"><img src="${news.image}" alt="News Image" onerror="this.src='image/ขาวใส.png'"></div>
+       articleCard.innerHTML = `
+    <div class="news-img"><img src="${news.image}" alt="News Image" loading="lazy" onerror="this.src='image/ขาวใส.png'"></div>
             <div class="news-content">
                 <span class="news-tag">${news.tag}</span>
                 <h3 class="news-title">${news.title}</h3>
@@ -685,7 +691,8 @@ function renderNewsFeed(searchQuery = "") {
     }
 }
 
-database.ref('udg_news_drops').on('value', (snapshot) => {
+// ดึงแค่ 50 ข่าวล่าสุดมาแสดงผล ประหยัดเน็ต ประหยัดโควต้า
+database.ref('udg_news_drops').orderByChild('timestamp').limitToLast(50).on('value', (snapshot) => {
     const allNewsData = snapshot.val();
     globalNewsList = []; 
     
@@ -697,14 +704,21 @@ database.ref('udg_news_drops').on('value', (snapshot) => {
     const newsSearchInput = document.getElementById('newsSearchInput');
     renderNewsFeed(newsSearchInput ? newsSearchInput.value : ""); 
 });
+// ระบบ Debounce หน่วงเวลาพิมพ์ค้นหาข่าว ป้องกันเว็บบัค/ค้าง
+function debounceSearch(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
 
-// 📌 ดักจับการพิมพ์ค้นหาข่าว
 const newsSearchInput = document.getElementById('newsSearchInput');
 if (newsSearchInput) {
-    newsSearchInput.addEventListener('input', (e) => {
+    newsSearchInput.addEventListener('input', debounceSearch((e) => {
         showAllNews = true; 
         renderNewsFeed(e.target.value);
-    });
+    }, 300)); // หน่วง 300 มิลลิวินาที
 }
 
 // ดักจับการคลิกปุ่ม Load More ข่าว
@@ -2095,3 +2109,4 @@ if (playerToggleVideo) {
         }
     });
 }
+

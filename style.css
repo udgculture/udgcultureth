@@ -242,7 +242,7 @@ footer {
     text-decoration: none;
     position: relative;
     overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .ad-banner:hover {
@@ -377,10 +377,10 @@ footer {
     border-radius: 4px;
     border: none;
 }
+
 /* =================================================================
    📅 CSS RECONSTRUCTION: UPCOMING GIGS RESPONSIVE ENGINE
 ================================================================= */
-
 .gig-item {
     display: flex;
     align-items: center;
@@ -391,7 +391,6 @@ footer {
     border-radius: 8px;
     padding: 15px 20px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    /* 🎯 เติมตัวนี้เพื่อป้องกันไม่ให้เนื้อหาข้างในเบียดกันจนทะลุเฟรม */
     width: 100%;
     box-sizing: border-box;
 }
@@ -401,7 +400,6 @@ footer {
     transform: translateX(5px); 
 }
 
-/* ล็อกขนาดป้ายวันที่ */
 .gig-date { 
     background: var(--accent-color); 
     color: #000; 
@@ -411,7 +409,7 @@ footer {
     font-weight: 800; 
     line-height: 1.2; 
     min-width: 85px; 
-    flex-shrink: 0; /* ห้ามโดนบีบขนาดเด็ดขาด */
+    flex-shrink: 0; 
 }
 .gig-date span { 
     display: block; 
@@ -419,14 +417,13 @@ footer {
     font-family: 'Space Grotesk', sans-serif;
 }
 
-/* ล็อกขนาดรูปโปสเตอร์งาน */
 .gig-poster-wrap {
     width: 75px;
     height: 75px;
     border-radius: 6px;
     border: 1px solid #252525;
     overflow: hidden;
-    flex-shrink: 0; /* ห้ามรูปโดนบีบจนแบน */
+    flex-shrink: 0; 
     background: #111;
 }
 .gig-poster-wrap img {
@@ -436,10 +433,9 @@ footer {
     object-position: center;
 }
 
-/* 🎯 โซนข้อความตรงกลาง: ให้ยืดหยุ่นขยายพื้นที่กวาดที่ว่างที่เหลือเต็มพิกัด */
 .gig-info { 
     flex-grow: 1; 
-    min-width: 0; /* ดักทางไม่ให้ข้อความยาวๆ ไปดันปุ่มขวาหลุดจอ */
+    min-width: 0; 
     padding: 0 10px; 
 }
 .gig-info h3 { 
@@ -447,7 +443,7 @@ footer {
     font-size: 1.15rem; 
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* ถ้าชื่อยาวจัดให้ตัดเป็นจุดไข่ปลา ... อัตโนมัติ */
+    text-overflow: ellipsis; 
 }
 .gig-info p { 
     color: #aaa; 
@@ -456,7 +452,6 @@ footer {
     line-height: 1.4;
 }
 
-/* ล็อกขนาดปุ่มสถานะขวาสุด */
 .gig-btn {
     display: inline-flex;
     align-items: center;
@@ -473,48 +468,27 @@ footer {
     min-width: 120px;
     max-width: 120px;
     text-align: center;
-    flex-shrink: 0; /* ล็อกความกว้างของปุ่มไว้ถาวร ไม่ให้หลุดขอบ */
+    flex-shrink: 0; 
     box-sizing: border-box;
 }
 
-/* สไตล์ปุ่มสถานะต่างๆ */
 .gig-btn.btn-comingsoon { background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); cursor: default; }
 .gig-btn.btn-ticket { background: var(--accent-color); border: 1px solid var(--accent-color); color: #020202; box-shadow: 0 0 12px rgba(0, 255, 255, 0.3); }
 .gig-btn.btn-ticket:hover { background: #fff; border-color: #fff; color: #000; box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); transform: translateY(-2px); }
 .gig-btn.btn-ended { background: rgba(255, 51, 51, 0.05); border: 1px solid #ff3333; color: #ff3333; cursor: not-allowed; }
 
-/* 📱 🎯 จุดตายบนมือถือ: ถ้าหน้าจอเล็กกว่า 768px ให้เปลี่ยนการจัดเรียงเป็นแนวตั้งทันที */
 @media (max-width: 768px) {
     .gig-item {
-        flex-direction: column !important; /* สับแถวเรียงลงมาเป็นแนวตั้ง */
+        flex-direction: column !important; 
         align-items: stretch !important;
         padding: 20px;
         text-align: center;
     }
-    
-    .gig-date {
-        width: 100% !important;
-        min-width: 100% !important;
-    }
-    
-    .gig-poster-wrap {
-        width: 120px !important;
-        height: 120px !important;
-        margin: 10px auto !important; /* จัดรูปโปสเตอร์ไว้กึ่งกลาง */
-    }
-    
-    .gig-info {
-        padding: 10px 0 !important;
-    }
-    .gig-info h3 {
-        white-space: normal !important; /* ยอมให้ชื่อคอนเสิร์ตขึ้นบรรทัดใหม่ได้บนมือถือ */
-    }
-    
-    .gig-btn {
-        width: 100% !important;
-        max-width: 100% !important; /* ปรับปุ่มให้ยืดเต็มความกว้างจอจิ้มง่ายๆ */
-        margin-top: 10px;
-    }
+    .gig-date { width: 100% !important; min-width: 100% !important; }
+    .gig-poster-wrap { width: 120px !important; height: 120px !important; margin: 10px auto !important; }
+    .gig-info { padding: 10px 0 !important; }
+    .gig-info h3 { white-space: normal !important; }
+    .gig-btn { width: 100% !important; max-width: 100% !important; margin-top: 10px; }
 }
 
 .rate-card { 
@@ -1086,18 +1060,6 @@ footer {
     pointer-events: none;
     transition: all 0.3s ease;
 }
-.vote-station-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #0a0a0a;
-    border: 1px solid #222;
-    padding: 12px 14px;
-    border-radius: 6px;
-    gap: 10px;
-}
-.vote-station-item .track-info { flex-grow: 1; min-width: 0; }
-.vote-station-item .track-info h4 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 @media (max-width: 768px) {
     .mini-player-box {
@@ -1261,60 +1223,11 @@ footer {
     100% { transform: translateX(calc(-50% - 30px)); }
 }
 
-.vote-station-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #0a0a0a;
-    border: 1px solid #222;
-    padding: 12px 18px;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-}
-.vote-station-item:hover { border-color: rgba(0, 255, 255, 0.3); background: #111; }
-.vote-up-btn {
-    background: transparent;
-    border: 1px solid var(--accent-color);
-    color: var(--accent-color);
-    padding: 6px 14px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 800;
-    font-size: 0.8rem;
-    border-radius: 4px;
-    cursor: pointer;
-    letter-spacing: 1px;
-    box-shadow: 0 0 8px rgba(0, 255, 255, 0.1);
-    transition: all 0.2s ease;
-}
-.vote-up-btn:hover {
-    background: var(--accent-color);
-    color: #000;
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-    transform: translateY(-2px);
-}
-.vote-total-badge {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.85rem;
-    color: #666;
-    background: #151515;
-    padding: 3px 8px;
-    border-radius: 4px;
-    margin-left: 10px;
-}
+/* =================================================================
+   🔥 UDG VOTING STATION - PRO UI UPGRADE (อัปเดตใหม่)
+================================================================= */
 
-#voting-station-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 280px; 
-    overflow-y: auto; 
-    padding-right: 5px; 
-}
-#voting-station-list::-webkit-scrollbar { width: 5px; }
-#voting-station-list::-webkit-scrollbar-track { background: #050505; border-radius: 4px; }
-#voting-station-list::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
-#voting-station-list::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
-
+/* 1. กล่อง Modal หลัก */
 .vote-modal-overlay {
     position: fixed;
     top: 0;
@@ -1332,19 +1245,21 @@ footer {
     transition: all 0.3s ease;
 }
 .vote-modal-overlay.active { opacity: 1; pointer-events: auto; }
+
 .vote-modal-box {
-    background: #0d0d0d;
+    background: #070707; /* ปรับสีพื้นหลังให้ดูลึกขึ้น */
     border: 1px solid var(--accent-color);
     box-shadow: 0 0 30px rgba(0, 255, 255, 0.15);
     width: 90%;
     max-width: 500px;
     padding: 30px 25px;
-    border-radius: 8px;
+    border-radius: 12px; /* ทำให้ขอบกล่องมนขึ้น */
     position: relative;
     transform: scale(0.9);
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .vote-modal-overlay.active .vote-modal-box { transform: scale(1); }
+
 .vote-glow-line {
     position: absolute;
     top: 0;
@@ -1353,7 +1268,9 @@ footer {
     height: 3px;
     background: linear-gradient(90deg, var(--accent-color), #ff007f);
     box-shadow: 0 0 10px var(--accent-color);
+    border-radius: 12px 12px 0 0; /* เส้นไฟนีออนโค้งรับกับกล่อง */
 }
+
 .vote-modal-close {
     position: absolute;
     top: 15px;
@@ -1366,11 +1283,28 @@ footer {
 .vote-modal-close:hover { color: var(--accent-color); }
 .vote-modal-box h3 { font-family: 'Space Grotesk', sans-serif; color: #fff; font-size: 1.3rem; letter-spacing: 1px; margin: 0 0 5px 0; }
 
+/* 2. ช่องค้นหา */
 .vote-search-wrap { position: relative; margin-bottom: 20px; }
 .vote-search-wrap .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #444; }
-.vote-search-wrap input { width: 100%; background: #111; border: 1px solid #222; padding: 12px 15px 12px 45px; color: #fff; font-family: 'Space Grotesk', 'Kanit', sans-serif; font-size: 0.95rem; border-radius: 4px; outline: none; transition: all 0.3s ease; }
-.vote-search-wrap input:focus { border-color: var(--accent-color); box-shadow: 0 0 10px rgba(0, 255, 255, 0.15); }
+.vote-search-wrap input {
+    width: 100%; 
+    background: #111; 
+    border: 1px solid #333; /* ปรับสีขอบให้ดูเนียนตา */
+    padding: 14px 15px 14px 45px; 
+    color: #fff; 
+    font-family: 'Space Grotesk', 'Kanit', sans-serif; 
+    font-size: 1rem; 
+    border-radius: 8px; /* ขอบมน */
+    outline: none; 
+    transition: all 0.3s ease; 
+}
+.vote-search-wrap input:focus { 
+    border-color: var(--accent-color); 
+    background: #000;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.15); 
+}
 
+/* 3. ลิสต์รายการเพลง (มี Scrollbar) */
 #modal-voting-list {
     display: flex;
     flex-direction: column;
@@ -1383,6 +1317,130 @@ footer {
 #modal-voting-list::-webkit-scrollbar-track { background: #050505; }
 #modal-voting-list::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
 #modal-voting-list::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
+
+/* 4. การ์ดรายการเพลงแต่ละบรรทัด (ตัวใหม่) */
+.vote-station-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #111;
+    border: 1px solid #1a1a1a;
+    padding: 12px 16px;
+    border-radius: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 15px;
+}
+.vote-station-item:hover {
+    border-color: rgba(0, 255, 255, 0.4);
+    background: #151515;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* 5. กลุ่มซ้าย (ปุ่ม Play + ชื่อเพลง) */
+.track-left-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-grow: 1;
+    min-width: 0;
+}
+.vote-play-btn {
+    background: rgba(0, 255, 255, 0.05);
+    color: var(--accent-color);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+.vote-play-btn:hover {
+    background: var(--accent-color);
+    color: #000;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+.track-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.track-title-text {
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 800;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.track-artist-text {
+    color: #888;
+    font-size: 0.75rem;
+    margin: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 6. กลุ่มขวา (แต้มโหวต + ปุ่มโหวต) */
+.track-right-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+.vote-total-badge {
+    background: #1a1a1a;
+    color: #fff;
+    border: 1px solid #222;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-align: center;
+    min-width: 55px;
+}
+.vote-up-btn {
+    background: linear-gradient(45deg, var(--accent-color), #0088cc);
+    color: #000;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.vote-up-btn:hover {
+    filter: brightness(1.2);
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+/* 7. รองรับมือถือ (Mobile Responsive) */
+@media (max-width: 480px) {
+    .vote-station-item { padding: 10px 12px; gap: 8px; }
+    .track-title-text { font-size: 0.85rem; }
+    .track-artist-text { font-size: 0.7rem; }
+    .vote-play-btn { width: 34px; height: 34px; font-size: 0.8rem; }
+    .vote-up-btn { padding: 6px 10px; font-size: 0.75rem; }
+    .vote-total-badge { padding: 4px 8px; font-size: 0.8rem; min-width: 45px; }
+    .track-left-group { gap: 8px; }
+    .track-right-group { gap: 8px; }
+}
 
 .auth-trigger-btn {
     background: transparent;
@@ -1827,8 +1885,10 @@ footer {
    🎰 ตู้สไลด์ CS:GO - ซ่อมแซมขนาดขอบหนาแนบชิด ล็อกกว้างถาวร (style.css)
 ================================================================= */
 .csgo-item-card {
-    width: 130px !important;    /* 🎯 ล็อกพิกเซลหน้ากว้างคงที่ถาวรสำหรับการคำนวณระยะทาง */
-    height: 130px !important;   /* บังคับความสูงคงที่ */
+   width: 130px !important;    
+    height: 130px !important;
+    min-width: 130px !important; /* ล็อกขั้นต่ำ */
+    flex-shrink: 0 !important;   /* ห้ามย่อขนาดเด็ดขาด */
     margin: 0 !important;       /* ขอบชิดแนบติดกันรัวๆ ไร้ช่องร่องลมสีดำคั่นกลาง */
     padding: 8px !important;    
     background: linear-gradient(180deg, #0d0d0d 0%, #050505 100%) !important;
