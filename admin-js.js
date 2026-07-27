@@ -975,3 +975,155 @@ function deleteAlbumData(albumKey) {
             });
     }
 }
+
+// =================================================================
+// ─── 📊 ADMIN COMMAND CENTER UPGRADE ENGINE (CHART ANALYTICS) ───
+// =================================================================
+let trafficChartInstance = null;
+let activitiesChartInstance = null;
+
+// ตั้งค่าวันที่เริ่มต้นในกล่องปฏิทินให้เป็นวันปัจจุบันออโต้
+const statsDatePicker = document.getElementById('statsDatePicker');
+if (statsDatePicker) {
+    const todayStr = new Date().toISOString().split('T')[0];
+    statsDatePicker.value = todayStr;
+    statsDatePicker.addEventListener('change', () => processAnalyticsCharts());
+}
+
+document.getElementById('btnFilterToday')?.addEventListener('click', () => {
+    if(statsDatePicker) { statsDatePicker.value = new Date().toISOString().split('T')[0]; processAnalyticsCharts(); }
+});
+document.getElementById('btnFilterMonth')?.addEventListener('click', () => {
+    alert("ระบบกำลังกวาดดึงประมวลผลภาพรวมรายเดือนให้ครับน้า!");
+    processAnalyticsCharts(true); // บังคับดึงโหมดรายเดือน
+});
+
+// ฟังชั่นสแกนฐานข้อมูลเพื่อวาดกราฟแบบเรียลไทม์เจาะลึก
+function processAnalyticsCharts(forceMonthMode = false) {
+    const selectedDate = statsDatePicker ? statsDatePicker.value : new Date().toISOString().split('T')[0];
+    
+    // จำลอง Data เพื่อทำการปูทางสายกราฟ (ในอนาคตน้าสามารถดึงจากถังเก็บ Log จริงของ Firebase มาลูปครอบได้เลย)
+    // ฝั่งที่ 1: ดึงค่ายอดชม (Traffic Line Chart)
+    let lineLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"];
+    let lineData = [12, 5, 45, 120, 85, 210]; // จำนวนคนจำลองรายวัน
+
+    if(forceMonthMode) {
+        lineLabels = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+        lineData = [1200, 1450, 980, 2100, 1850, 3200, 4100, 0, 0, 0, 0, 0];
+    }
+
+    renderTrafficLineChart(lineLabels, lineData);
+
+    // ฝั่งที่ 2: นับจำนวนคนทำกิจกรรมแยกประเภท (User Activities Pie Chart)
+    // ไปดึงค่าสดจากแดชบอร์ดมาคํานวณสัดส่วนพ่นลงกราฟวงกลมทันที
+    const countDemos = parseInt(document.getElementById('dashDemos')?.innerText || 0);
+    const countGraffiti = parseInt(document.getElementById('dashGraffiti')?.innerText || 0);
+    const countCases = parseInt(document.getElementById('dashCases')?.innerText || 0);
+    const fakeOrdersCount = 15; // สมมติค่าออเดอร์เสื้อ
+
+    renderActivitiesPieChart(countGraffiti, countCases, countDemos, fakeOrdersCount);
+}
+
+// 🎨 เอนจิ้นวาดกราฟเส้น ยอดคนดู (Neon Blue Line)
+function renderTrafficLineChart(labels, data) {
+    const ctx = document.getElementById('trafficLineChart')?.getContext('2d');
+    if (!ctx) return;
+
+    if (trafficChartInstance) { trafficChartInstance.destroy(); }
+
+    trafficChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'จำนวนผู้เข้าชม (คน)',
+                data: data,
+                borderColor: '#00aaff',
+                backgroundColor: 'rgba(0, 170, 255, 0.05)',
+                borderWidth: 3,
+                pointBackgroundColor: '#fff',
+                pointHoverRadius: 7,
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: '#151515' }, ticks: { color: '#666' } },
+                x: { grid: { display: false }, ticks: { color: '#666' } }
+            }
+        }
+    });
+}
+
+// 🎨 เอนจิ้นวาดกราฟวงกลม พฤติกรรมคนดู (Glow Pie Chart)
+function renderActivitiesPieChart(graffiti, cases, demos, orders) {
+    const ctx = document.getElementById('activitiesPieChart')?.getContext('2d');
+    if (!ctx) return;
+
+    if (activitiesChartInstance) { activitiesChartInstance.destroy(); }
+
+    // ป้องกันค่า 0 ทั้งหมดแล้วกราฟบั๊ก
+    const total = graffiti + cases + demos + orders;
+    const finalData = total === 0 ? [1, 1, 1, 1] : [graffiti, cases, demos, orders];
+
+    activitiesChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['พ่นสีแชท', 'เปิดกล่องสุ่ม', 'ส่ง Demo เพลง', 'สั่งซื้อสินค้า'],
+            datasets: [{
+                data: finalData,
+                backgroundColor: ['#00ffff', '#ff007f', '#ff4500', '#ffaa00'],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: '#ccc', font: { family: 'Kanit' }, boxWidth: 12 }
+                }
+            }
+        }
+    });
+}
+
+// 📡 ระบบจำลองสาย Feed Log กิจกรรมสดพ่นลงตารางชั้นล่างสุด
+function pushLiveCommandLog(username, action) {
+    const tbody = document.getElementById('commandLiveLogsTbody');
+    if (!tbody) return;
+    
+    // ลบแถวแรกที่เป็นตัว Loading ออกเมื่อมีข้อมูลมาตัวแรก
+    if (tbody.innerHTML.includes('กำลังเปิดสถานีเชื่อมสาย')) { tbody.innerHTML = ''; }
+
+    const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td style="color:#555; font-family:monospace;">⏳ ${timeStr}</td>
+        <td style="color:#ffaa00; font-weight:bold;"><i class="fa-solid fa-user-ninja"></i> ${username}</td>
+        <td style="color:#fff;">${action}</td>
+    `;
+    
+    tbody.insertBefore(tr, tbody.firstChild);
+    if (tbody.children.length > 30) { tbody.removeChild(tbody.lastChild); } // คุมคิวไม่ให้เบิ้ลเกิน 30 แถว
+}
+
+// ⚡ บังคับกระตุ้นประมวลผลกราฟทันทีเมื่อเปิดเว็บบอร์ดแอดมินสำเร็จ
+setTimeout(() => { 
+    processAnalyticsCharts();
+    // จำลองประวัติสาย Feed สดโชว์พาวเวอร์ให้น้าเห็นภาพ
+   
+}, 2000);
+
+// เสียบสายพ่วงสปายดักความเรียลไทม์ (เมื่อมีคนหย่อนเพลงเข้าตู้แดงให้พ่น Log ออโต้)
+database.ref('udg_demo_dropbox').on('child_added', (snap) => {
+    const val = snap.val();
+    if(val) pushLiveCommandLog(val.artistName || "ศิลปินนิรนาม", `สาดเพลงใหม่ [${val.trackTitle || "Untitled"}] เข้าสู่ระบบตู้ Dropbox แดง`);
+});
+
