@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Tools - ALL IN ONE</title>
+    <link rel="stylesheet" href="allinonestyle.css">
+    
+    <script src="https://unpkg.com/easyqrcodejs/dist/easy.qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <h1>เครื่องมืออเนกประสงค์ ALL-IN-ONE</h1>
+
+        <div class="tools-grid">
+            <!-- ส่วนที่ 1: YouTube Downloader -->
+            <div class="card">
+                <h2>📥 โหลดวีดีโอ YouTube</h2>
+                <input type="text" id="ytLink" placeholder="วางลิ้งก์ YouTube ที่นี่...">
+                
+                <select id="ytFormat">
+                    <optgroup label="🎬 วิดีโอ (MP4)">
+                        <option value="1080">MP4 (ภาพคมชัด 1080p)</option>
+                        <option value="4k">MP4 (ภาพโคตรชัด 4K)</option>
+                    </optgroup>
+                    <optgroup label="🎵 เสียงออดิโอ">
+                        <option value="mp3_128">MP3 (128 kbps - ขนาดเล็ก)</option>
+                        <option value="mp3_320">MP3 (320 kbps - คุณภาพสูง)</option>
+                        <option value="wav">WAV (ไฟล์ดิบ ไม่บีบอัด)</option>
+                    </optgroup>
+                </select>
+
+                <button onclick="downloadYT()">ประมวลผลไฟล์</button>
+                <div id="download-widget"></div>
+            </div>
+
+            <!-- ส่วนที่ 2: QR Code Generator (อัปเดต Quick Logo) -->
+            <div class="card">
+                <h2>🔳 สร้าง QR Code</h2>
+                <input type="text" id="qrLink" placeholder="วางลิ้งก์ที่ต้องการทำ QR Code...">
+                
+                <div class="quick-logos">
+                    <label style="display:block; text-align:left; margin-bottom: 8px; font-size: 14px; font-weight: bold;">เลือกโลโก้ด่วน:</label>
+                    <div class="logo-btn-group" id="quickLogoGroup">
+                        <button type="button" class="logo-btn" onclick="setQuickLogo(this, 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/256px-YouTube_full-color_icon_%282017%29.svg.png')">▶️ YouTube</button>
+                        <button type="button" class="logo-btn" onclick="setQuickLogo(this, 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/256px-Spotify_logo_without_text.svg.png')">🎧 Spotify</button>
+                        <button type="button" class="logo-btn" onclick="setQuickLogo(this, 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/SoundCloud_logo.svg/256px-SoundCloud_logo.svg.png')">☁️ SoundCloud</button>
+                    </div>
+                </div>
+
+                <div class="file-upload">
+                    <label for="qrLogo" style="display:block; text-align:left; margin-bottom: 8px; font-size: 14px;">หรืออัปโหลดรูปโลโก้ของคุณเอง:</label>
+                    <!-- ใส่ฟังก์ชัน clearQuickLogo เพื่อรีเซ็ตปุ่มด่วนเวลาอัปโหลดรูปเอง -->
+                    <input type="file" id="qrLogo" accept="image/*" onchange="clearQuickLogo()">
+                </div>
+                
+                <button onclick="generateQR()">สร้าง QR Code</button>
+                <div id="qrcode"></div>
+            </div>
+        </div>
+
+        <!-- ส่วนที่ 3: ระบบออกใบเสร็จรับเงิน (โครงสร้างเดิม) -->
+        <div class="receipt-section">
+            <h2 style="text-align: center; margin-bottom: 20px;">🧾 ระบบออกใบเสร็จรับเงิน</h2>
+            
+            <div class="controls-wrapper">
+                <div class="controls-title">เครื่องมือจัดการใบเสร็จ (Receipt Control Panel)</div>
+                <div class="btn-group">
+                    <button class="btn-lang" onclick="toggleLanguage()" id="btn-lang-toggle">🌐 Switch to English</button>
+                    <button class="btn-add" onclick="addNewRow()">➕ <span data-th="เพิ่มรายการ" data-en="Add Item">เพิ่มรายการ</span></button>
+                    <button class="btn-pdf" onclick="exportToPDF()">📄 <span data-th="ดาวน์โหลดเป็น PDF" data-en="Download PDF">ดาวน์โหลดเป็น PDF</span></button>
+                    <button class="btn-png" onclick="exportToPNG()">🖼️ <span data-th="ดาวน์โหลดเป็นรูปภาพ PNG" data-en="Download PNG">ดาวน์โหลดเป็นรูปภาพ PNG</span></button>
+                    <button class="btn-print" onclick="window.print()">🖨️ <span data-th="สั่งพิมพ์กระดาษ" data-en="Print">สั่งพิมพ์กระดาษ</span></button>
+                </div>
+            </div>
+
+            <div class="receipt-capture-area-wrapper">
+                <div class="receipt-capture-area" id="receipt-area">
+                    <table class="header-layout-table">
+                        <tr>
+                            <td style="width: 60%; padding-right: 20px;">
+                                <div class="logo-uploader-box" style="margin-bottom: 12px;" id="logo-ctrl-panel">
+                                    <label for="logo-input" style="cursor: pointer; background: #cbd5e1; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: bold; display: inline-block;">
+                                        🖼️ <span data-th="ใส่โลโก้ร้าน/รูปภาพ" data-en="Upload Logo">ใส่โลโก้ร้าน/รูปภาพ</span>
+                                    </label>
+                                    <input type="file" id="logo-input" accept="image/*" style="display: none;" onchange="previewLogo(this)">
+                                    <button type="button" id="btn-remove-logo" class="btn-delete" style="padding: 4px 8px; font-size: 12px; display: none; margin-left: 5px;" onclick="removeLogo()">ลบโลโก้</button>
+                                </div>
+                                <div id="logo-preview-container" style="display: none; margin-bottom: 12px; text-align: left;">
+                                    <img id="logo-img" src="" alt="Logo" style="max-height: 70px; max-width: 180px; object-fit: contain;">
+                                </div>
+                                <textarea id="vendor-info" rows="4" placeholder="กรอกชื่อ-นามสกุลของคุณ (ผู้รับเงิน)&#10;เลขประจำตัวประชาชน: X-XXXX-XXXXX-XX-X&#10;ที่อยู่ปัจจุบัน...&#10;เบอร์โทรศัพท์..." oninput="autoGrow(this); saveDraft();"></textarea>
+                            </td>
+                            <td style="width: 40%; text-align: right;">
+                                <div class="receipt-title" id="receipt-main-title" data-th="ใบเสร็จรับเงิน / RECEIPT" data-en="RECEIPT">ใบเสร็จรับเงิน / RECEIPT</div>
+                                <div class="meta-grid">
+                                    <span class="meta-label" data-th="เลขที่ / No. :" data-en="No. :">เลขที่ / No. :</span>
+                                    <input type="text" id="receipt-no" value="RE-2026001" style="text-align: right;" oninput="saveDraft()">
+                                    <span class="meta-label" data-th="วันที่ / Date :" data-en="Date :">วันที่ / Date :</span>
+                                    <input type="date" id="receipt-date" style="text-align: right;" oninput="saveDraft()">
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div style="border-bottom: 2px solid var(--text-main); margin-bottom: 25px;"></div>
+
+                    <div class="customer-block">
+                        <div class="info-box">
+                            <div class="info-box-title" data-th="ผู้จ่ายเงิน / ลูกค้า / Customer" data-en="Customer Info">ผู้จ่ายเงิน / ลูกค้า / Customer</div>
+                            <textarea id="customer-info" rows="3" placeholder="ชื่อ-นามสกุล ลูกค้า หรือ ชื่อบริษัทลูกค้า&#10;ที่อยู่ลูกค้า...&#10;เลขประจำตัวผู้เสียภาษี (ถ้ามี)..." oninput="autoGrow(this); saveDraft();"></textarea>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-box-title" data-th="รายละเอียดการชำระเงิน / Remark" data-en="Payment Details / Remark">รายละเอียดการชำระเงิน / Remark</div>
+                            <textarea id="receipt-remark" rows="3" placeholder="ชำระโดย: [ ] เงินสด  [ ] โอนผ่านธนาคาร&#10;ชื่อบัญชี: XXXXXXXX&#10;เลขที่บัญชี: XXX-X-XXXXX-X" oninput="autoGrow(this); saveDraft();"></textarea>
+                        </div>
+                    </div>
+
+                    <table class="items-table" id="items-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 6%; text-align: center;" data-th="ลำดับ" data-en="No.">ลำดับ</th>
+                                <th style="width: 48%; text-align: left;" data-th="รายการ / Description" data-en="Description">รายการ / Description</th>
+                                <th style="width: 12%; text-align: right;" data-th="จำนวน / Qty" data-en="Qty">จำนวน / Qty</th>
+                                <th style="width: 16%; text-align: right;" data-th="ราคาต่อหน่วย / Price" data-en="Unit Price">ราคาต่อหน่วย / Price</th>
+                                <th style="width: 15%; text-align: right;" data-th="จำนวนเงิน / Amount" data-en="Amount">จำนวนเงิน / Amount</th>
+                                <th class="col-action" style="width: 3%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="text-align: center;" class="row-index">1</td>
+                                <td><input type="text" class="input-item-name" placeholder="พิมพ์รายการสินค้าหรือบริการที่นี่..." data-th-holder="พิมพ์รายการสินค้าหรือบริการที่นี่..." data-en-holder="Enter product or service name..." oninput="saveDraft()"></td>
+                                <td><input type="number" class="qty-field" value="1" min="0" oninput="calculateReceipt(); saveDraft();"></td>
+                                <td><input type="number" class="price-field" value="0.00" min="0" step="0.01" oninput="calculateReceipt(); saveDraft();"></td>
+                                <td style="text-align: right;" class="amount-field">0.00</td>
+                                <td style="text-align: center;" class="col-action">
+                                    <button class="btn-delete" onclick="deleteRow(this)" data-th="ลบ" data-en="Delete">ลบ</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="summary-block">
+                        <div class="baht-text-container" id="baht-text-display">
+                            ( ศูนย์บาทถ้วน )
+                        </div>
+                        <div>
+                            <table class="calc-table">
+                                <tr>
+                                    <td data-th="รวมเป็นเงิน (Subtotal):" data-en="Subtotal:">รวมเป็นเงิน (Subtotal):</td>
+                                    <td style="text-align: right;" id="subtotal-val">0.00</td>
+                                </tr>
+                                <tr class="grand-total-row">
+                                    <td style="padding-top: 10px;" data-th="จำนวนเงินทั้งสิ้น (Grand Total):" data-en="Grand Total:">จำนวนเงินทั้งสิ้น (Grand Total):</td>
+                                    <td style="text-align: right; padding-top: 10px;" id="grand-total-val">0.00</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="online-footer-block" style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-color); padding-top: 25px;">
+                        <div style="font-size: 12px; color: #64748b; font-style: italic; max-width: 70%; line-height: 1.5;">
+                            * <span data-th="เอกสารฉบับนี้ออกด้วยระบบอิเล็กทรอนิกส์ ไม่จำเป็นต้องมีลายมือชื่อผู้รับเงิน" data-en="This is a system-generated document and requires no signature.">เอกสารฉบับนี้ออกด้วยระบบอิเล็กทรอนิกส์ ไม่จำเป็นต้องมีลายมือชื่อผู้รับเงิน</span>
+                        </div>
+                        <div class="paid-stamp-box" style="border: 3px double #10b981; color: #10b981; padding: 6px 16px; font-weight: bold; font-size: 18px; border-radius: 4px; transform: rotate(-4deg); letter-spacing: 2px; text-transform: uppercase; white-space: nowrap;">
+                            ✓ <span data-th="ชำระเงินแล้ว" data-en="PAID">ชำระเงินแล้ว</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="allinonescript.js"></script>
+</body>
+</html>
