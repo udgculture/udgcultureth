@@ -1003,21 +1003,49 @@ function preloadAllRewardImages(itemsArray) {
     });
 }
 
+let vaultCountdownTimer = null; // ⚡ เสียบปลั๊กตัวแปรนี้ไว้สำหรับล้างรอบมอเตอร์
+
 function listenToMySavedCouponsVault(uid) {
     if (!myCouponsList) return;
+    
     database.ref(`users_rewards_vault/${uid}`).on('value', (snapshot) => {
         myCouponsList.innerHTML = '';
         const coupons = snapshot.val();
+        
+        // 🛑 เคลียร์ระบบนับถอยหลังอันเก่าทิ้งก่อน ป้องกันมอเตอร์ทำงานซ้อนกันจนเว็บบัค
+        if (vaultCountdownTimer) clearInterval(vaultCountdownTimer);
+
         if (!coupons) {
             myCouponsList.innerHTML = `<div style="color:#333; text-align:center; padding-top:100px; font-size:0.85rem;">🎁 ตู้เซฟของคุณยังว่างเปล่า<br>กดเปิดกล่องสุ่มสไลด์เพื่อลุ้นรับคูปองกันน้า BRO!</div>`;
             return;
         }
+
+        const currentTime = Date.now();
+        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+        let hasValidCoupons = false;
+        let activeCountdowns = []; // 📦 ถังเก็บข้อมูลเวลาสำหรับให้มอเตอร์วิ่งอัปเดตหน้าจอ
+
         Object.keys(coupons).forEach(k => {
             const item = coupons[k];
-            const dateObj = new Date(item.wonTimestamp);
+            const itemTime = item.wonTimestamp || item.timestamp || 0;
+            const expireTime = itemTime + sevenDaysMs;
+
+            // 🚨 ตรวจจับไอเท็มหมดอายุ (เกิน 7 วัน) ถ้ายอดเวลาติดลบให้ลบทิ้งทันที
+            if (currentTime > expireTime) {
+                database.ref(`users_rewards_vault/${uid}/${k}`).remove();
+                return; 
+            }
+
+            hasValidCoupons = true;
+            
+            const dateObj = new Date(itemTime);
             const dateStr = dateObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
             const timeStr = dateObj.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + " น.";
             const ticketIdDisplay = item.ticketId ? item.ticketId : "NO-ID";
+
+            const countdownSpanId = `countdown-${k}`;
+            // โยนเข้าถังรอให้มอเตอร์อัปเดตแบบเรียลไทม์
+            activeCountdowns.push({ id: countdownSpanId, expireTime: expireTime, key: k, uid: uid });
 
             const div = document.createElement('div');
             div.className = "vault-coupon-card";
@@ -1025,13 +1053,54 @@ function listenToMySavedCouponsVault(uid) {
                 <div>
                     <strong class="coupon-info-title">🎫 ${item.rewardName}</strong>
                     <span class="coupon-secret-code-badge">CODE: ${ticketIdDisplay}</span>
-                    <span class="coupon-timestamp"><i class="fa-solid fa-clock"></i> ได้รับเมื่อ: ${dateStr} - ${timeStr}</span>
+                    <span class="coupon-timestamp"><i class="fa-solid fa-clock"></i> ได้รับ: ${dateStr} - ${timeStr}</span>
+                    <span class="coupon-timestamp" id="${countdownSpanId}" style="color:#00ffff; margin-top:5px; font-family: 'Space Grotesk', sans-serif; font-size:0.75rem;">
+                        <i class="fa-solid fa-hourglass-half fa-spin-pulse"></i> กำลังประมวลผลเวลา...
+                    </span>
                 </div>
                 <span class="coupon-status-ready">READY</span>
             `;
             myCouponsList.appendChild(div);
         });
-        myCouponsList.scrollTop = myCouponsList.scrollHeight;
+
+        if (!hasValidCoupons) {
+             myCouponsList.innerHTML = `<div style="color:#333; text-align:center; padding-top:100px; font-size:0.85rem;">🎁 ตู้เซฟของคุณยังว่างเปล่า<br>กดเปิดกล่องสุ่มสไลด์เพื่อลุ้นรับคูปองกันน้า BRO!</div>`;
+        } else {
+             myCouponsList.scrollTop = myCouponsList.scrollHeight;
+             
+             // ⏱️ สตาร์ทมอเตอร์นับถอยหลัง (อัปเดตเข็มวิทุกๆ 1 วินาที)
+             vaultCountdownTimer = setInterval(() => {
+                 const now = Date.now();
+                 activeCountdowns.forEach(data => {
+                     const timeDiff = data.expireTime - now;
+                     const el = document.getElementById(data.id);
+                     
+                     if (el) {
+                         if (timeDiff <= 0) {
+                             el.innerHTML = `<i class="fa-solid fa-ban"></i> หมดอายุแล้ว!`;
+                             el.style.color = "#ff3333";
+                             // ระเบิดทิ้งออโต้เมื่อหมดเวลาต่อหน้าต่อตา
+                             database.ref(`users_rewards_vault/${data.uid}/${data.key}`).remove();
+                         } else {
+                             // แปลงหน่วยมิลลิวินาทีเป็น วัน, ชั่วโมง, นาที, วินาที
+                             const d = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                             const h = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
+                             const m = Math.floor((timeDiff / 1000 / 60) % 60);
+                             const s = Math.floor((timeDiff / 1000) % 60);
+                             
+                             let timeString = "";
+                             if (d > 0) timeString += `${d} วัน `;
+                             timeString += `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                             
+                             el.innerHTML = `<i class="fa-solid fa-hourglass-half"></i> หมดอายุใน: <strong>${timeString}</strong>`;
+                             
+                             // กิมมิค: ถ้าเวลาเหลือน้อยกว่า 1 วัน ให้ไฟไซเรนเปลี่ยนเป็นสีส้ม (#ffaa00) เตือนให้รีบใช้!
+                             el.style.color = d < 1 ? "#ffaa00" : "#00ffff";
+                         }
+                     }
+                 });
+             }, 1000);
+        }
     });
 }
 
@@ -2111,3 +2180,25 @@ if (playerToggleVideo) {
 }
 
 
+// =================================================================
+// ─── 📊 TRAFFIC TRACKER ENGINE (ระบบเก็บสถิติยอดวิวคนเข้าเว็บจริง) ───
+// =================================================================
+function logRealPageView() {
+    // เช็ก Session Storage กันคนรีเฟรชรัวๆ ปั่นยอดวิว
+    if (!sessionStorage.getItem('udg_view_logged')) {
+        const now = new Date();
+        const dateStr = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, '0') + "-" + String(now.getDate()).padStart(2, '0');
+        const hourStr = String(now.getHours()); // 0-23
+        
+        // ยิงข้อมูลไปบวกเลขที่คลาวด์ แยกรอบวันและชั่วโมง
+        database.ref(`udg_page_views/${dateStr}/${hourStr}`).transaction((currentViews) => {
+            return (currentViews || 0) + 1;
+        }, (error, committed) => {
+            if (committed) {
+                sessionStorage.setItem('udg_view_logged', 'true');
+            }
+        });
+    }
+}
+// เดินเครื่องนับยอดวิวมืดทันทีที่โหลดเว็บเสร็จ
+logRealPageView();

@@ -235,137 +235,61 @@ document.getElementById('addAdBtn').addEventListener('click', () => {
 });
 function removeAdFromCloud(k) { if(confirm("ต้องการลบป้ายโฆษณานี้ใช่หรือไม่?")) database.ref(`udg_live_advertisements/${k}`).remove(); }
 
-// 🗳️ [ระบบแท็บที่ 5] ล็อกชาร์ตประจำเดือนและเก็บเข้าหอเกียรติยศ
+// 🗳️ [ระบบแท็บที่ 5] ล็อกชาร์ตปิดยอดแชมป์เพลงหอเกียรติยศ (อัปเดตเป็นแบบรายเดือน)
 const archivedWeeksList = document.getElementById('archivedWeeksList');
-const archiveMonthlyBtn = document.getElementById('archiveWeeklyBtn'); // คง ID เดิมไว้เพื่อไม่ให้ HTML รุ่นเก่าพัง
-
-function formatArchivePeriod(periodKey, log = {}) {
-    if (log.periodType === 'month' || periodKey.startsWith('month_')) {
-        const parts = periodKey.replace('month_', '').split('_');
-        return parts.length === 2 ? `${parts[1]}/${parts[0]}` : periodKey;
-    }
-    return periodKey.replace('week_', '').replace(/_/g, '-');
-}
-
-function renderArchiveLogs(logs) {
+database.ref('udg_votes_archive_logs').on('value', (snapshot) => {
     if (!archivedWeeksList) return;
-    archivedWeeksList.innerHTML = '';
-
-    if (!logs) {
-        archivedWeeksList.innerHTML = `<li style="color: #555; font-size: 0.85rem;">📜 ทำเนียบประวัติว่างเปล่า</li>`;
-        return;
+    archivedWeeksList.innerHTML = ''; 
+    const logs = snapshot.val();
+    
+    if (!logs) { 
+        archivedWeeksList.innerHTML = `<li style="color: #555; font-size: 0.85rem;">📜 ทำเนียบประวัติว่างเปล่า</li>`; 
+        return; 
     }
-
-    Object.keys(logs)
-        .sort((a, b) => (logs[b].closedTimestamp || 0) - (logs[a].closedTimestamp || 0))
-        .forEach(periodKey => {
-            const log = logs[periodKey] || {};
-            const li = document.createElement('li');
-            const periodLabel = formatArchivePeriod(periodKey, log);
-            const totalVotes = Number(log.totalVotes || 0);
-            const totalTracks = Number(log.totalTracks || 0);
-
-            li.style.cssText = "background:#111; padding:10px 15px; border-radius:4px; border-left:3px solid #cc00ff; display:flex; justify-content:space-between; align-items:center; gap:12px; font-size:0.85rem;";
-            li.innerHTML = `
-                <div>
-                    <strong style="color:#fff;">🗓️ รอบเดือน: ${periodLabel}</strong><br>
-                    <span style="color:#aaa;">🥇 แชมป์ประจำเซ็ต: <span style="color:#00ffff; font-weight:bold;">${log.winnerTitle || '-'}</span> - ${log.winnerArtist || '-'} (${Number(log.winnerVotes || 0)} PTS)</span>
-                    ${totalTracks ? `<br><span style="color:#666; font-size:0.75rem;">${totalTracks} TRACKS · ${totalVotes} TOTAL VOTES</span>` : ''}
-                </div>
-                <button class="delete-artist-btn" onclick="deleteArchiveLog('${periodKey}')" style="color:#ff3333; flex-shrink:0;">// DELETE LOG</button>
-            `;
-            archivedWeeksList.appendChild(li);
-        });
-}
-
-database.ref('udg_votes_archive_logs').on(
-    'value',
-    snapshot => renderArchiveLogs(snapshot.val()),
-    error => {
-        console.error('Archive list read failed:', error);
-        if (archivedWeeksList) {
-            archivedWeeksList.innerHTML = `<li style="color:#ff3333; font-size:0.85rem;">❌ โหลดแฟ้มประวัติไม่ได้: ${error.message}</li>`;
-        }
-    }
-);
-
-if (archiveMonthlyBtn) {
-    archiveMonthlyBtn.addEventListener('click', async () => {
-        const currentMonthId = getAdminCurrentMonthKey();
-        const monthLabel = formatArchivePeriod(currentMonthId, { periodType: 'month' });
-
-        if (!confirm(`🚨 ยืนยันการสรุปชาร์ตและบันทึกเซ็ตเพลงประจำเดือน ${monthLabel} เข้าสู่ ARCHIVE ใช่หรือไม่?`)) return;
-
-        const originalHtml = archiveMonthlyBtn.innerHTML;
-        archiveMonthlyBtn.disabled = true;
-        archiveMonthlyBtn.style.opacity = '0.65';
-        archiveMonthlyBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> SAVING ARCHIVE...';
-
-        try {
-            const archiveRef = database.ref(`udg_votes_archive_logs/${currentMonthId}`);
-            const [existingSnapshot, voteSnapshot, trackSnapshot] = await Promise.all([
-                archiveRef.once('value'),
-                database.ref(`monthly_music_votes/${currentMonthId}`).once('value'),
-                database.ref(`udg_monthly_tracks_vault/${currentMonthId}`).once('value')
-            ]);
-
-            if (existingSnapshot.exists()) {
-                const overwrite = confirm(`⚠️ เดือน ${monthLabel} มีข้อมูล ARCHIVE อยู่แล้ว ต้องการเขียนทับหรือไม่?`);
-                if (!overwrite) return;
-            }
-
-            const votesData = voteSnapshot.val() || {};
-            const monthlyTracks = trackSnapshot.val() || {};
-
-            if (Object.keys(monthlyTracks).length === 0) {
-                alert(`❌ ยังไม่มีรายชื่อเพลงในเซ็ตเดือน ${monthLabel}\nกรุณาเพิ่มเพลงในแท็บ MUSIC ก่อนครับน้า!`);
-                return;
-            }
-
-            const sortedChartList = Object.keys(monthlyTracks).map(trackKey => {
-                const track = monthlyTracks[trackKey] || {};
-                const trackId = track.id || trackKey;
-                return {
-                    id: trackId,
-                    title: track.title || 'UNTITLED',
-                    artist: track.artist || 'UNKNOWN ARTIST',
-                    votes: Number(votesData[trackId] || 0)
-                };
-            }).sort((a, b) => b.votes - a.votes || a.title.localeCompare(b.title));
-
-            const winner = sortedChartList[0];
-            const archivePayload = {
-                periodType: 'month',
-                periodId: currentMonthId,
-                winnerTitle: winner.title,
-                winnerArtist: winner.artist,
-                winnerVotes: winner.votes,
-                totalTracks: sortedChartList.length,
-                totalVotes: sortedChartList.reduce((sum, track) => sum + track.votes, 0),
-                standings: sortedChartList.slice(0, 5),
-                closedTimestamp: firebase.database.ServerValue.TIMESTAMP
-            };
-
-            await archiveRef.set(archivePayload);
-            alert(`🏆 SAVE ARCHIVE SUCCESS!\nบันทึกแชมป์เดือน ${monthLabel}: ${winner.title} - ${winner.artist} (${winner.votes} PTS) เรียบร้อยแล้ว`);
-        } catch (error) {
-            console.error('Archive save failed:', error);
-            alert(`❌ บันทึก ARCHIVE ไม่สำเร็จ\n${error.message}\n\nตรวจสอบ Firebase Realtime Database Rules ว่าแอดมินมีสิทธิ์อ่าน/เขียน path udg_votes_archive_logs`);
-        } finally {
-            archiveMonthlyBtn.disabled = false;
-            archiveMonthlyBtn.style.opacity = '1';
-            archiveMonthlyBtn.innerHTML = originalHtml;
-        }
+    
+    Object.keys(logs).forEach(monthKey => {
+        const log = logs[monthKey]; 
+        const li = document.createElement('li');
+        li.style.cssText = "background:#111; padding:10px 15px; border-radius:4px; border-left:3px solid #cc00ff; display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;";
+        li.innerHTML = `<div><strong style="color:#fff;">🗓️ รอบเดือนเซ็ต: ${monthKey.replace('month_', '').replace(/_/g, '-')}</strong><br><span style="color:#aaa;">🥇 แชมป์ประจำเซ็ต: <span style="color:#00ffff; font-weight:bold;">${log.winnerTitle}</span> - ${log.winnerArtist} (${log.winnerVotes} PTS)</span></div><button class="delete-artist-btn" onclick="deleteArchiveLog('${monthKey}')" style="color:#ff3333;">// DELETE LOG</button>`; 
+        archivedWeeksList.appendChild(li);
     });
-}
+});
 
-async function deleteArchiveLog(periodKey) {
-    if (!confirm(`คุณต้องการลบแฟ้มบันทึกประวัติรอบ ${formatArchivePeriod(periodKey)} ใช่หรือไม่?`)) return;
-    try {
-        await database.ref(`udg_votes_archive_logs/${periodKey}`).remove();
-    } catch (error) {
-        console.error('Archive delete failed:', error);
-        alert(`❌ ลบแฟ้มประวัติไม่สำเร็จ\n${error.message}`);
+document.getElementById('archiveWeeklyBtn').addEventListener('click', async () => {
+    const currentMonthId = getAdminCurrentMonthKey(); 
+    
+    if (!confirm(`🚨 ยืนยันการสรุปชาร์ตและปิดยอดเซ็ตเพลงรอบเดือน [${currentMonthId}] ใช่หรือไม่?`)) return;
+    
+    const voteSnapshot = await database.ref(`monthly_music_votes/${currentMonthId}`).once('value'); 
+    const votesData = voteSnapshot.val() ? voteSnapshot.val() : {};
+    
+    const trackSnapshot = await database.ref(`udg_monthly_tracks_vault/${currentMonthId}`).once('value'); 
+    const monthlyTracks = trackSnapshot.val() ? trackSnapshot.val() : {};
+    
+    if (Object.keys(monthlyTracks).length === 0) { 
+        alert("❌ ไม่มีรายชื่อเพลงเลยครับน้า!"); 
+        return; 
+    }
+    
+    let sortedChartList = Object.keys(monthlyTracks).map(key => { 
+        const track = monthlyTracks[key]; 
+        return { title: track.title, artist: track.artist, votes: votesData[track.id] ? votesData[track.id] : 0 }; 
+    });
+    
+    sortedChartList.sort((a, b) => b.votes - a.votes); 
+    const winner = sortedChartList[0];
+    
+    const archivePayload = { winnerTitle: winner.title, winnerArtist: winner.artist, winnerVotes: winner.votes, closedTimestamp: Date.now() };
+    
+    database.ref(`udg_votes_archive_logs/${currentMonthId}`).set(archivePayload, (error) => { 
+        if (!error) alert(`🏆 LOCK ARCHIVE SUCCESS!`); 
+    });
+});
+
+function deleteArchiveLog(logKey) { 
+    if (confirm(`คุณต้องการลบแฟ้มบันทึกประวัติเซ็ต ${logKey} ใช่หรือไม่?`)) {
+        database.ref(`udg_votes_archive_logs/${logKey}`).remove(); 
     }
 }
 
@@ -563,6 +487,9 @@ database.ref('users_rewards_vault').on('value', (snapshot) => {
         return;
     }
 
+    const currentTime = Date.now();
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+
     try {
         // กวาดสายสัญญาณเจาะลึกแกะกล่องข้อมูลทีละไอดีผู้ใช้ (UID)
         Object.keys(allVaultData).forEach(uid => {
@@ -571,14 +498,22 @@ database.ref('users_rewards_vault').on('value', (snapshot) => {
                 Object.keys(userItems).forEach(itemKey => {
                     const info = userItems[itemKey];
                     if (info) {
-                        // 🎯 มัดสายไฟสำคัญ: บังคับบันทึกประทับตราฝังค่า userUid และ couponKey เข้าถังแคชหลักให้สคริปต์สไนเปอร์หยิบไปใช้งานลบรายชิ้นได้ถูกต้อง
+                        const itemTime = info.wonTimestamp || info.timestamp || currentTime;
+
+                        // 🚨 เช็กหมดอายุ 7 วัน ถ้าเกินก็ระเบิดทิ้งจากฐานข้อมูลออโต้เลย
+                        if (currentTime - itemTime > sevenDaysMs) {
+                            database.ref(`users_rewards_vault/${uid}/${itemKey}`).remove();
+                            return; // ข้ามคิว ไม่เก็บเข้าตารางให้แอดมินรกตา
+                        }
+
+                        // 🎯 มัดสายไฟสำคัญ: บังคับบันทึกเข้าถังแคชหลักเฉพาะของที่ยังไม่หมดอายุ
                         globalAllUsersRewardsCache.push({
                             userUid: uid,
                             couponKey: itemKey,
                             accountName: info.userName || info.username || "ANONYMOUS USER", 
                             rewardName: info.rewardName || "UNKNOWN REWARD",
                             ticketId: info.ticketId || "NO-CODE", 
-                            timestamp: info.wonTimestamp || info.timestamp || Date.now()
+                            timestamp: itemTime
                         });
                     }
                 });
@@ -597,7 +532,6 @@ database.ref('users_rewards_vault').on('value', (snapshot) => {
         adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#ff3333; text-align:center; padding: 20px;">❌ เกิดข้อผิดพลาดทางเทคนิค: ${error.message}</td></tr>`;
     }
 });
-
 // ฟังก์ชันสั่งเขียนโครงตารางประวัติผู้ใช้งานพร้อมปุ่ม USED
 function renderFilteredUserRewards(filterText) {
     if (!adminUserRewardsTbody) return;
@@ -1107,29 +1041,68 @@ document.getElementById('btnFilterMonth')?.addEventListener('click', () => {
 });
 
 // ฟังชั่นสแกนฐานข้อมูลเพื่อวาดกราฟแบบเรียลไทม์เจาะลึก
-function processAnalyticsCharts(forceMonthMode = false) {
+// ⚡ เปลี่ยนฟังก์ชันเป็น async เพื่อรอข้อมูลจากคลาวด์
+async function processAnalyticsCharts(forceMonthMode = false) {
     const selectedDate = statsDatePicker ? statsDatePicker.value : new Date().toISOString().split('T')[0];
+    const targetYear = selectedDate.split('-')[0];
     
-    // จำลอง Data เพื่อทำการปูทางสายกราฟ (ในอนาคตน้าสามารถดึงจากถังเก็บ Log จริงของ Firebase มาลูปครอบได้เลย)
-    // ฝั่งที่ 1: ดึงค่ายอดชม (Traffic Line Chart)
-    let lineLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"];
-    let lineData = [12, 5, 45, 120, 85, 210]; // จำนวนคนจำลองรายวัน
+    // 🛒 ฝั่งที่ 1: กราฟวงกลม (ดึงยอดสั่งซื้อสินค้าจริง)
+    const ordersSnap = await database.ref('udg_merch_orders').once('value');
+    const realOrdersCount = ordersSnap.exists() ? ordersSnap.numChildren() : 0; // นับจำนวนออเดอร์ของจริง
 
-    if(forceMonthMode) {
-        lineLabels = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-        lineData = [1200, 1450, 980, 2100, 1850, 3200, 4100, 0, 0, 0, 0, 0];
-    }
-
-    renderTrafficLineChart(lineLabels, lineData);
-
-    // ฝั่งที่ 2: นับจำนวนคนทำกิจกรรมแยกประเภท (User Activities Pie Chart)
-    // ไปดึงค่าสดจากแดชบอร์ดมาคํานวณสัดส่วนพ่นลงกราฟวงกลมทันที
     const countDemos = parseInt(document.getElementById('dashDemos')?.innerText || 0);
     const countGraffiti = parseInt(document.getElementById('dashGraffiti')?.innerText || 0);
     const countCases = parseInt(document.getElementById('dashCases')?.innerText || 0);
-    const fakeOrdersCount = 15; // สมมติค่าออเดอร์เสื้อ
 
-    renderActivitiesPieChart(countGraffiti, countCases, countDemos, fakeOrdersCount);
+    renderActivitiesPieChart(countGraffiti, countCases, countDemos, realOrdersCount);
+
+    // 📈 ฝั่งที่ 2: กราฟเส้น (ดึงยอดผู้เข้าชมระบบจริง)
+    let lineLabels = [];
+    let lineData = [];
+
+    if (forceMonthMode) {
+        // 🗓️ โหมดกราฟรายเดือน (สรุปยอดรวมทั้งปี)
+        lineLabels = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+        lineData = new Array(12).fill(0);
+        
+        const viewsSnap = await database.ref('udg_page_views').once('value');
+        if (viewsSnap.exists()) {
+            const allViews = viewsSnap.val();
+            // กวาดข้อมูลเฉพาะปีที่เลือก
+            Object.keys(allViews).forEach(dateKey => {
+                if (dateKey.startsWith(targetYear)) {
+                    const monthIndex = parseInt(dateKey.split('-')[1]) - 1; // แปลงเดือนเป็น index 0-11
+                    const hoursObj = allViews[dateKey];
+                    let dailyTotal = 0;
+                    Object.values(hoursObj).forEach(count => dailyTotal += count);
+                    lineData[monthIndex] += dailyTotal;
+                }
+            });
+        }
+    } else {
+        // 🕒 โหมดกราฟรายวัน (แบ่งตามช่วงเวลา)
+        lineLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"];
+        lineData = [0, 0, 0, 0, 0, 0];
+        
+        const viewsSnap = await database.ref(`udg_page_views/${selectedDate}`).once('value');
+        if (viewsSnap.exists()) {
+            const hoursObj = viewsSnap.val();
+            // จัดกลุ่มยอดวิวเข้าตามกะเวลา
+            Object.keys(hoursObj).forEach(hour => {
+                const h = parseInt(hour);
+                const count = hoursObj[hour];
+                if (h >= 0 && h < 4) lineData[0] += count;
+                else if (h >= 4 && h < 8) lineData[1] += count;
+                else if (h >= 8 && h < 12) lineData[2] += count;
+                else if (h >= 12 && h < 16) lineData[3] += count;
+                else if (h >= 16 && h < 20) lineData[4] += count;
+                else if (h >= 20 && h <= 23) lineData[5] += count;
+            });
+        }
+    }
+    
+    // พ่นข้อมูลจริงลงกราฟ
+    renderTrafficLineChart(lineLabels, lineData);
 }
 
 // 🎨 เอนจิ้นวาดกราฟเส้น ยอดคนดู (Neon Blue Line)
