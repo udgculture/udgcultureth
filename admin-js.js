@@ -1041,68 +1041,80 @@ document.getElementById('btnFilterMonth')?.addEventListener('click', () => {
 });
 
 // ฟังชั่นสแกนฐานข้อมูลเพื่อวาดกราฟแบบเรียลไทม์เจาะลึก
-// ⚡ เปลี่ยนฟังก์ชันเป็น async เพื่อรอข้อมูลจากคลาวด์
+// ⚡ อัปเกรดฟังก์ชันวาดกราฟ (ใส่เกราะป้องกัน Error หน้าเว็บแหว่ง)
 async function processAnalyticsCharts(forceMonthMode = false) {
     const selectedDate = statsDatePicker ? statsDatePicker.value : new Date().toISOString().split('T')[0];
     const targetYear = selectedDate.split('-')[0];
-    
-    // 🛒 ฝั่งที่ 1: กราฟวงกลม (ดึงยอดสั่งซื้อสินค้าจริง)
-    const ordersSnap = await database.ref('udg_merch_orders').once('value');
-    const realOrdersCount = ordersSnap.exists() ? ordersSnap.numChildren() : 0; // นับจำนวนออเดอร์ของจริง
 
-    const countDemos = parseInt(document.getElementById('dashDemos')?.innerText || 0);
-    const countGraffiti = parseInt(document.getElementById('dashGraffiti')?.innerText || 0);
-    const countCases = parseInt(document.getElementById('dashCases')?.innerText || 0);
-
-    renderActivitiesPieChart(countGraffiti, countCases, countDemos, realOrdersCount);
-
-    // 📈 ฝั่งที่ 2: กราฟเส้น (ดึงยอดผู้เข้าชมระบบจริง)
-    let lineLabels = [];
-    let lineData = [];
+    // 🛡️ สร้างตัวแปรตั้งต้นรอไว้เลย เผื่อคลาวด์พัง กราฟก็ยังมีเส้นตารางโชว์
+    let realOrdersCount = 0;
+    let lineLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"];
+    let lineData = [0, 0, 0, 0, 0, 0];
 
     if (forceMonthMode) {
-        // 🗓️ โหมดกราฟรายเดือน (สรุปยอดรวมทั้งปี)
         lineLabels = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
         lineData = new Array(12).fill(0);
-        
-        const viewsSnap = await database.ref('udg_page_views').once('value');
-        if (viewsSnap.exists()) {
-            const allViews = viewsSnap.val();
-            // กวาดข้อมูลเฉพาะปีที่เลือก
-            Object.keys(allViews).forEach(dateKey => {
-                if (dateKey.startsWith(targetYear)) {
-                    const monthIndex = parseInt(dateKey.split('-')[1]) - 1; // แปลงเดือนเป็น index 0-11
-                    const hoursObj = allViews[dateKey];
-                    let dailyTotal = 0;
-                    Object.values(hoursObj).forEach(count => dailyTotal += count);
-                    lineData[monthIndex] += dailyTotal;
-                }
-            });
-        }
-    } else {
-        // 🕒 โหมดกราฟรายวัน (แบ่งตามช่วงเวลา)
-        lineLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"];
-        lineData = [0, 0, 0, 0, 0, 0];
-        
-        const viewsSnap = await database.ref(`udg_page_views/${selectedDate}`).once('value');
-        if (viewsSnap.exists()) {
-            const hoursObj = viewsSnap.val();
-            // จัดกลุ่มยอดวิวเข้าตามกะเวลา
-            Object.keys(hoursObj).forEach(hour => {
-                const h = parseInt(hour);
-                const count = hoursObj[hour];
-                if (h >= 0 && h < 4) lineData[0] += count;
-                else if (h >= 4 && h < 8) lineData[1] += count;
-                else if (h >= 8 && h < 12) lineData[2] += count;
-                else if (h >= 12 && h < 16) lineData[3] += count;
-                else if (h >= 16 && h < 20) lineData[4] += count;
-                else if (h >= 20 && h <= 23) lineData[5] += count;
-            });
-        }
     }
-    
-    // พ่นข้อมูลจริงลงกราฟ
-    renderTrafficLineChart(lineLabels, lineData);
+
+    try {
+        // 🛒 ฝั่งที่ 1: กราฟวงกลม (พยายามดึงยอดสั่งซื้อสินค้าจริง)
+        try {
+            const ordersSnap = await database.ref('udg_merch_orders').once('value');
+            realOrdersCount = ordersSnap.exists() ? ordersSnap.numChildren() : 0;
+        } catch (err) {
+            console.warn("⚠️ ดึงออเดอร์ไม่ได้ (อาจติด Rules):", err.message);
+        }
+
+        const countDemos = parseInt(document.getElementById('dashDemos')?.innerText || 0);
+        const countGraffiti = parseInt(document.getElementById('dashGraffiti')?.innerText || 0);
+        const countCases = parseInt(document.getElementById('dashCases')?.innerText || 0);
+
+        renderActivitiesPieChart(countGraffiti, countCases, countDemos, realOrdersCount);
+
+        // 📈 ฝั่งที่ 2: กราฟเส้น (พยายามดึงยอดผู้เข้าชมระบบจริง)
+        try {
+            if (forceMonthMode) {
+                const viewsSnap = await database.ref('udg_page_views').once('value');
+                if (viewsSnap.exists()) {
+                    const allViews = viewsSnap.val();
+                    Object.keys(allViews).forEach(dateKey => {
+                        if (dateKey.startsWith(targetYear)) {
+                            const monthIndex = parseInt(dateKey.split('-')[1]) - 1;
+                            const hoursObj = allViews[dateKey];
+                            let dailyTotal = 0;
+                            Object.values(hoursObj).forEach(count => dailyTotal += count);
+                            lineData[monthIndex] += dailyTotal;
+                        }
+                    });
+                }
+            } else {
+                const viewsSnap = await database.ref(`udg_page_views/${selectedDate}`).once('value');
+                if (viewsSnap.exists()) {
+                    const hoursObj = viewsSnap.val();
+                    Object.keys(hoursObj).forEach(hour => {
+                        const h = parseInt(hour);
+                        const count = hoursObj[hour];
+                        if (h >= 0 && h < 4) lineData[0] += count;
+                        else if (h >= 4 && h < 8) lineData[1] += count;
+                        else if (h >= 8 && h < 12) lineData[2] += count;
+                        else if (h >= 12 && h < 16) lineData[3] += count;
+                        else if (h >= 16 && h < 20) lineData[4] += count;
+                        else if (h >= 20 && h <= 23) lineData[5] += count;
+                    });
+                }
+            }
+        } catch (err) {
+            console.warn("⚠️ ดึงยอดวิวไม่ได้ (อาจติด Rules):", err.message);
+        }
+
+        // 🎨 พ่นข้อมูลลงกราฟ (ถึงจะเป็นเลข 0 กราฟก็ยังขึ้นโครงสวยงาม)
+        renderTrafficLineChart(lineLabels, lineData);
+
+    } catch (mainError) {
+        console.error("❌ ระบบกราฟขัดข้อง:", mainError);
+        // แผนสำรองฉุกเฉิน บังคับวาดกราฟเปล่าๆ 
+        renderTrafficLineChart(lineLabels, lineData);
+    }
 }
 
 // 🎨 เอนจิ้นวาดกราฟเส้น ยอดคนดู (Neon Blue Line)

@@ -1490,7 +1490,9 @@ footer {
 
 @media (max-width: 768px) {
     .auth-corner-zone { position: static !important; margin-bottom: 10px; text-align: center; width: 100%; }
-    .auth-trigger-btn { width: 100%; justify-content: center; padding: 10px; }
+    
+    /* แก้จาก width: 100%; เป็น width: fit-content; และสั่งให้อยู่ตรงกลางด้วย margin: 0 auto; */
+    .auth-trigger-btn { width: fit-content; margin: 0 auto; justify-content: center; padding: 10px 25px; }
 }
 
 /* 📸 วงกลมรูปโปรไฟล์ Facebook บนเมนูขวาบน */
