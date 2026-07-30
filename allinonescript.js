@@ -1,5 +1,5 @@
 // ==========================================
-// 1. ระบบดาวน์โหลด YouTube (Cobalt API)
+// 1. ระบบดาวน์โหลด YouTube (อัปเดตแก้ปัญหาเชื่อมต่อเซิร์ฟเวอร์ไม่ได้)
 // ==========================================
 async function downloadYT() {
     const link = document.getElementById('ytLink').value;
@@ -10,7 +10,9 @@ async function downloadYT() {
         alert('กรุณาใส่ลิ้งก์ YouTube ให้ถูกต้องครับ');
         return;
     }
-    widget.innerHTML = "<p style='color:#f39c12; margin-top:15px;'>⏳ กำลังประมวลผลไฟล์... (อาจใช้เวลาสักครู่)</p>";
+    
+    // แสดงข้อความสถานะระหว่างรอ
+    widget.innerHTML = "<p style='color:#f39c12; margin-top:15px;'>⏳ กำลังประมวลผลไฟล์และเชื่อมต่อเซิร์ฟเวอร์... (อาจใช้เวลาสักครู่)</p>";
 
     let requestBody = { url: link, vQuality: "1080", isAudioOnly: false, aFormat: "mp3" };
 
@@ -22,20 +24,51 @@ async function downloadYT() {
         requestBody.isAudioOnly = true; requestBody.aFormat = "wav";
     }
 
-    try {
-        const response = await fetch('https://api.cobalt.tools/api/json', {
-            method: 'POST',
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestBody)
-        });
-        const data = await response.json();
-        if (data.status === "stream" || data.status === "redirect") {
-            widget.innerHTML = `<a href="${data.url}" target="_blank" class="real-download-btn">✅ กดดาวน์โหลดไฟล์ที่นี่</a>`;
-        } else if (data.status === "error") {
-            widget.innerHTML = `<p style="color:red;">❌ เกิดข้อผิดพลาด: วิดีโอนี้อาจติดลิขสิทธิ์</p>`;
+    // รายชื่อเซิร์ฟเวอร์และ Proxy สำรอง (สลับอัตโนมัติหากอันแรกติดบล็อก CORS)
+    const apiEndpoints = [
+        'https://co.wuk.sh/api/json',
+        'https://api.cobalt.tools/api/json',
+        'https://corsproxy.io/?' + encodeURIComponent('https://co.wuk.sh/api/json')
+    ];
+
+    let successData = null;
+
+    // ลูปเพื่อทดลองยิง API ไปทีละเซิร์ฟเวอร์
+    for (let api of apiEndpoints) {
+        try {
+            const response = await fetch(api, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (response.ok) {
+                successData = await response.json();
+                break; // ถ้ายิงสำเร็จ ให้ออกจากลูปทันที
+            }
+        } catch (error) {
+            console.warn(`เชื่อมต่อ ${api} ไม่สำเร็จ กำลังสลับไปเซิร์ฟเวอร์สำรอง...`);
         }
-    } catch (error) {
-        widget.innerHTML = `<p style="color:red;">❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้</p>`;
+    }
+
+    // ตรวจสอบและแสดงผลลัพธ์
+    if (successData) {
+        if (successData.status === "stream" || successData.status === "redirect" || successData.url) {
+            const downloadUrl = successData.url;
+            widget.innerHTML = `<a href="${downloadUrl}" target="_blank" class="real-download-btn">✅ กดดาวน์โหลดไฟล์ที่นี่</a>`;
+        } else if (successData.status === "error") {
+            widget.innerHTML = `<p style="color:red;">❌ เกิดข้อผิดพลาด: ${successData.text || 'วิดีโอนี้อาจถูกจำกัดสิทธิ์หรือติดลิขสิทธิ์'}</p>`;
+        } else {
+            widget.innerHTML = `<p style="color:red;">❌ เกิดข้อผิดพลาดในการประมวลผลข้อมูล</p>`;
+        }
+    } else {
+        // หากเซิร์ฟเวอร์สำรองทั้งหมดใช้งานไม่ได้เลย
+        widget.innerHTML = `
+            <p style="color:red; font-weight:bold;">❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ดาวน์โหลดได้เลย</p>
+            <div style="font-size: 13px; color: #64748b; margin-top: 10px; text-align: left; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                💡 <b>คำแนะนำเพิ่มเติม:</b> อาการนี้มักเกิดจากการเปิดไฟล์ HTML ตรงๆ (file:///) ทำให้เบราว์เซอร์บล็อกการทำงาน<br>
+                👉 แนะนำให้ทดสอบเปิดเว็บผ่านโปรแกรมจำลองเซิร์ฟเวอร์ เช่น Extension <b>Live Server</b> ในโปรแกรม VSCode ครับ
+            </div>`;
     }
 }
 
