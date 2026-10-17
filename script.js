@@ -2441,6 +2441,7 @@ async function claimEventVoucher(eventId) {
                 ticketId: secretTicketId,
                 eventTitle: val.title,
                 sponsor: "UDG Culture TH",
+                userName: displayName,
                 wonTimestamp: Date.now()
             }).then(() => {
                 incrementUserStat('cases');
