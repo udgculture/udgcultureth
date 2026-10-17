@@ -2244,16 +2244,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // =================================================================
-// 🎟️ UDG EVENT GIFT VOUCHER ENGINE (ระบบกดรับคูปองป้องกันการใช้ซ้ำ 100%)
+// 🎟️ UDG EVENT GIFT VOUCHER ENGINE (อัปเดตปุ่มกดรับสิทธิ์ออโต้เมื่อล็อกอิน)
 // =================================================================
 const liveVoucherGrid = document.getElementById('live-voucher-grid');
+let cachedVouchersData = null; // ถังพักข้อมูลสำหรับอัปเดตปุ่มตอนสลับสถานะล็อกอิน
 
-database.ref('udg_events_vouchers').on('value', (snapshot) => {
+function renderVouchersUI() {
     if (!liveVoucherGrid) return;
     liveVoucherGrid.innerHTML = '';
-    const eventsData = snapshot.val();
 
-    if (!eventsData) {
+    if (!cachedVouchersData) {
         liveVoucherGrid.innerHTML = `
             <div style="padding:40px; color:#555; text-align:center; grid-column:1/-1; font-size:0.9rem;">
                 🎟️ ขณะนี้ยังไม่มีกิจกรรมแจก Gift Voucher<br>โปรดติดตามการอัปเดตงานอีเวนต์ใหม่จาก UDG Culture TH เร็วๆ นี้!
@@ -2263,11 +2263,13 @@ database.ref('udg_events_vouchers').on('value', (snapshot) => {
 
     const currentUser = firebase.auth().currentUser;
     const currentUid = currentUser ? currentUser.uid : null;
+    let hasActiveVouchers = false;
 
-    Object.keys(eventsData).forEach(eventId => {
-        const item = { id: eventId, ...eventsData[eventId] };
+    Object.keys(cachedVouchersData).forEach(eventId => {
+        const item = { id: eventId, ...cachedVouchersData[eventId] };
         
-        if (item.active === false) return; // ข้ามอีเวนต์ที่ปิดรับสิทธิ์อยู่
+        if (item.active === false) return; // ข้ามรายการที่ปิดรับสิทธิ์อยู่
+        hasActiveVouchers = true;
 
         const total = item.totalQuantity || 0;
         const remaining = item.remainingQuantity !== undefined ? item.remainingQuantity : total;
@@ -2276,20 +2278,25 @@ database.ref('udg_events_vouchers').on('value', (snapshot) => {
         const claimedUsers = item.claimed_users || {};
         const isClaimedByMe = currentUid && claimedUsers[currentUid];
 
-        let buttonText = `<i class="fa-solid fa-gift"></i> กดรับ GIFT VOUCHER`;
+        let buttonText = `<i class="fa-solid fa-gift"></i> กดรับสิทธิ์`;
         let buttonClass = "claim-voucher-btn";
         let isDisabled = false;
 
+        // 🎯 เงื่อนไขการเปลี่ยนข้อความบนปุ่ม
         if (!currentUid) {
+            // ยังไม่ได้ล็อกอิน
             buttonText = `<i class="fa-solid fa-lock"></i> เข้าสู่ระบบเพื่อกดรับ Voucher`;
         } else if (isClaimedByMe) {
+            // ล็อกอินแล้ว + กดรับสิทธิ์ไปแล้ว
             buttonText = `<i class="fa-solid fa-circle-check"></i> รับสิทธิ์เรียบร้อยแล้ว`;
             buttonClass += " claimed";
             isDisabled = true;
         } else if (remaining <= 0) {
+            // ล็อกอินแล้ว + สิทธิ์เต็ม
             buttonText = `<i class="fa-solid fa-ban"></i> สิทธิ์เต็มแล้ว (OUT OF STOCK)`;
             isDisabled = true;
         }
+        // * หากล็อกอินแล้ว + ยังไม่ได้รับสิทธิ์ + สิทธิ์ยังเหลือ -> แสดง "กดรับสิทธิ์" ออโต้ *
 
         const card = document.createElement('div');
         card.className = 'voucher-card';
@@ -2319,6 +2326,24 @@ database.ref('udg_events_vouchers').on('value', (snapshot) => {
         `;
         liveVoucherGrid.appendChild(card);
     });
+
+    if (!hasActiveVouchers) {
+        liveVoucherGrid.innerHTML = `
+            <div style="padding:40px; color:#555; text-align:center; grid-column:1/-1; font-size:0.9rem;">
+                🎟️ ขณะนี้ยังไม่มีกิจกรรมแจก Gift Voucher<br>โปรดติดตามการอัปเดตงานอีเวนต์ใหม่จาก UDG Culture TH เร็วๆ นี้!
+            </div>`;
+    }
+}
+
+// ดักจับการเปลี่ยนแปลงข้อมูลจาก Firebase Database
+database.ref('udg_events_vouchers').on('value', (snapshot) => {
+    cachedVouchersData = snapshot.val();
+    renderVouchersUI();
+});
+
+// ⚡ ดักจับการเปลี่ยนสถานะการล็อกอิน (Login / Logout) เพื่อสั่งอัปเดตปุ่มทันที
+firebase.auth().onAuthStateChanged(() => {
+    renderVouchersUI();
 });
 
 async function claimEventVoucher(eventId) {
@@ -2332,25 +2357,18 @@ async function claimEventVoucher(eventId) {
     const displayName = currentUser.displayName || "MEMBER UDG";
     const eventRef = database.ref(`udg_events_vouchers/${eventId}`);
 
-    // 🔥 ใช้ Firebase Realtime Transaction ป้องกัน Race Condition แย่งกันกดอย่างสมบูรณ์แบบ
+    // 🔥 ระบบ Atomic Transaction ป้องกันการแย่งกดจนสิทธิ์ติดลบ
     eventRef.transaction((eventData) => {
         if (!eventData) return eventData;
-
-        if (eventData.active === false) return; // ยกเลิกหากปิดรับสิทธิ์แล้ว
+        if (eventData.active === false) return;
 
         if (!eventData.claimed_users) eventData.claimed_users = {};
 
-        // 1. ตรวจสอบว่าเคยรับสิทธิ์ไปแล้วหรือยัง
-        if (eventData.claimed_users[uid]) {
-            return; // ยกเลิก Transaction หากเคยรับไปแล้ว
+        // ตรวจสอบการรับสิทธิ์ซ้ำและโควต้าคงเหลือ
+        if (eventData.claimed_users[uid] || eventData.remainingQuantity <= 0) {
+            return; // ยกเลิก Transaction หากเคยรับแล้วหรือสิทธิ์เต็ม
         }
 
-        // 2. ตรวจสอบว่าโควต้าหมดหรือยัง
-        if (eventData.remainingQuantity <= 0) {
-            return; // ยกเลิก Transaction หากหมดโควต้า
-        }
-
-        // ตัดจำนวนคงเหลือลง 1 และบันทึก ID ผู้ใช้ไว้
         eventData.remainingQuantity -= 1;
         eventData.claimed_users[uid] = {
             claimedAt: Date.now(),
@@ -2371,10 +2389,12 @@ async function claimEventVoucher(eventId) {
                 showErrorAlert("CLAIM FAILED", "ทำรายการไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
             }
         } else {
-            // สำเร็จ! สร้างรหัสสิทธิ์และบันทึกเข้า MY VAULT ประวัติของผู้ใช้ทันที
+            // สำเร็จ: สุ่ม Unique Code เฉพาะตัว และยัดใส่ MY VAULT
             const val = snapshot.val();
-            const secretTicketId = "UDG-GIFT-" + Math.random().toString(36).substring(2, 7).toUpperCase();
-            const voucherCode = val.voucherCode || secretTicketId;
+            const uniqueTimeStamp = Date.now().toString(36).toUpperCase();
+            const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+            const secretTicketId = `UDG-${uniqueTimeStamp}-${randomPart}`;
+            const voucherCode = val.voucherCode ? `${val.voucherCode}-${randomPart}` : secretTicketId;
 
             database.ref(`users_rewards_vault/${uid}`).push({
                 rewardName: `[GIFT VOUCHER] ${val.title}`,
@@ -2385,7 +2405,7 @@ async function claimEventVoucher(eventId) {
                 wonTimestamp: Date.now()
             }).then(() => {
                 incrementUserStat('cases');
-                showErrorAlert("CLAIM SUCCESS! 🎉", `ยินดีด้วยครับ! คุณได้รับ Gift Voucher งาน:<br><strong style="color:#fff000; font-size:1.1rem;">[ ${val.title} ]</strong><br><br>โค้ดส่วนลด: <strong style="color:#00ffff; font-family:monospace;">${voucherCode}</strong><br><br>ระบบบันทึกคูปองเข้าสู่ <strong>MY VAULT</strong> เรียบร้อยแล้ว!`, true);
+                showErrorAlert("CLAIM SUCCESS! 🎉", `ยินดีด้วยครับ! คุณได้รับ Gift Voucher งาน:<br><strong style="color:#fff000; font-size:1.1rem;">[ ${val.title} ]</strong><br><br>โค้ดส่วนลดของคุณ: <strong style="color:#00ffff; font-family:monospace;">${voucherCode}</strong><br><br>ระบบบันทึกคูปองเข้าสู่ <strong>MY VAULT</strong> เรียบร้อยแล้ว!`, true);
             });
         }
     });
