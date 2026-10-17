@@ -36,6 +36,7 @@
    <!-- 🎛️ แผงแท็บเมนูหลักส่วนกลาง (PRO VERSION) -->
     <div class="tabs-container" id="adminTabsMenu" style="display: none;">
         <button type="button" class="tab-trigger-btn active" data-target="overviewPanelBox"><i class="fa-solid fa-satellite-dish"></i> OVERVIEW</button>
+        <button type="button" class="tab-trigger-btn" data-target="voucherPanelBox"><i class="fa-solid fa-ticket"></i> VOUCHERS</button>
         <button type="button" class="tab-trigger-btn" data-target="newsPanelBox"><i class="fa-solid fa-newspaper"></i> CONTENT</button>
         <!-- <button type="button" class="tab-trigger-btn active" data-target="newsPanelBox"><i class="fa-solid fa-newspaper"></i> CONTENT</button> -->
         <button type="button" class="tab-trigger-btn" data-target="musicPanelBox"><i class="fa-solid fa-music"></i> MUSIC</button>
@@ -464,6 +465,37 @@
         <table class="artist-list-table" style="margin-top: 30px;">
             <thead><tr><th>อัลบั้ม / ศิลปิน</th><th>รูปปก</th><th>จัดการ</th></tr></thead>
             <tbody id="album-admin-tbody"><tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังโหลด...</td></tr></tbody>
+        </table>
+        <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
+    </div>
+    <!-- 🎟️ [แท็บ] EVENT GIFT VOUCHERS CONTROL DESK -->
+    <div class="admin-box" id="voucherPanelBox" style="display: none; border-color: #ffaa00; box-shadow: 0 0 30px rgba(255, 170, 0, 0.05);">
+        <h2><i class="fa-solid fa-ticket" style="color: #ffaa00;"></i> UDG EVENT GIFT VOUCHERS DESK</h2>
+        <p style="color: #555; font-size: 0.85rem;">สร้างอีเวนต์แจก Gift Voucher กำหนดโควต้า และแก้ไขจำนวนคงเหลือได้แบบเรียลไทม์</p>
+        
+        <div class="form-group"><label style="color: #ffaa00;">EVENT TITLE (ชื่องานอีเวนต์)</label><input type="text" id="newVoucherTitle" placeholder="เช่น: UDG Underground Concert 2026"></div>
+        <div class="form-group"><label style="color: #ffaa00;">VOUCHER CODE / DETAILS (รหัสส่วนลด / สิทธิ์พิเศษ)</label><input type="text" id="newVoucherCode" placeholder="เช่น: UDG200OFF (ส่วนลด 200 บาท)"></div>
+        <div class="form-group"><label style="color: #ffaa00;">DESCRIPTION (คำอธิบายสั้นๆ)</label><input type="text" id="newVoucherDesc" placeholder="เช่น: สปอนเซอร์ส่วนลดโดย UDG Culture TH"></div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group"><label style="color: #ffaa00;">TOTAL QUANTITY (จำนวนสิทธิ์ทั้งหมด)</label><input type="number" id="newVoucherTotal" placeholder="เช่น: 50" min="1"></div>
+            <div class="form-group"><label style="color: #ffaa00;">REMAINING QUANTITY (จำนวนคงเหลือ)</label><input type="number" id="newVoucherRemaining" placeholder="เช่น: 50 (ถ้าเว้นว่างจะเท่ากับทั้งหมด)" min="0"></div>
+        </div>
+
+        <div class="form-group">
+            <label style="color: #ffaa00;">EVENT POSTER / IMAGE (รูปโปสเตอร์งาน)</label>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="file" id="newVoucherImgFile" accept="image/*" style="background: #111; padding: 10px; border: 1px dashed #ffaa00; border-radius: 4px; color: #aaa; cursor: pointer; font-size: 0.85rem;">
+                <input type="text" id="newVoucherImg" placeholder="ลิงก์รูปจะปรากฏที่นี่อัตโนมัติ">
+            </div>
+            <span id="voucherUploadStatus" style="font-size: 0.8rem; font-family: 'Space Grotesk', sans-serif; display: none; margin-top: 5px;"></span>
+        </div>
+        
+        <button type="button" class="post-btn" id="addVoucherBtn" style="background: linear-gradient(45deg, #ffaa00, #ff5500); color: #000; box-shadow: 0 0 15px rgba(255, 170, 0, 0.3);"><i class="fa-solid fa-plus-circle"></i> PUBLISH EVENT GIFT VOUCHER</button>
+        
+        <table class="artist-list-table" style="margin-top: 30px;">
+            <thead><tr><th>ชื่องาน / รหัสส่วนลด</th><th>โควต้าคงเหลือ / ทั้งหมด</th><th>สถานะ / แก้ไข</th><th>จัดการ</th></tr></thead>
+            <tbody id="voucher-admin-tbody"><tr><td colspan="4" style="color:#444; text-align:center;">⏳ กำลังโหลดรายการ Gift Voucher...</td></tr></tbody>
         </table>
         <a href="index.html" class="back-link">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>

@@ -439,3 +439,9 @@ select:focus, input:focus, textarea:focus {
     box-shadow: 0 0 15px rgba(255, 0, 255, 0.3) !important; 
     background: rgba(255, 0, 255, 0.1) !important; 
 }
+.tab-trigger-btn[data-target="voucherPanelBox"].active { 
+    border-color: #ffaa00 !important; 
+    color: #fff !important; 
+    box-shadow: 0 0 15px rgba(255, 170, 0, 0.3) !important; 
+    background: rgba(255, 170, 0, 0.1) !important; 
+}

@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Underground Culture TH | News & Drops</title>
+    <title>Underground Culture TH | Thai Hip Hop Movement</title>
     <link rel="icon" type="image/x-icon" href="image/ขาวใส.png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <!-- ⚡ MOBILE PERFORMANCE: โหลดคลังสไตล์และไอคอน FontAwesome แบบ Asynchronous เพื่อเปิดหน้าเว็บได้ไวที่สุด -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" media="print" onload="this.media='all'">
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     
-<script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     
     <link rel="stylesheet" href="style.css">
     
@@ -29,368 +28,313 @@
 </head>
 <body class="crt">
 
-    <!-- 📍 หน้าฉากกั้น Glitch Intro ก่อนเข้าเว็บ -->
+    <!-- Screen Intro Loader -->
     <div id="web-loader" class="intro-loader">
         <div class="intro-content">
-            <img src="image/ขาวใส.png" alt="UDG Logo" class="intro-logo-glitch">
-            <h2 class="intro-text-glitch">UNDERGROUND CULTURE TH</h2>
-            <div class="scanline-effect"></div>
+            <img src="image/ขาวใส.png" alt="UDG Logo" class="intro-logo">
+            <h2 class="intro-title">UNDERGROUND CULTURE TH</h2>
+            <p class="intro-sub">THE CORE OF THAI HIP HOP</p>
         </div>
     </div>
 
-    <!-- แถบเลื่อนข่าวแจ่มๆ -->
+    <!-- แถบแจ้งข่าว Ticker -->
     <div class="news-ticker">
         <div class="ticker-text">
-            🔥 NEW RELEASE DROPPING THIS FRIDAY! | UNDERGROUND CULTURE TH 🔥
+            🔥 NEW RELEASE DROPPING THIS FRIDAY! | UNDERGROUND CULTURE TH — THE CORE OF THAI HIP HOP MOVEMENT 🔥
         </div>
     </div>
 
-    <nav class="sticky-nav">
-        <div class="nav-container">
-            <a href="#" class="nav-link active" data-section="home">HOME</a>
-            <a href="#featured" class="nav-link" data-section="featured">FEATURED</a>
-            <a href="#news" class="nav-link" data-section="news">NEWS</a>
-            <a href="#charts" class="nav-link" data-section="charts">CHARTS</a>
-            <a href="#spin" class="nav-link" data-section="udgspin">UDG SPIN</a>
-            <a href="#graffiti" class="nav-link" data-section="graffiti">GRAFFITI WALL</a>
-            <a href="#radar" class="nav-link" data-section="radar">RADAR</a>
-        </div>
-    </nav>
-
-    <!-- โลโก้แบรนด์ -->
-    <header>
-   <div class="header-container" style="position: relative; width: 100%;">
-       <!-- 🔑 ปุ่มล็อกอิน / กล่องสไลด์เมนูสำหรับผู้ใช้ที่ล็อกอินแล้ว -->
-           <div class="auth-corner-zone" style="position: absolute; top: -20px; right: 0; z-index: 1000;">
-                <div class="auth-wrapper" style="position: relative; display: inline-block;">
-                    <button type="button" id="openAuthModalBtn" class="auth-trigger-btn">
-                        <div id="authBtnContent" style="display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-right-to-bracket"></i> 
-                            <span class="auth-btn-text">LOGIN</span>
-                        </div>
-                    </button>
-                    
-                    <div id="userDropdownMenu" class="user-dropdown-menu" style="display: none; position: absolute; top: calc(100% + 8px); right: 0; background: #0d0d0d; border: 1px solid #00ffff; box-shadow: 0 5px 15px rgba(0, 255, 255, 0.2); border-radius: 4px; padding: 6px; min-width: 170px; z-index: 2100;">
-    
-    <a href="#luckywheel" id="vaultLinkBtn" style="text-decoration: none; display: block;">
-        <button type="button" style="width: 100%; background: transparent; border: none; color: #fff; padding: 10px 12px; font-family: 'Space Grotesk', 'Kanit', sans-serif; font-weight: 800; font-size: 0.8rem; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 8px; letter-spacing: 1px; border-bottom: 1px solid #222; transition: 0.2s;"><i class="fa-solid fa-vault" style="color: #ffaa00;"></i> MY VAULT</button>
-    </a>
-
-    <button type="button" id="openStatsBtn" style="width: 100%; background: transparent; border: none; color: #fff; padding: 10px 12px; font-family: 'Space Grotesk', 'Kanit', sans-serif; font-weight: 800; font-size: 0.8rem; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 8px; letter-spacing: 1px; border-bottom: 1px solid #222; transition: 0.2s;"><i class="fa-solid fa-chart-simple" style="color: #39ff14;"></i> MY STATS</button>
-
-    <button type="button" id="openEditTagBtn" style="width: 100%; background: transparent; border: none; color: #fff; padding: 10px 12px; font-family: 'Space Grotesk', 'Kanit', sans-serif; font-weight: 800; font-size: 0.8rem; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 8px; letter-spacing: 1px; border-bottom: 1px solid #222; transition: 0.2s;"><i class="fa-solid fa-paintbrush" style="color: #ff007f;"></i> EDIT TAG</button>
-
-    <button type="button" id="signOutBtn" style="width: 100%; background: transparent; border: none; color: #ff3333; padding: 10px 12px; font-family: 'Space Grotesk', 'Kanit', sans-serif; font-weight: 800; font-size: 0.8rem; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 8px; letter-spacing: 1px; margin-top: 4px; transition: 0.2s;"><i class="fa-solid fa-right-from-bracket"></i> SIGN OUT</button>
-
-</div>
+    <!-- Header & Navigation -->
+    <header class="main-header">
+        <div class="header-inner">
+            <div class="brand-block">
+                <img src="image/ขาวใส.png" alt="Underground Culture TH Logo" class="brand-logo">
+                <div class="brand-info">
+                    <h1 class="logo">Underground <span>Culture</span> TH</h1>
+                    <p>The Core of Thai Hip Hop Movement</p>
                 </div>
             </div>
 
-            <img src="image/ขาวใส.png" alt="Underground Culture TH Logo" class="brand-logo">
-            <div class="brand-text">
-                <h1 class="logo">Underground <span>Culture</span> TH</h1>
-                <p>The Core of Thai Hip Hop Movement.</p>
+            <div class="header-actions">
                 <div class="social-links">
-                    <a href="https://www.instagram.com/undergroundculture.th/" target="_blank" class="social-icon" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="https://www.facebook.com/profile.php?id=61564457331092" target="_blank" class="social-icon" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="https://www.tiktok.com/@undergroundculture_tt" target="_blank" class="social-icon" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-                    <a href="https://discord.com/invite/jQp9JDB8d3" target="_blank" class="social-icon" aria-label="Discord"><i class="fa-brands fa-discord"></i></a>
+                    <a href="https://www.instagram.com/undergroundculture.th/" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://www.facebook.com/profile.php?id=61564457331092" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://www.tiktok.com/@undergroundculture_tt" target="_blank" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                    <a href="https://discord.com/invite/jQp9JDB8d3" target="_blank" aria-label="Discord"><i class="fa-brands fa-discord"></i></a>
+                    <!-- ปุ่มสลับธีม สว่าง / มืด -->
+<button type="button" id="themeToggleBtn" class="theme-toggle-btn" title="สลับธีม สว่าง/มืด" aria-label="Toggle Theme">
+    <i class="fa-solid fa-moon"></i>
+</button>
+                </div>
+
+                <!-- Auth Corner -->
+                <div class="auth-wrapper">
+                    <button type="button" id="openAuthModalBtn" class="auth-trigger-btn">
+                        <i class="fa-solid fa-user"></i> 
+                        <span class="auth-btn-text">LOGIN</span>
+                    </button>
+                    
+                    <div id="userDropdownMenu" class="user-dropdown-menu">
+                        <a href="#luckywheel" id="vaultLinkBtn"><i class="fa-solid fa-vault"></i> MY VAULT</a>
+                        <button type="button" id="openStatsBtn"><i class="fa-solid fa-chart-simple"></i> MY STATS</button>
+                        <button type="button" id="openEditTagBtn"><i class="fa-solid fa-paintbrush"></i> EDIT TAG</button>
+                        <button type="button" id="signOutBtn" class="sign-out-btn"><i class="fa-solid fa-right-from-bracket"></i> SIGN OUT</button>
+                    </div>
                 </div>
             </div>
         </div>
     </header>
-<div class="ad-container">
-    <a href="#" id="live-ad-banner" class="ad-banner" target="_blank">
-        <span class="ad-label">
-            <i class="fa-solid fa-rectangle-ad"></i> SPONSOR 
-            <span id="ad-timer-countdown" style="color: var(--accent-color); font-family: monospace; margin-left: 5px;">8s</span>
-        </span>
-        
-        <img id="live-ad-img" src="" alt="Sponsor Banner" style="display: none;">
-        
-        <div id="live-ad-content" class="ad-content">
-            <h3>ADVERTISE WITH US</h3>
-            <p>พื้นที่โฆษณาว่าง ติดต่อเพื่อโปรโมทแบรนด์หรืออีเวนต์ของคุณที่นี่</p>
-        </div>
 
-        <div class="ad-progress-bar-wrap">
-            <div id="ad-progress-laser"></div>
-        </div>
-    </a>
-</div>
+<nav class="sticky-nav">
+    <div class="nav-container">
+        <a href="#" class="nav-link active" data-section="home"><i class="fa-solid fa-house"></i> <span>HOME</span></a>
+        <a href="#featured" class="nav-link" data-section="featured"><i class="fa-solid fa-fire"></i> <span>FEATURED</span></a>
+        <a href="#news" class="nav-link" data-section="news"><i class="fa-solid fa-newspaper"></i> <span>NEWS</span></a>
+        <a href="#vouchers" class="nav-link" data-section="vouchers"><i class="fa-solid fa-ticket"></i> <span>VOUCHERS</span></a>
+        <a href="#charts" class="nav-link" data-section="charts"><i class="fa-solid fa-ranking-star"></i> <span>CHARTS</span></a>
+        <a href="#luckywheel" class="nav-link" data-section="udgspin"><i class="fa-solid fa-box-open"></i> <span>SPIN</span></a>
+        <a href="#graffiti" class="nav-link" data-section="graffiti"><i class="fa-solid fa-spray-can"></i> <span>WALL</span></a>
+        <a href="#radar" class="nav-link" data-section="radar"><i class="fa-solid fa-satellite-dish"></i> <span>RADAR</span></a>
+    </div>
+</nav>
+
+    <!-- Sponsor Ad Container -->
+    <div class="ad-container">
+        <a href="#" id="live-ad-banner" class="ad-banner" target="_blank">
+            <span class="ad-label">
+                <i class="fa-solid fa-rectangle-ad"></i> SPONSOR 
+                <span id="ad-timer-countdown">8s</span>
+            </span>
+            <img id="live-ad-img" src="" alt="Sponsor Banner" style="display: none;">
+            <div id="live-ad-content" class="ad-content">
+                <h3>ADVERTISE WITH US</h3>
+                <p>พื้นที่โฆษณาว่าง ติดต่อเพื่อโปรโมทแบรนด์หรืออีเวนต์ของคุณที่นี่</p>
+            </div>
+            <div class="ad-progress-bar-wrap">
+                <div id="ad-progress-laser"></div>
+            </div>
+        </a>
+    </div>
 
     <main>
-        <!-- 📰 โซนไฮไลท์ข่าวเด่นตัวบนสุด (ดึงฟีดคลาวด์ออโต้) -->
+        <!-- โซน UDG EVENT GIFT VOUCHERS -->
+        <section id="vouchers" class="section-block">
+            <div class="section-header flex-header">
+                <h2 class="section-title">UDG EVENT GIFT VOUCHERS</h2>
+            </div>
+            <p class="section-desc">// เลือกงานอีเวนต์ที่ UDG เป็นสปอนเซอร์ แย่งกันกดรับ Gift Voucher จำนวนจำกัด! (ต้องล็อกอินก่อนกดรับ)</p>
+            <div class="voucher-grid" id="live-voucher-grid">
+                <div class="loading-state">⏳ กำลังโหลดรายการ Gift Voucher งานอีเวนต์...</div>
+            </div>
+        </section>
+        <!-- โซนข่าวเด่น + Top Charts -->
         <section id="featured" class="featured-section">
             <article class="featured-card" id="live-featured-card">
-                <div style="padding: 60px; color: #555; text-align: center; width: 100%;">⏳ กำลังสแกนสัญญาณดาวเทียมดึงข้อมูลข่าวเด่นประจำเพจ UDG...</div>
+                <div class="loading-state">⏳ กำลังโหลดข้อมูลข่าวเด่นประจำเพจ UDG...</div>
             </article>
 
-            <!-- 📊 โซนชาร์ตเพลงอัปเดตคะแนนอัตโนมัติเรียลไทม์ -->
             <aside id="charts" class="top-charts">
                 <h2 class="section-title">TOP 5 TRACKS</h2>
                 <div class="chart-list" id="live-chart-display">
-                    <div style="padding: 20px; color: #555; text-align: center; font-size: 0.9rem;">⏳ กำลังประมวลผลอันดับชาร์ต...</div>
-                </div>
-                <div class="chart-criteria">
-                    <h5><i class="fa-solid fa-circle-info"></i> HOW WE RANK</h5>
-                    <p><strong>#01 - #05 [AUTOMATED CHART]:</strong> แฟนคลับดันเพลงไหน เพลงนั้นพุ่งขึ้นอันดับหนึ่งทันที!</p>
-                    <p style="color: #ffaa00; font-size: 0.85rem; margin-top: 10px; border-top: 1px dashed #222; padding-top: 10px; font-weight: 500;">
-                        <i class="fa-solid fa-bullhorn" style="color: #ffaa00; margin-right: 5px;"></i> 
-                        ทำยังไงถึงจะมีเพลงให้โหวตในเว็บ? ต้องโปรโมทกับ Underground Culture TH เท่านั้น!
-                    </p>
-                   <span class="criteria-note" id="chart-status-text">*รีเซ็ตโหวตทุกวันที่ 1 เวลา 00:01 น. ของทุกเดือน *</span>
+                    <div class="loading-state">⏳ กำลังประมวลผลอันดับชาร์ต...</div>
                 </div>
                 
-                <!-- 🗳️ VOTING STATION: ปุ่มเปิดตู้สาดคะแนนไฟลุก -->
-                <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; margin: 30px 0 15px 0; color: var(--accent-color); letter-spacing: 1px;">🔥 VOTING STATION</h3>
-                <button type="button" id="openVoteModalBtn" style="width: 100%; padding: 15px; background: #0a0a0a; border: 1px solid var(--accent-color); color: var(--accent-color); font-family: 'Space Grotesk', sans-serif; font-weight: 800; border-radius: 4px; cursor: pointer; letter-spacing: 1px; box-shadow: 0 0 15px rgba(0, 255, 255, 0.1); transition: all 0.3s ease;">
-                    <i class="fa-solid fa-square-poll-horizontal" style="margin-right: 8px;"></i> โหวตศิลปินให้ติด TOP ได้ที่นี่
+                <div class="chart-criteria">
+                    <h5><i class="fa-solid fa-circle-info"></i> HOW WE RANK</h5>
+                    <p><strong>AUTOMATED CHART:</strong> คะแนนดันเพลงจากแฟนคลับ ประมวลผลแบบเรียลไทม์!</p>
+                    <span class="criteria-note" id="chart-status-text">* รีเซ็ตคะแนนโหวตทุกวันที่ 1 เวลา 00:01 น. ของทุกเดือน *</span>
+                </div>
+                
+                <button type="button" id="openVoteModalBtn" class="primary-btn full-width">
+                    <i class="fa-solid fa-fire"></i> โหวตเพลงดันชาร์ตติด Top
                 </button>
             </aside>
         </section>
 
-        <!-- 📰 โซนฟีดข่าวสารทั่วไปด้านล่าง (ดึงคลาวด์ออโต้ ลื่น ๆ) -->
-        <h2 id="news" class="section-title">LATEST DROPS & NEWS</h2>
-        <div class="news-search-container" style="text-align: center; margin-bottom: 20px;">
-    <div style="position: relative; display: inline-block; width: 90%; max-width: 500px;">
-        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--accent-color);"></i>
-        <input type="text" id="newsSearchInput" placeholder="SEARCH NEWS (ค้นหาข่าวสาร)..." style="width: 100%; background: #111; border: 1px solid var(--accent-color); padding: 12px 15px 12px 45px; color: #fff; border-radius: 4px; outline: none; font-family: 'Space Grotesk', 'Kanit', sans-serif;">
-    </div>
-</div>
-        <div class="news-grid" id="live-news-grid">
-            <div style="padding: 40px; color: #555; text-align: center; grid-column: 1/-1;">⏳ กำลังระเบิดสัญญาณดึงข้อมูลข่าวสารล่าสุดจากคลาวด์...</div>
-        </div>
-<div id="loadMoreNewsContainer" style="text-align: center; margin-top: 30px; display: none;">
-            <button type="button" id="loadMoreNewsBtn" class="graffiti-btn" style="padding: 12px 35px; font-size: 1rem;">
-                <i class="fa-solid fa-circle-plus"></i> แสดงข่าวเพิ่มเติม
-            </button>
-        </div>
-
-<!-- <div style="text-align: center; margin: 50px 0; padding: 40px; background: linear-gradient(135deg, #111, #000); border: 1px solid #ffaa00; border-radius: 8px;">
-    <h2 style="color: #ffaa00; font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; margin-bottom: 10px;">EXCLUSIVE MERCH DROP</h2>
-    <p style="color: #ccc; margin-bottom: 20px;">เสื้อยืด UDG CULTURE TH คอลเลกชันแรก (เปิดพรีออเดอร์จำนวนจำกัด)</p>
-    <button type="button" id="openMerchBtn" class="graffiti-btn" style="background: #ffaa00; color: #000; padding: 15px 40px; font-size: 1.2rem;">
-        <i class="fa-solid fa-cart-shopping"></i> PRE-ORDER NOW
-    </button>
-</div> -->
-
-<!-- 💿 โซนแสดงอัลบั้ม (ALBUM DISCUSSIONS) -->
-<h2 id="albums" class="section-title" style="margin-top: 60px;">ALBUM DISCUSSIONS</h2>
-<div class="album-grid" id="live-album-grid">
-    <div style="padding: 40px; color: #555; text-align: center; grid-column: 1/-1;">⏳ กำลังโหลดชั้นวางแผ่นเสียง...</div>
-</div>
-
-<!-- 🎧 หน้าต่าง Modal สำหรบแชท/รีวิวอัลบั้ม -->
-<div id="albumChatModal" class="vote-modal-overlay">
-    <div class="vote-modal-box album-modal-layout">
-        <div class="vote-glow-line" style="background: linear-gradient(90deg, #cc00ff, #00ffff);"></div>
-        <div class="vote-modal-close" id="closeAlbumChatBtn">&times;</div>
-        
-        <!-- ฝั่งซ้าย: ข้อมูลปกอัลบั้ม -->
-        <!-- ฝั่งซ้าย: ข้อมูลปกอัลบั้ม + เรทติ้งดาว -->
-        <div class="album-info-side">
-            <div class="album-cover-wrap">
-                <img id="modalAlbumCover" src="image/ขาวใส.png" alt="Album Cover">
-            </div>
-            <h3 id="modalAlbumTitle">ALBUM TITLE</h3>
-            <p id="modalAlbumArtist" class="album-artist-name">ARTIST NAME</p>
-            <p id="modalAlbumDesc" class="album-desc-text">คำอธิบายอัลบั้ม หรือความรู้สึกที่ศิลปินอยากสื่อสาร...</p>
-            
-            <!-- ⭐ โซนระบบให้คะแนนดาว -->
-            <div class="album-rating-zone">
-                <div class="average-rating-display" id="modalAvgRating">
-                    <span class="stars-container">
-                        <i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
-                    </span>
-                    <span class="rating-text">0.0 (0 รีวิว)</span>
-                </div>
-                
-                <div class="user-rate-action" id="modalUserRateAction">
-                    <p style="font-size: 0.75rem; color: #888; margin-bottom: 8px; font-family: 'Space Grotesk', sans-serif;">// RATE THIS ALBUM</p>
-                    <div class="interactive-stars" id="interactiveStars">
-                        <i class="fa-regular fa-star" data-val="1"></i>
-                        <i class="fa-regular fa-star" data-val="2"></i>
-                        <i class="fa-regular fa-star" data-val="3"></i>
-                        <i class="fa-regular fa-star" data-val="4"></i>
-                        <i class="fa-regular fa-star" data-val="5"></i>
+        <!-- ฟีดข่าวสารทั่วไป -->
+        <section class="section-block">
+            <div class="section-header">
+                <h2 id="news" class="section-title">LATEST DROPS & NEWS</h2>
+                <div class="news-search-container">
+                    <div class="search-input-wrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="newsSearchInput" placeholder="ค้นหาข่าวสาร หรือชื่อศิลปิน...">
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- ฝั่งขวา: กำแพงแชทรีวิว -->
-        <div class="album-chat-side">
-            <h4 style="color: #00ffff; font-family: 'Space Grotesk', sans-serif; margin-bottom: 15px; font-size: 1rem;">
-                <i class="fa-solid fa-comments"></i> SHARE YOUR VIBE
-            </h4>
-            
-            <div class="album-chat-box" id="albumChatWall">
-                <!-- คอมเมนต์จะโหลดมาที่นี่ -->
+            <div class="news-grid" id="live-news-grid">
+                <div class="loading-state">⏳ กำลังดึงข้อมูลข่าวสารล่าสุด...</div>
             </div>
-            
-            <div class="album-chat-input-wrap">
-                <input type="text" id="albumChatInput" placeholder="ฟังแล้วรู้สึกยังไง พิมพ์บอกหน่อย... (Enter เพื่อส่ง)" maxlength="150">
-                <button type="button" id="sendAlbumChatBtn"><i class="fa-solid fa-paper-plane"></i></button>
+
+            <div id="loadMoreNewsContainer" class="load-more-wrap" style="display: none;">
+                <button type="button" id="loadMoreNewsBtn" class="secondary-btn">
+                    <i class="fa-solid fa-circle-plus"></i> แสดงข่าวเพิ่มเติม
+                </button>
             </div>
-        </div>
-    </div>
-</div>
+        </section>
 
- <section id="spin" class="udgspin"></section>
-<h2 id="luckywheel" class="section-title" style="margin-top: 60px;">UDG CYBER CASE OPENING</h2>
-<div class="wheel-system-flex-container">
-    
-    <div class="wheel-left-panel" style="width: 100%; max-width: 460px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; box-sizing: border-box;">
-        
-        <div class="csgo-roulette-wrapper" style="position: relative; width: 100%; max-width: 420px; height: 160px; background: #090909; border: 2px solid #222; border-radius: 6px; overflow: hidden; margin: 20px auto; box-sizing: border-box;">
-            <div class="csgo-pointer" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 3px; height: 100%; background: #ff3333; box-shadow: 0 0 12px #ff3333; z-index: 15;"></div>
-            <div class="csgo-strip" id="csgoStrip" style="display: flex; position: absolute; left: 0; top: 0; height: 100%; width: max-content; align-items: center; will-change: transform; margin: 0; padding: 0;">
-                <div class="csgo-item-card"><img src="image/ขาวใส.png"><p>LOADING CASE...</p></div>
+        <!-- โซนรีวิวอัลบั้ม -->
+        <section class="section-block">
+            <h2 id="albums" class="section-title">ALBUM DISCUSSIONS</h2>
+            <div class="album-grid" id="live-album-grid">
+                <div class="loading-state">⏳ กำลังโหลดชั้นวางแผ่นเสียง...</div>
             </div>
-        </div>
+        </section>
 
-        <div class="csgo-control-buttons" style="display: flex; gap: 15px; justify-content: center; margin-top: 25px; flex-wrap: wrap; width: 100%; box-sizing: border-box; padding: 0 10px;">
-            <button type="button" id="demoSpinBtn" class="graffiti-btn" style="background: linear-gradient(135deg, #222 0%, #111 100%); border: 1px solid #444; color: #aaa; flex: 1; min-width: 130px; padding: 12px 0; font-weight: 500;">
-                <i class="fa-solid fa-flask"></i> TEST SPIN
-            </button>
-            <button type="button" id="openCaseBtn" class="graffiti-btn" style="flex: 1.3; min-width: 170px; padding: 12px 0; font-weight: 800; font-size: 1.1rem; background: linear-gradient(135deg, #ff3333 0%, #700000 100%); border: 1px solid #ff3333;">
-                <i class="fa-solid fa-box-open"></i> OPEN CASE
-            </button>
-        </div>
-        
-        <div class="wheel-pool-section" style="width: 100%; box-sizing: border-box; padding: 0 10px;">
-            <span class="wheel-pool-title"><i class="fa-solid fa-boxes-stacked"></i> // AVAILABLE ITEMS IN CASE:</span>
-            <div id="userVisibleRewardsPool" class="wheel-rewards-grid-box"></div>
-        </div>
-    </div>
+        <!-- โซน CS:GO Cyber Case -->
+        <section id="luckywheel" class="section-block">
+            <h2 class="section-title">UDG CYBER CASE OPENING</h2>
+            <div class="wheel-system-flex-container">
+                <div class="wheel-left-panel">
+                    <div class="csgo-roulette-wrapper">
+                        <div class="csgo-pointer"></div>
+                        <div class="csgo-strip" id="csgoStrip">
+                            <div class="csgo-item-card"><img src="image/ขาวใส.png" alt=""><p>LOADING...</p></div>
+                        </div>
+                    </div>
 
-    <div class="rewards-vault-right-panel">
-        <div class="vault-header">
-            <h3><i class="fa-solid fa-vault"></i> MY REWARDS VAULT</h3>
-            <p>ตู้เซฟเก็บประวัติคูปองส่วนลดส่วนตัวของคุณ (แคปหน้าจอให้เห็นโค้ดส่งไปทางข้อความ IG ของ UDG CULTURE TH เพื่อเคลมสิทธิ์)</p>
-        </div>
-        <div id="myCouponsList">
-            <p style="color: #444; text-align: center; margin-top: 120px; font-size: 0.85rem;">⏳ กรุณาล็อกอินเพื่อเปิดใช้งานตู้เซฟ...</p>
-        </div>
-        <div style="border-top: 1px solid #1a1a1a; padding-top: 12px; text-align: center;">
-            <span style="font-size: 0.72rem; color: #444;">* จำกัดสิทธิ์เปิดกล่องสุ่มได้ 1 ครั้งต่อวันต่อบัญชีสมาชิกเท่านั้น *</span>
-        </div>
-    </div>
-</div>
-</section>
+                    <div class="csgo-control-buttons">
+                        <button type="button" id="demoSpinBtn" class="secondary-btn">
+                            <i class="fa-solid fa-flask"></i> ทดลองหมุน
+                        </button>
+                        <button type="button" id="openCaseBtn" class="primary-btn">
+                            <i class="fa-solid fa-box-open"></i> เปิดกล่องสุ่มจริง
+                        </button>
+                    </div>
+                    
+                    <div class="wheel-pool-section">
+                        <span class="wheel-pool-title"><i class="fa-solid fa-boxes-stacked"></i> // ของรางวัลในกล่องสุ่ม:</span>
+                        <div id="userVisibleRewardsPool" class="wheel-rewards-grid-box"></div>
+                    </div>
+                </div>
 
-<!-- 🤝 โซน COLLAB WANTED BOARD (บอร์ดหาคนทำเพลง) -->
-        <h2 id="collab" class="section-title" style="margin-top: 60px;">COLLAB WANTED BOARD</h2>
-        <div style="background: #090909; border: 1px dashed #ffaa00; border-radius: 8px; padding: 25px; margin-bottom: 40px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
-                <p style="color: #aaa; font-size: 0.9rem; font-family: 'Space Grotesk', sans-serif; margin: 0;">
-                    // พื้นที่ประกาศหาทีมงาน: หาบีท, หาคนมิกซ์, หาคนฟีท, หาคนทำปก ฯลฯ
-                </p>
-                <button type="button" id="openCollabModalBtn" class="graffiti-btn" style="background: #ffaa00; color: #000; padding: 10px 20px; font-size: 0.9rem; box-shadow: 0 0 10px rgba(255, 170, 0, 0.3);">
-                    <i class="fa-solid fa-bullhorn"></i> POST WANTED AD
+                <div class="rewards-vault-right-panel">
+                    <div class="vault-header">
+                        <h3><i class="fa-solid fa-vault"></i> MY REWARDS VAULT</h3>
+                        <p>ตู้เซฟประวัติส่วนลดส่วนตัวของคุณ (แคปหน้าจอเห็นโค้ดแล้วส่งเข้า IG UDG CULTURE TH เพื่อเคลมสิทธิ์)</p>
+                    </div>
+                    <div id="myCouponsList" class="coupons-list">
+                        <p class="empty-state">⏳ กรุณาล็อกอินเพื่อเปิดใช้งานตู้เซฟ...</p>
+                    </div>
+                    <div class="vault-footer">
+                        <span>* จำกัดสิทธิ์เปิดกล่องสุ่มได้ 1 ครั้ง / วัน / บัญชี *</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- โซน Collab Wanted Board -->
+        <section id="collab" class="section-block">
+            <div class="section-header flex-header">
+                <h2 class="section-title">COLLAB WANTED BOARD</h2>
+                <button type="button" id="openCollabModalBtn" class="primary-btn accent-yellow">
+                    <i class="fa-solid fa-bullhorn"></i> โพสต์ประกาศหาคน
                 </button>
             </div>
             
-            <!-- กระดานโชว์ประกาศ -->
-            <div class="collab-grid" id="live-collab-board">
-                <div style="padding: 30px; color: #555; text-align: center; width: 100%;">⏳ กำลังกวาดสายสัญญาณหากระดานประกาศ...</div>
-            </div>
-        </div>
-    </div>
-        <!-- 💬 โซนกำแพงแชทสเปรย์ไซเบอร์ -->
-        <h2 id="graffiti" class="section-title" style="margin-top: 60px;">CYBER GRAFFITI WALL</h2>
-        
-        <div class="graffiti-container">
-            <div class="graffiti-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <span>// SHOUTOUT TO THE STREETS — พิมพ์ข้อความหรือไรม์ของคุณทิ้งไว้ที่นี่</span>
-                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                    <div class="room-selector" style="display: flex; gap: 5px;">
-                        <button type="button" class="room-btn active" data-room="general_1">ทั่วไป 1 #กรองคำหยาบ</button>
-                        <button type="button" class="room-btn" data-room="general_2">ทั่วไป 2 #ใส่นัว</button>
-                    </div>
-                    <div class="live-counter">
-                        <span class="live-dot"></span>
-                        <span class="live-text">STREET ONLINE: <strong id="onlineCount">1</strong> คน</span>
-                    </div>
+            <div class="collab-container">
+                <p class="section-desc">// พื้นที่ประกาศหาทีมงาน: หาบีท, คนมิกซ์เสียง, ร้องฟีท, ทำปกเพลง ฯลฯ</p>
+                <div class="collab-grid" id="live-collab-board">
+                    <div class="loading-state">⏳ กำลังโหลดกระดานประกาศ...</div>
                 </div>
             </div>
-            
-            <div class="graffiti-wall-box" id="graffitiWall"></div>
-            
-            <div class="graffiti-emojis" style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
-                <span style="color: #555; font-size: 0.85rem; font-family: 'Space Grotesk', sans-serif; align-self: center; margin-right: 5px;">QUICK SPRAY:</span>
-                <button type="button" class="emoji-btn">🔥</button>
-                <button type="button" class="emoji-btn">🎤</button>
-                <button type="button" class="emoji-btn">🚨</button>
-                <button type="button" class="emoji-btn">💯</button>
-                <button type="button" class="emoji-btn">💸</button>
-                <button type="button" class="emoji-btn">👑</button>
-                <button type="button" class="emoji-btn">🩹</button>
-                <button type="button" class="emoji-btn">😈</button>
-            </div>
-            
-            <div class="graffiti-form">
-                <input type="text" id="graffitiName" placeholder="YOUR NAME..." class="graffiti-input" style="flex-grow: 0; min-width: 150px; border-color: rgba(0, 255, 255, 0.2);">
-                <input type="text" id="graffitiInput" placeholder="LEAVE A RHYME (MAX 100 CHARS / 4s COOLDOWN)..." class="graffiti-input" maxlength="100">
-                <button id="graffitiBtn" class="graffiti-btn">SPRAY</button>
-            </div>
-        </div>
+        </section>
 
-        <!-- 🎤 โซนแนะนำศิลปินหน้าใหม่ดาวรุ่ง (ดึงฟีดคลาวด์ออโต้คู่ขนาน) -->
-        <h2 id="radar" class="section-title radar-title">RADAR: NEXT UP</h2>
-        <!-- 🔴 ตู้แดงหย่อนเพลง DEMO DROPBOX (ปุ่มเปิด) -->
-        <div class="demo-dropbox-container" style="text-align: center; margin-bottom: 30px;">
-            <button type="button" id="openDemoDropboxBtn" class="graffiti-btn" style="background: linear-gradient(45deg, #ff3333, #8b0000); border: 1px solid #ff3333; color: #fff; padding: 15px 30px; font-size: 1.1rem; box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);">
-                <i class="fa-solid fa-compact-disc fa-spin-hover"></i> ส่งเพลง DEMO ของคุณให้เราฟัง (DROPBOX)
-            </button>
-            <p style="color: #888; font-size: 0.85rem; margin-top: 10px; font-family: 'Space Grotesk', sans-serif;">
-                // มีของดีอย่าเก็บไว้คนเดียว ส่งลิงก์มา แอดมินฟังแล้วเดือดเดี๋ยวจัดลงชาร์ต RADAR ให้! //
-            </p>
-        </div>
-        <div class="news-grid" id="live-radar-grid"> 
-            <div style="padding: 30px; color: #555; text-align: center; grid-column: 1/-1;">⏳ กำลังเชื่อมกระแสจิตส่องหาดาวรุ่งวงการใต้ดิน...</div>
-        </div>
-
-        <h2 class="section-title" style="margin-top: 60px;">UPCOMING GIGS</h2>
-        <div class="gig-list">
-            </div>
-
-        <!-- 💸 โซนสปอนเซอร์และพาร์ทเนอร์เพจ UDG -->
-        <h2 class="section-title" style="margin-top: 60px;">ADVERTISE WITH US</h2>
-        <div class="rate-card">
-            <h3 class="section-title" style="margin-top: 10px; font-size: 1.2rem; border-color: #333; color: #444;">CULTURE PARTNERS / SPONSORS</h3>
-            <div class="sponsor-ticker-container">
-                <div class="sponsor-ticker-track">
-                    <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 1"></div>
-                    <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 2"></div>
-                    <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 3"></div>
-                    <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 4"></div>
-                    <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 5"></div>
-                    <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 1"></div>
-                    <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 2"></div>
-                    <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 3"></div>
-                    <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 4"></div>
-                    <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 5"></div>
+        <!-- Cyber Graffiti Wall -->
+        <section id="graffiti" class="section-block">
+            <h2 class="section-title">CYBER GRAFFITI WALL</h2>
+            
+            <div class="graffiti-container">
+                <div class="graffiti-header">
+                    <span>// SHOUTOUT TO THE STREETS — ฝากไรม์หรือข้อความไว้บนกำแพง</span>
+                    <div class="graffiti-controls">
+                        <div class="room-selector">
+                            <button type="button" class="room-btn active" data-room="general_1">ทั่วไป 1 #กรองคำหยาบ</button>
+                            <button type="button" class="room-btn" data-room="general_2">ทั่วไป 2 #ใส่นัว</button>
+                        </div>
+                        <div class="live-counter">
+                            <span class="live-dot"></span>
+                            <span class="live-text">ONLINE: <strong id="onlineCount">1</strong></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="graffiti-wall-box" id="graffitiWall"></div>
+                
+                <div class="graffiti-emojis">
+                    <span class="emoji-label">QUICK SPRAY:</span>
+                    <button type="button" class="emoji-btn">🔥</button>
+                    <button type="button" class="emoji-btn">🎤</button>
+                    <button type="button" class="emoji-btn">🚨</button>
+                    <button type="button" class="emoji-btn">💯</button>
+                    <button type="button" class="emoji-btn">💸</button>
+                    <button type="button" class="emoji-btn">👑</button>
+                    <button type="button" class="emoji-btn">🩹</button>
+                    <button type="button" class="emoji-btn">😈</button>
+                </div>
+                
+                <div class="graffiti-form">
+                    <input type="text" id="graffitiName" placeholder="ชื่อเล่น / AKA..." class="graffiti-input name-input">
+                    <input type="text" id="graffitiInput" placeholder="พิมพ์ข้อความของคุณที่นี่ (สูงสุด 100 ตัวอักษร)..." class="graffiti-input text-input" maxlength="100">
+                    <button id="graffitiBtn" class="primary-btn">SPRAY</button>
                 </div>
             </div>
-            <div class="rate-stats">
-                <div class="stat-box"><h4>500K+</h4><p>Monthly Views</p></div>
-                <div class="stat-box"><h4>10K+</h4><p>Followers</p></div>
-                <div class="stat-box"><h4>100%</h4><p>Hip Hop Heads</p></div>
+        </section>
+
+        <!-- โซน Radar Next Up -->
+        <section id="radar" class="section-block">
+            <h2 class="section-title">RADAR: NEXT UP</h2>
+            <div class="demo-dropbox-container">
+                <button type="button" id="openDemoDropboxBtn" class="primary-btn red-btn">
+                    <i class="fa-solid fa-compact-disc"></i> ส่งเพลง DEMO ของคุณให้เราฟัง (DROPBOX)
+                </button>
+                <p class="section-desc">// มีของดีอย่าเก็บไว้คนเดียว ส่งลิงก์มา แอดมินฟังแล้วเดือดเดี๋ยวจัดลงชาร์ต RADAR ให้! //</p>
             </div>
-            <div class="rate-action">
-                <p>โปรโมทแบรนด์ คอนเสิร์ต หรือสินค้าของคุณ สู่สายตาชาว Underground</p>
-                <a href="https://www.instagram.com/undergroundculture.th/" target="_blank" class="rate-btn"><i class="fa-brands fa-instagram"></i> ขอเรตการ์ด / ติดต่อสปอนเซอร์</a>
+            <div class="news-grid" id="live-radar-grid"> 
+                <div class="loading-state">⏳ กำลังเชื่อมต่อสัญญาณดาวรุ่ง...</div>
             </div>
-        </div>
+        </section>
+
+        <!-- Upcoming Gigs & Sponsor -->
+        <section class="section-block">
+            <h2 class="section-title">UPCOMING GIGS</h2>
+            <div class="gig-list"></div>
+        </section>
+
+        <section class="section-block">
+            <h2 class="section-title">ADVERTISE WITH US</h2>
+            <div class="rate-card">
+                <h3>CULTURE PARTNERS / SPONSORS</h3>
+                <div class="sponsor-ticker-container">
+                    <div class="sponsor-ticker-track">
+                        <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 1"></div>
+                        <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 2"></div>
+                        <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 3"></div>
+                        <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 4"></div>
+                        <div class="sponsor-logo-item"><img src="image/ขาวใส.png" alt="Partner 5"></div>
+                    </div>
+                </div>
+                <div class="rate-stats">
+                    <div class="stat-box"><h4>500K+</h4><p>Monthly Views</p></div>
+                    <div class="stat-box"><h4>10K+</h4><p>Followers</p></div>
+                    <div class="stat-box"><h4>100%</h4><p>Hip Hop Heads</p></div>
+                </div>
+                <div class="rate-action">
+                    <p>โปรโมทแบรนด์ คอนเสิร์ต หรือสินค้าของคุณ สู่สายตาชาว Underground</p>
+                    <a href="https://www.instagram.com/undergroundculture.th/" target="_blank" class="rate-btn">
+                        <i class="fa-brands fa-instagram"></i> ขอเรตการ์ด / ติดต่อสปอนเซอร์
+                    </a>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer>
         <p>&copy; 2026 Underground Culture TH. All Rights Reserved.</p>
     </footer>
 
-    <!-- 📺 ตัวเล่นเพลงมินิแอบซ่อนเครื่องเล่น YouTube ไว้สตรีมเสียงสดข้างหลังจอ -->
+    <!-- Mini Audio Player -->
     <div id="mini-audio-player" class="mini-player-box">
         <div class="player-track-info">
             <i class="fa-solid fa-compact-disc disc-spinning"></i>
@@ -400,12 +344,11 @@
             </div>
         </div>
 
-        <!-- 🎬 กล่องแสดงวิดีโอแบบ Pop-up (ซ่อนไว้เป็นค่าเริ่มต้น) -->
         <div id="video-popup-container" class="video-popup-hidden">
             <div id="yt-hidden-stream"></div>
         </div>
-<div class="player-controls">
-            <!-- 🔊 ปุ่มควบคุมเสียงสไตล์ YouTube (ชี้แล้วแถบเลื่อนจะโผล่) -->
+
+        <div class="player-controls">
             <div class="volume-container" id="volume-container">
                 <button type="button" id="player-mute-btn" class="p-control-btn" title="ปิด/เปิดเสียง">
                     <i class="fa-solid fa-volume-high"></i>
@@ -416,20 +359,17 @@
             </div>
             
             <span class="player-divider">|</span>
-            
-            <!-- ปุ่มเล่นเพลง และ ปิด/เปิดวิดีโอ -->
             <button type="button" id="player-play-btn" class="p-control-btn" title="เล่น/หยุด"><i class="fa-solid fa-pause"></i></button>
             <button type="button" id="player-toggle-video" class="p-control-btn" title="แสดงวิดีโอ"><i class="fa-solid fa-video"></i></button>
-            
             <span class="player-divider">|</span>
-            
-            <span id="player-time-display" style="font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; color: #555;">00:00</span>
+            <span id="player-time-display" class="player-time">00:00</span>
         </div>
     </div>
-    <!-- 🔐 หน้าต่างยืนยันตัวตนแร็ปเปอร์ (โมดอลนีออนส้ม) -->
-    <div id="artistModal" class="artist-modal-overlay">
-        <div class="artist-modal-box">
-            <div class="modal-glow-line"></div>
+
+    <!-- Modals -->
+    <div id="artistModal" class="vote-modal-overlay">
+        <div class="vote-modal-box narrow-modal">
+            <div class="vote-glow-line"></div>
             <i class="fa-solid fa-user-shield modal-icon"></i>
             <h3>ARTIST VERIFICATION</h3>
             <p>ระบบตรวจพบชื่อแร็ปเปอร์เฝ้าระวัง<br>กรุณากรอกรหัสลับเพื่อยืนยันตัวตน (สิทธิ์คุ้มครอง 30 นาที)</p>
@@ -438,29 +378,28 @@
                 <input type="password" id="modalPasscode" placeholder="ENTER SECRET PASSCODE...">
             </div>
             <div class="modal-action-btns">
-                <button type="button" id="modalCancelBtn" class="m-btn btn-cancel">CANCEL</button>
-                <button type="button" id="modalSubmitBtn" class="m-btn btn-submit">CONFIRM</button>
+                <button type="button" id="modalCancelBtn" class="secondary-btn">CANCEL</button>
+                <button type="button" id="modalSubmitBtn" class="primary-btn">CONFIRM</button>
             </div>
         </div>
     </div>
 
-    <!-- 🚨 หน้าต่างแจ้งเตือนภัยระบบ/แจ้งผลโหวตเดือด -->
-    <div id="errorModal" class="error-modal-overlay">
-        <div class="error-modal-box">
-            <div class="error-glow-line"></div>
-           <i id="customModalIcon" class="fa-solid fa-triangle-exclamation error-modal-icon"></i>
+    <div id="errorModal" class="vote-modal-overlay">
+        <div class="vote-modal-box narrow-modal">
+            <div class="vote-glow-line"></div>
+            <i id="customModalIcon" class="fa-solid fa-triangle-exclamation modal-icon"></i>
             <h3 id="errorModalTitle">SYSTEM ERROR</h3>
             <p id="errorModalMessage">กรุณากรอกข้อมูลให้ครบถ้วนก่อนพ่นสี</p>
-            <button type="button" id="errorModalCloseBtn" class="error-m-btn">GOT IT</button>
+            <button type="button" id="errorModalCloseBtn" class="primary-btn full-width">GOT IT</button>
         </div>
     </div>
 
- <div id="voteModal" class="vote-modal-overlay">
+    <div id="voteModal" class="vote-modal-overlay">
         <div class="vote-modal-box">
             <div class="vote-glow-line"></div>
             <div class="vote-modal-close" id="closeVoteModalBtn">&times;</div>
-            <h3><i class="fa-solid fa-fire" style="color: var(--accent-color);"></i> UDG VOTING STATION</h3>
-            <p style="color: #666; font-size: 0.85rem; margin-bottom: 20px;">ค้นหาเพลงหรือศิลปินที่คุณชอบ แล้วกดสาดคะแนนไฟลุกได้เลยน้า</p>
+            <h3><i class="fa-solid fa-fire"></i> UDG VOTING STATION</h3>
+            <p class="modal-sub">ค้นหาเพลงหรือศิลปินที่คุณชอบ แล้วกดสาดคะแนนดันชาร์ตได้เลย</p>
             <div class="vote-search-wrap">
                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
                 <input type="text" id="voteSearchInput" placeholder="SEARCH TRACK OR ARTIST...">
@@ -469,14 +408,14 @@
         </div>
     </div>
 
- <div id="authProviderModal" class="vote-modal-overlay">
-        <div class="vote-modal-box" style="max-width: 380px; text-align: center;">
-            <div class="vote-glow-line" style="background: linear-gradient(90deg, #00ffff, #3b5998);"></div>
+    <div id="authProviderModal" class="vote-modal-overlay">
+        <div class="vote-modal-box narrow-modal text-center">
+            <div class="vote-glow-line"></div>
             <div class="vote-modal-close" id="closeAuthBtn">&times;</div>
-            <h3><i class="fa-solid fa-shield-halved" style="color: var(--accent-color);"></i> MEMBER PORTAL</h3>
-            <p style="color: #666; font-size: 0.85rem; margin-bottom: 25px;">เลือกช่องทางยืนยันตัวตนเพื่อเข้าสู่ระบบ Underground Culture</p>
+            <h3><i class="fa-solid fa-shield-halved"></i> MEMBER PORTAL</h3>
+            <p class="modal-sub">เข้าสู่ระบบเพื่อใช้งานฟีเจอร์พิเศษบน Underground Culture</p>
             
-            <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="auth-buttons-group">
                 <button type="button" id="loginGoogleBtn" class="provider-btn btn-google">
                     <i class="fa-brands fa-google"></i> CONTINUE WITH GOOGLE
                 </button>
@@ -484,140 +423,148 @@
                     <i class="fa-brands fa-facebook"></i> CONTINUE WITH FACEBOOK
                 </button>
             </div>
-            <div id="userProfileDisplay" style="display: none; margin-top: 15px; padding: 10px; background: #111; border-radius: 4px; border: 1px dashed #333;">
-                <p style="color: #39ff14; font-size: 0.8rem; margin: 0;"><i class="fa-solid fa-circle-check"></i> เข้าสู่ระบบแล้วในชื่อ:</p>
-                <strong id="authUserName" style="color: #fff; font-size: 0.95rem;">-</strong>
+            <div id="userProfileDisplay" class="user-profile-card" style="display: none;">
+                <p><i class="fa-solid fa-circle-check"></i> เข้าสู่ระบบแล้วในชื่อ:</p>
+                <strong id="authUserName">-</strong>
             </div>
         </div>
     </div>
+
     <div id="statsModal" class="vote-modal-overlay">
-        <div class="vote-modal-box" style="max-width: 350px; text-align: center;">
-            <div class="vote-glow-line" style="background: linear-gradient(90deg, #39ff14, #00ffff);"></div>
+        <div class="vote-modal-box narrow-modal text-center">
+            <div class="vote-glow-line"></div>
             <div class="vote-modal-close" id="closeStatsBtn">&times;</div>
-            <h3><i class="fa-solid fa-chart-simple" style="color: #39ff14;"></i> MY STREET STATS</h3>
-            <p style="color: #666; font-size: 0.8rem; margin-bottom: 20px;">ผลงานความเคลื่อนไหวของคุณใน UDG</p>
+            <h3><i class="fa-solid fa-chart-simple"></i> MY STREET STATS</h3>
+            <p class="modal-sub">สถิติและประวัติความเคลื่อนไหวของคุณ</p>
             
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #111; padding: 12px 15px; border-radius: 4px; border-left: 3px solid #ff3333;">
-                    <span style="color: #aaa; font-size: 0.85rem;"><i class="fa-solid fa-fire" style="color: #ff3333;"></i> โหวตดันชาร์ต</span>
-                    <strong id="statVotes" style="color: #fff; font-size: 1.2rem; font-family: 'Space Grotesk', sans-serif;">0</strong>
+            <div class="stats-list">
+                <div class="stat-row red-border">
+                    <span><i class="fa-solid fa-fire"></i> โหวตดันชาร์ต</span>
+                    <strong id="statVotes">0</strong>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #111; padding: 12px 15px; border-radius: 4px; border-left: 3px solid #00ffff;">
-                    <span style="color: #aaa; font-size: 0.85rem;"><i class="fa-solid fa-spray-can" style="color: #00ffff;"></i> สเปรย์ข้อความ</span>
-                    <strong id="statGraffiti" style="color: #fff; font-size: 1.2rem; font-family: 'Space Grotesk', sans-serif;">0</strong>
+                <div class="stat-row cyan-border">
+                    <span><i class="fa-solid fa-spray-can"></i> สเปรย์ข้อความ</span>
+                    <strong id="statGraffiti">0</strong>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #111; padding: 12px 15px; border-radius: 4px; border-left: 3px solid #ffaa00;">
-                    <span style="color: #aaa; font-size: 0.85rem;"><i class="fa-solid fa-box-open" style="color: #ffaa00;"></i> เปิดกล่องสุ่ม</span>
-                    <strong id="statCases" style="color: #fff; font-size: 1.2rem; font-family: 'Space Grotesk', sans-serif;">0</strong>
+                <div class="stat-row yellow-border">
+                    <span><i class="fa-solid fa-box-open"></i> เปิดกล่องสุ่ม</span>
+                    <strong id="statCases">0</strong>
                 </div>
             </div>
         </div>
     </div>
-<!-- 🔴 หน้าต่างกรอกข้อมูลเพลง DEMO DROPBOX -->
+
     <div id="demoDropboxModal" class="vote-modal-overlay">
-        <div class="vote-modal-box" style="max-width: 450px; text-align: center;">
-            <div class="vote-glow-line" style="background: linear-gradient(90deg, #ff3333, #ffaa00);"></div>
+        <div class="vote-modal-box">
+            <div class="vote-glow-line"></div>
             <div class="vote-modal-close" id="closeDemoDropboxBtn">&times;</div>
-            <h3><i class="fa-solid fa-compact-disc" style="color: #ff3333;"></i> UDG DEMO DROPBOX</h3>
-            <p style="color: #aaa; font-size: 0.85rem; margin-bottom: 25px;">หย่อนผลงานของคุณลงตู้แดง เพื่อโอกาสขึ้นหน้า RADAR</p>
+            <h3 class="text-center"><i class="fa-solid fa-compact-disc"></i> UDG DEMO DROPBOX</h3>
+            <p class="modal-sub text-center">ส่งผลงานของคุณลงตู้แดง เพื่อโอกาสโปรโมทขึ้นหน้า RADAR</p>
             
-            <div style="display: flex; flex-direction: column; gap: 15px;">
-                <div class="modal-input-wrap" style="margin-bottom: 0;">
+            <div class="form-grid">
+                <div class="modal-input-wrap">
                     <i class="fa-solid fa-microphone"></i>
-                    <input type="text" id="demoArtistName" placeholder="ARTIST NAME (ชื่อศิลปิน / AKA)..." maxlength="50">
+                    <input type="text" id="demoArtistName" placeholder="ชื่อศิลปิน / AKA..." maxlength="50">
                 </div>
-                <div class="modal-input-wrap" style="margin-bottom: 0;">
+                <div class="modal-input-wrap">
                     <i class="fa-solid fa-music"></i>
-                    <input type="text" id="demoTrackTitle" placeholder="TRACK TITLE (ชื่อเพลง)..." maxlength="50">
+                    <input type="text" id="demoTrackTitle" placeholder="ชื่อเพลง..." maxlength="50">
                 </div>
-                <div class="modal-input-wrap" style="margin-bottom: 0;">
+                <div class="modal-input-wrap">
                     <i class="fa-solid fa-link"></i>
-                    <input type="url" id="demoTrackLink" placeholder="YOUTUBE OR SOUNDCLOUD LINK...">
+                    <input type="url" id="demoTrackLink" placeholder="ลิงก์เพลง (YouTube หรือ SoundCloud)...">
                 </div>
-                <div class="modal-input-wrap" style="margin-bottom: 0;">
+                <div class="modal-input-wrap">
                     <i class="fa-brands fa-instagram"></i>
-                    <input type="text" id="demoContact" placeholder="IG OR FB (สำหรับให้ทีมงานติดต่อกลับ)..." maxlength="50">
+                    <input type="text" id="demoContact" placeholder="ช่องทางติดต่อ (IG / FB / เบอร์โทร)..." maxlength="50">
                 </div>
             </div>
             
-            <button type="button" id="submitDemoBtn" class="m-btn btn-submit" style="width: 100%; margin-top: 25px; background: linear-gradient(45deg, #ff3333, #ffaa00); box-shadow: 0 0 15px rgba(255, 51, 51, 0.4); color: #fff; font-size: 1rem; padding: 15px;">
+            <button type="button" id="submitDemoBtn" class="primary-btn red-btn full-width margin-top-md">
                 SEND TRACK TO UDG
             </button>
-            <div style="font-size: 0.75rem; color: #555; margin-top: 15px; border-top: 1px dashed #333; padding-top: 10px;">
-                * จำกัดสิทธิ์การส่ง 1 เพลงต่อวัน เพื่อป้องกันระบบสแปม *
-            </div>
+            <span class="modal-note">* จำกัดการส่ง 1 เพลงต่อวัน *</span>
         </div>
     </div>
+
     <div id="editTagModal" class="vote-modal-overlay">
-        <div class="vote-modal-box" style="max-width: 350px; text-align: center;">
-            <div class="vote-glow-line" style="background: linear-gradient(90deg, #ff007f, #cc00ff);"></div>
+        <div class="vote-modal-box narrow-modal text-center">
+            <div class="vote-glow-line"></div>
             <div class="vote-modal-close" id="closeEditTagBtn">&times;</div>
-            <h3><i class="fa-solid fa-paintbrush" style="color: #ff007f;"></i> EDIT MY TAG</h3>
-            <p style="color: #666; font-size: 0.8rem; margin-bottom: 20px;">ตั้งฉายาใหม่ของคุณสำหรับพ่นสีบนกำแพง</p>
+            <h3><i class="fa-solid fa-paintbrush"></i> EDIT MY TAG</h3>
+            <p class="modal-sub">ตั้งฉายาใหม่สำหรับใช้พ่นสีบนกำแพง</p>
             
             <div class="modal-input-wrap">
                 <i class="fa-solid fa-user-tag"></i>
-                <input type="text" id="editTagNameInput" placeholder="ENTER NEW NAME...">
+                <input type="text" id="editTagNameInput" placeholder="กรอกฉายาใหม่ของคุณ...">
             </div>
             
-            <button type="button" id="saveTagBtn" class="m-btn btn-submit" style="width: 100%; background: linear-gradient(45deg, #ff007f, #cc00ff); box-shadow: 0 0 10px rgba(255, 0, 127, 0.3); color: #fff;">
+            <button type="button" id="saveTagBtn" class="primary-btn full-width">
                 SAVE TAG
             </button>
         </div>
     </div>
 
-    <div id="merchModal" class="vote-modal-overlay">
-    <div class="vote-modal-box" style="max-width: 450px; text-align: left;">
-        <div class="vote-glow-line" style="background: linear-gradient(90deg, #ffaa00, #ff007f);"></div>
-        <div class="vote-modal-close" id="closeMerchBtn">&times;</div>
-        <h3 style="text-align: center; margin-bottom: 5px;"><i class="fa-solid fa-shirt" style="color: #ffaa00;"></i> UDG PRE-ORDER</h3>
-        <p style="color: #aaa; font-size: 0.85rem; text-align: center; margin-bottom: 20px;">โอนเงินเข้าบัญชี: 123-4-56789-0 (กสิกรไทย - บักหำทิว)<br>ยอดโอน: <strong>590 บาท</strong> (รวมส่ง)</p>
-        
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div class="modal-input-wrap" style="margin-bottom: 0;">
-                <i class="fa-solid fa-ruler"></i>
-                <select id="orderSize" style="width: 100%; background: #111; border: 1px solid #222; padding: 12px 15px 12px 45px; color: #fff; border-radius: 4px; outline: none; font-family: 'Space Grotesk', sans-serif;">
-                    <option value="" disabled selected>SELECT SIZE (เลือกไซส์)</option>
-                    <option value="S">SIZE S (อก 38")</option>
-                    <option value="M">SIZE M (อก 40")</option>
-                    <option value="L">SIZE L (อก 44")</option>
-                    <option value="XL">SIZE XL (อก 48")</option>
-                </select>
+    <div id="albumChatModal" class="vote-modal-overlay">
+        <div class="vote-modal-box album-modal-layout">
+            <div class="vote-glow-line"></div>
+            <div class="vote-modal-close" id="closeAlbumChatBtn">&times;</div>
+            
+            <div class="album-info-side">
+                <div class="album-cover-wrap">
+                    <img id="modalAlbumCover" src="image/ขาวใส.png" alt="Album Cover">
+                </div>
+                <h3 id="modalAlbumTitle">ALBUM TITLE</h3>
+                <p id="modalAlbumArtist" class="album-artist-name">ARTIST NAME</p>
+                <p id="modalAlbumDesc" class="album-desc-text">คำอธิบายอัลบั้ม...</p>
+                
+                <div class="album-rating-zone">
+                    <div class="average-rating-display" id="modalAvgRating">
+                        <span class="stars-container">
+                            <i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+                        </span>
+                        <span class="rating-text">0.0 (0 รีวิว)</span>
+                    </div>
+                    
+                    <div class="user-rate-action" id="modalUserRateAction">
+                        <p class="rate-label">// RATE THIS ALBUM</p>
+                        <div class="interactive-stars" id="interactiveStars">
+                            <i class="fa-regular fa-star" data-val="1"></i>
+                            <i class="fa-regular fa-star" data-val="2"></i>
+                            <i class="fa-regular fa-star" data-val="3"></i>
+                            <i class="fa-regular fa-star" data-val="4"></i>
+                            <i class="fa-regular fa-star" data-val="5"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="modal-input-wrap" style="margin-bottom: 0;">
-                <i class="fa-solid fa-user"></i>
-                <input type="text" id="orderName" placeholder="ชื่อ-นามสกุล ผู้รับ...">
-            </div>
-            <div class="modal-input-wrap" style="margin-bottom: 0;">
-                <i class="fa-solid fa-phone"></i>
-                <input type="text" id="orderPhone" placeholder="เบอร์โทรศัพท์ติดต่อ..." maxlength="10">
-            </div>
-            <div class="modal-input-wrap" style="margin-bottom: 0;">
-                <textarea id="orderAddress" placeholder="ที่อยู่จัดส่งแบบละเอียด (บ้านเลขที่ ตำบล อำเภอ จังหวัด รหัสไปรษณีย์)..." rows="3" style="width: 100%; background: #111; border: 1px solid #222; padding: 12px; color: #fff; border-radius: 4px; font-family: 'Kanit', sans-serif; resize: none;"></textarea>
-            </div>
-            <div style="background: #1a1a1a; padding: 12px; border-radius: 4px; border: 1px dashed #444;">
-                <label style="color: #ffaa00; font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 5px;"><i class="fa-solid fa-file-invoice-dollar"></i> อัปโหลดสลิปโอนเงิน (บังคับ)</label>
-                <input type="file" id="orderSlip" accept="image/*" style="color: #ccc; font-size: 0.8rem; width: 100%;">
+
+            <div class="album-chat-side">
+                <h4 class="chat-title">
+                    <i class="fa-solid fa-comments"></i> SHARE YOUR VIBE
+                </h4>
+                
+                <div class="album-chat-box" id="albumChatWall"></div>
+                
+                <div class="album-chat-input-wrap">
+                    <input type="text" id="albumChatInput" placeholder="ฟังแล้วรู้สึกยังไง พิมพ์บอกหน่อย... (Enter เพื่อส่ง)" maxlength="150">
+                    <button type="button" id="sendAlbumChatBtn"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
             </div>
         </div>
-        
-        <button type="button" id="submitOrderBtn" class="m-btn btn-submit" style="width: 100%; margin-top: 20px; background: linear-gradient(45deg, #ffaa00, #ff007f); box-shadow: 0 0 15px rgba(255, 170, 0, 0.4); color: #000; padding: 15px;">
-            CONFIRM ORDER & UPLOAD SLIP
-        </button>
     </div>
-</div>
-<!-- 🤝 หน้าต่างกรอกข้อมูลประกาศหาคนทำเพลง -->
+
     <div id="collabModal" class="vote-modal-overlay">
-        <div class="vote-modal-box" style="max-width: 450px; text-align: left;">
-            <div class="vote-glow-line" style="background: linear-gradient(90deg, #ffaa00, #ff3333);"></div>
+        <div class="vote-modal-box">
+            <div class="vote-glow-line"></div>
             <div class="vote-modal-close" id="closeCollabModalBtn">&times;</div>
-            <h3 style="text-align: center; margin-bottom: 5px;"><i class="fa-solid fa-handshake" style="color: #ffaa00;"></i> POST WANTED AD</h3>
-            <p style="color: #aaa; font-size: 0.85rem; text-align: center; margin-bottom: 20px;">สร้างประกาศหาเพื่อนร่วมงาน หรือโปรโมทสกิลของคุณ</p>
+            <h3 class="text-center"><i class="fa-solid fa-handshake"></i> POST WANTED AD</h3>
+            <p class="modal-sub text-center">สร้างประกาศหาเพื่อนร่วมงาน หรือโปรโมทสกิลของคุณ</p>
             
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <div class="modal-input-wrap" style="margin-bottom: 0;">
+            <div class="form-grid">
+                <div class="modal-input-wrap">
                     <i class="fa-solid fa-tag"></i>
-                    <select id="collabRole" style="width: 100%; background: #111; border: 1px solid #222; padding: 12px 15px 12px 45px; color: #fff; border-radius: 4px; outline: none; font-family: 'Space Grotesk', 'Kanit', sans-serif;">
+                    <select id="collabRole" class="custom-select">
                         <option value="" disabled selected>-- คุณกำลังตามหาใคร? --</option>
                         <option value="RAPPER">🎤 RAPPER (หาคนร้อง/ฟีท)</option>
                         <option value="BEATMAKER">🎹 BEATMAKER (หาบีท/โปรดิวเซอร์)</option>
@@ -627,29 +574,29 @@
                         <option value="OTHER">👽 OTHER (อื่นๆ)</option>
                     </select>
                 </div>
-                <div class="modal-input-wrap" style="margin-bottom: 0;">
-    <i class="fa-solid fa-image"></i>
-    <input type="file" id="collabImage" accept="image/*" style="width: 100%; background: #111; border: 1px solid #222; padding: 12px 15px 12px 45px; color: #aaa; border-radius: 4px; outline: none; font-family: 'Space Grotesk', 'Kanit', sans-serif;">
-</div>
-                <div class="modal-input-wrap" style="margin-bottom: 0;">
+                <div class="modal-input-wrap">
+                    <i class="fa-solid fa-image"></i>
+                    <input type="file" id="collabImage" accept="image/*" class="file-input">
+                </div>
+                <div class="modal-input-wrap">
                     <i class="fa-solid fa-heading"></i>
-                    <input type="text" id="collabTitle" placeholder="หัวข้อประกาศแบบสั้นๆ..." maxlength="40">
+                    <input type="text" id="collabTitle" placeholder="หัวข้อประกาศสั้นๆ..." maxlength="40">
                 </div>
-                <div class="modal-input-wrap" style="margin-bottom: 0;">
-                    <textarea id="collabDesc" placeholder="รายละเอียดงาน, สไตล์เพลง, หรืองบประมาณ (ถ้ามี)..." rows="3" style="width: 100%; background: #111; border: 1px solid #222; padding: 12px; color: #fff; border-radius: 4px; font-family: 'Kanit', sans-serif; resize: none;"></textarea>
+                <div class="modal-input-wrap">
+                    <textarea id="collabDesc" placeholder="รายละเอียดงาน สไตล์เพลง หรืองบประมาณ..." rows="3" class="custom-textarea"></textarea>
                 </div>
-                <div class="modal-input-wrap" style="margin-bottom: 0;">
+                <div class="modal-input-wrap">
                     <i class="fa-brands fa-instagram"></i>
-                    <input type="text" id="collabContact" placeholder="ช่องทางติดต่อ (IG, FB, Line)..." maxlength="50">
+                    <input type="text" id="collabContact" placeholder="ช่องทางติดต่อ (IG / FB / Line)..." maxlength="50">
                 </div>
             </div>
             
-            <button type="button" id="submitCollabBtn" class="m-btn btn-submit" style="width: 100%; margin-top: 20px; background: linear-gradient(45deg, #ffaa00, #ff3333); box-shadow: 0 0 15px rgba(255, 170, 0, 0.4); color: #000; padding: 15px;">
+            <button type="button" id="submitCollabBtn" class="primary-btn accent-yellow full-width margin-top-md">
                 PUBLISH AD
             </button>
         </div>
     </div>
-    
+
     <script defer src="script.js"></script>
 </body>
 </html>

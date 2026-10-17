@@ -1219,4 +1219,125 @@ database.ref('udg_demo_dropbox').on('child_added', (snap) => {
     const val = snap.val();
     if(val) pushLiveCommandLog(val.artistName || "ศิลปินนิรนาม", `สาดเพลงใหม่ [${val.trackTitle || "Untitled"}] เข้าสู่ระบบตู้ Dropbox แดง`);
 });
+// =================================================================
+// 🎟️ ADMIN GIFT VOUCHERS ENGINE (หลังบ้านเพิ่ม/ปรับโควต้า Gift Voucher)
+// =================================================================
+const voucherAdminTbody = document.getElementById('voucher-admin-tbody');
 
+database.ref('udg_events_vouchers').on('value', (snapshot) => {
+    if (!voucherAdminTbody) return;
+    voucherAdminTbody.innerHTML = '';
+    const vouchers = snapshot.val();
+
+    if (!vouchers) {
+        voucherAdminTbody.innerHTML = `<tr><td colspan="4" style="color:#555; text-align:center; padding: 20px;">🎟️ ยังไม่มีรายการ Gift Voucher ในระบบครับ</td></tr>`;
+        return;
+    }
+
+    Object.keys(vouchers).forEach(key => {
+        const item = { key: key, ...vouchers[key] };
+        const activeStatus = item.active !== false;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <strong style="color:#ffaa00; font-size:1rem;">${item.title}</strong><br>
+                <span style="color:#00ffff; font-size:0.8rem; font-family:monospace;">CODE: ${item.voucherCode || 'N/A'}</span>
+            </td>
+            <td style="color:#fff; font-weight:bold;">
+                <span style="color:#39ff14;">${item.remainingQuantity !== undefined ? item.remainingQuantity : item.totalQuantity}</span> / ${item.totalQuantity} ใบ
+            </td>
+            <td>
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <button onclick="editVoucherStock('${item.key}', ${item.remainingQuantity !== undefined ? item.remainingQuantity : item.totalQuantity}, ${item.totalQuantity})" style="background:#222; border:1px solid #ffaa00; color:#ffaa00; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer;"><i class="fa-solid fa-pen-to-square"></i> ปรับโควต้า</button>
+                    <button onclick="toggleVoucherActive('${item.key}', ${activeStatus})" style="background:#111; border:1px solid ${activeStatus ? '#39ff14' : '#ff3333'}; color:${activeStatus ? '#39ff14' : '#ff3333'}; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer;">${activeStatus ? '🟢 เปิดรับ' : '🔴 ปิดรับ'}</button>
+                </div>
+            </td>
+            <td style="text-align: center;">
+                <button onclick="deleteVoucherData('${item.key}')" style="background:#111; border:1px solid #ff3333; color:#ff3333; padding:5px 10px; cursor:pointer; border-radius:4px; font-size:0.75rem; font-weight:bold;">
+                    <i class="fa-solid fa-trash"></i> ลบทิ้ง
+                </button>
+            </td>
+        `;
+        voucherAdminTbody.appendChild(tr);
+    });
+});
+
+setupImgbbAutoUploader('newVoucherImgFile', 'newVoucherImg', 'voucherUploadStatus');
+
+const addVoucherBtn = document.getElementById('addVoucherBtn');
+if (addVoucherBtn) {
+    addVoucherBtn.addEventListener('click', () => {
+        const title = document.getElementById('newVoucherTitle').value.trim();
+        const code = document.getElementById('newVoucherCode').value.trim();
+        const desc = document.getElementById('newVoucherDesc').value.trim();
+        const total = parseInt(document.getElementById('newVoucherTotal').value);
+        const remInput = document.getElementById('newVoucherRemaining').value;
+        const remaining = remInput !== "" ? parseInt(remInput) : total;
+        const imgUrl = document.getElementById('newVoucherImg').value.trim();
+
+        if (!title || isNaN(total) || total < 1) {
+            alert("❌ กรุณากรอกชื่องานอีเวนต์ และกำหนดจำนวนสิทธิ์ทั้งหมดให้ถูกต้อง!");
+            return;
+        }
+
+        database.ref('udg_events_vouchers').push({
+            title: title,
+            voucherCode: code || "UDG-EVENT-VOUCHER",
+            desc: desc || "สปอนเซอร์ส่วนลดโดย UDG Culture TH",
+            totalQuantity: total,
+            remainingQuantity: remaining,
+            image: imgUrl || "image/ขาวใส.png",
+            active: true,
+            timestamp: Date.now()
+        }, (error) => {
+            if (!error) {
+                document.getElementById('newVoucherTitle').value = '';
+                document.getElementById('newVoucherCode').value = '';
+                document.getElementById('newVoucherDesc').value = '';
+                document.getElementById('newVoucherTotal').value = '';
+                document.getElementById('newVoucherRemaining').value = '';
+                document.getElementById('newVoucherImg').value = '';
+                alert(`🔥 เพิ่ม Gift Voucher งาน "${title}" เข้าสู่ระบบเรียบร้อยแล้ว!`);
+            } else {
+                alert("❌ เกิดข้อผิดพลาด: " + error.message);
+            }
+        });
+    });
+}
+
+function editVoucherStock(key, currentRemaining, currentTotal) {
+    const newRemainingStr = prompt(`แก้ไขจำนวนสิทธิ์คงเหลือ (ปัจจุบัน: ${currentRemaining} ใบ):`, currentRemaining);
+    if (newRemainingStr === null) return;
+    const newRemaining = parseInt(newRemainingStr);
+
+    const newTotalStr = prompt(`แก้ไขจำนวนสิทธิ์ทั้งหมด (ปัจจุบัน: ${currentTotal} ใบ):`, currentTotal);
+    if (newTotalStr === null) return;
+    const newTotal = parseInt(newTotalStr);
+
+    if (isNaN(newRemaining) || isNaN(newTotal) || newRemaining < 0 || newTotal < 1) {
+        alert("❌ ข้อมูลจำนวนสิทธิ์ไม่ถูกต้อง!");
+        return;
+    }
+
+    database.ref(`udg_events_vouchers/${key}`).update({
+        remainingQuantity: newRemaining,
+        totalQuantity: newTotal
+    }).then(() => {
+        alert("🔥 อัปเดตจำนวนสิทธิ์ Gift Voucher เรียบร้อยแล้ว!");
+    }).catch(err => {
+        alert("❌ เกิดข้อผิดพลาด: " + err.message);
+    });
+}
+
+function toggleVoucherActive(key, currentStatus) {
+    database.ref(`udg_events_vouchers/${key}`).update({
+        active: !currentStatus
+    });
+}
+
+function deleteVoucherData(key) {
+    if (confirm("🚨 คุณต้องการลบรายการ Gift Voucher งานนี้ใช่หรือไม่?")) {
+        database.ref(`udg_events_vouchers/${key}`).remove();
+    }
+}
