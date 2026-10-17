@@ -182,44 +182,19 @@
                 <div class="loading-state">⏳ กำลังโหลดรายการ Gift Voucher งานอีเวนต์...</div>
             </div>
         </section>
-        <!-- โซน CS:GO Cyber Case -->
+ <!-- โซน MY REWARDS VAULT (ตู้เซฟเก็บประวัติคูปอง) -->
         <section id="luckywheel" class="section-block">
-            <h2 class="section-title">UDG CYBER CASE OPENING</h2>
-            <div class="wheel-system-flex-container">
-                <div class="wheel-left-panel">
-                    <div class="csgo-roulette-wrapper">
-                        <div class="csgo-pointer"></div>
-                        <div class="csgo-strip" id="csgoStrip">
-                            <div class="csgo-item-card"><img src="image/ขาวใส.png" alt=""><p>LOADING...</p></div>
-                        </div>
-                    </div>
-
-                    <div class="csgo-control-buttons">
-                        <button type="button" id="demoSpinBtn" class="secondary-btn">
-                            <i class="fa-solid fa-flask"></i> ทดลองหมุน
-                        </button>
-                        <button type="button" id="openCaseBtn" class="primary-btn">
-                            <i class="fa-solid fa-box-open"></i> เปิดกล่องสุ่มจริง
-                        </button>
-                    </div>
-                    
-                    <div class="wheel-pool-section">
-                        <span class="wheel-pool-title"><i class="fa-solid fa-boxes-stacked"></i> // ของรางวัลในกล่องสุ่ม:</span>
-                        <div id="userVisibleRewardsPool" class="wheel-rewards-grid-box"></div>
-                    </div>
+            <h2 class="section-title"><i class="fa-solid fa-vault"></i> MY REWARDS VAULT</h2>
+            <div class="rewards-vault-full-panel">
+                <div class="vault-header text-center">
+                    <h3>ตู้เซฟประวัติส่วนลดส่วนตัวของคุณ</h3>
+                    <p>กดปุ่ม "บันทึกรูป Voucher" เพื่อสร้างรูปภาพตั๋วคูปองนำไปแสดงหน้างานอีเวนต์ หรือส่งเคลมสิทธิ์ทาง IG UDG CULTURE TH</p>
                 </div>
-
-                <div class="rewards-vault-right-panel">
-                    <div class="vault-header">
-                        <h3><i class="fa-solid fa-vault"></i> MY REWARDS VAULT</h3>
-                        <p>ตู้เซฟประวัติส่วนลดส่วนตัวของคุณ (แคปหน้าจอเห็นโค้ดแล้วส่งเข้า IG UDG CULTURE TH เพื่อเคลมสิทธิ์)</p>
-                    </div>
-                    <div id="myCouponsList" class="coupons-list">
-                        <p class="empty-state">⏳ กรุณาล็อกอินเพื่อเปิดใช้งานตู้เซฟ...</p>
-                    </div>
-                    <div class="vault-footer">
-                        <span>* จำกัดสิทธิ์เปิดกล่องสุ่มได้ 1 ครั้ง / วัน / บัญชี *</span>
-                    </div>
+                <div id="myCouponsList" class="coupons-grid-list">
+                    <p class="empty-state">⏳ กรุณาล็อกอินเพื่อเปิดใช้งานตู้เซฟ...</p>
+                </div>
+                <div class="vault-footer text-center">
+                    <span>* คูปองมีอายุใช้งาน 7 วันนับจากวันที่กดรับสิทธิ์ *</span>
                 </div>
             </div>
         </section>
@@ -596,7 +571,23 @@
             </button>
         </div>
     </div>
+<!-- Modal แสดงรูปภาพ Gift Voucher สำหรับดาวน์โหลด -->
+    <div id="voucherImageModal" class="vote-modal-overlay">
+        <div class="vote-modal-box text-center" style="max-width: 520px;">
+            <div class="vote-glow-line"></div>
+            <div class="vote-modal-close" id="closeVoucherImageBtn">&times;</div>
+            <h3><i class="fa-solid fa-ticket"></i> OFFICIAL GIFT VOUCHER</h3>
+            <p class="modal-sub">ระบบสร้างรูปภาพคูปองให้อัตโนมัติ สามารถกดบันทึกรูปภาพนำไปใช้หน้างานได้เลย</p>
 
+            <div id="voucherCanvasContainer" style="margin: 15px 0; text-align: center;">
+                <canvas id="voucherCanvas" width="800" height="420" style="width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--accent-cyan); box-shadow: 0 0 20px rgba(0, 242, 254, 0.25);"></canvas>
+            </div>
+
+            <a id="downloadVoucherImageBtn" href="#" download="UDG-Gift-Voucher.png" class="primary-btn accent-yellow full-width">
+                <i class="fa-solid fa-download"></i> บันทึกรูปภาพ (DOWNLOAD PNG)
+            </a>
+        </div>
+    </div>
     <script defer src="script.js"></script>
 </body>
 </html>

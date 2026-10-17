@@ -1003,7 +1003,10 @@ function preloadAllRewardImages(itemsArray) {
     });
 }
 
-let vaultCountdownTimer = null; // ⚡ เสียบปลั๊กตัวแปรนี้ไว้สำหรับล้างรอบมอเตอร์
+// =================================================================
+// 🎟️ MY REWARDS VAULT & AUTOMATIC VOUCHER IMAGE GENERATOR
+// =================================================================
+let vaultCountdownTimer = null;
 
 function listenToMySavedCouponsVault(uid) {
     if (!myCouponsList) return;
@@ -1012,25 +1015,23 @@ function listenToMySavedCouponsVault(uid) {
         myCouponsList.innerHTML = '';
         const coupons = snapshot.val();
         
-        // 🛑 เคลียร์ระบบนับถอยหลังอันเก่าทิ้งก่อน ป้องกันมอเตอร์ทำงานซ้อนกันจนเว็บบัค
         if (vaultCountdownTimer) clearInterval(vaultCountdownTimer);
 
         if (!coupons) {
-            myCouponsList.innerHTML = `<div style="color:#333; text-align:center; padding-top:100px; font-size:0.85rem;">🎁 ตู้เซฟของคุณยังว่างเปล่า<br>กดเปิดกล่องสุ่มสไลด์เพื่อลุ้นรับคูปองกันน้า BRO!</div>`;
+            myCouponsList.innerHTML = `<div style="color:#555; text-align:center; padding:40px; grid-column:1/-1; font-size:0.85rem;">🎁 ตู้เซฟของคุณยังว่างเปล่า<br>เลือกกดรับ Gift Voucher งานอีเวนต์เพื่อเก็บตั๋วส่วนลดไว้ที่นี่ครับน้า!</div>`;
             return;
         }
 
         const currentTime = Date.now();
         const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
         let hasValidCoupons = false;
-        let activeCountdowns = []; // 📦 ถังเก็บข้อมูลเวลาสำหรับให้มอเตอร์วิ่งอัปเดตหน้าจอ
+        let activeCountdowns = [];
 
         Object.keys(coupons).forEach(k => {
             const item = coupons[k];
             const itemTime = item.wonTimestamp || item.timestamp || 0;
             const expireTime = itemTime + sevenDaysMs;
 
-            // 🚨 ตรวจจับไอเท็มหมดอายุ (เกิน 7 วัน) ถ้ายอดเวลาติดลบให้ลบทิ้งทันที
             if (currentTime > expireTime) {
                 database.ref(`users_rewards_vault/${uid}/${k}`).remove();
                 return; 
@@ -1041,34 +1042,35 @@ function listenToMySavedCouponsVault(uid) {
             const dateObj = new Date(itemTime);
             const dateStr = dateObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
             const timeStr = dateObj.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + " น.";
-            const ticketIdDisplay = item.ticketId ? item.ticketId : "NO-ID";
+            
+            const displayTitle = item.rewardName || item.eventTitle || "GIFT VOUCHER";
+            const displayCode = item.voucherCode || item.ticketId || "UDG-VOUCHER";
+            const displayTicketId = item.ticketId || displayCode;
 
             const countdownSpanId = `countdown-${k}`;
-            // โยนเข้าถังรอให้มอเตอร์อัปเดตแบบเรียลไทม์
             activeCountdowns.push({ id: countdownSpanId, expireTime: expireTime, key: k, uid: uid });
 
             const div = document.createElement('div');
             div.className = "vault-coupon-card";
             div.innerHTML = `
                 <div>
-                    <strong class="coupon-info-title">🎫 ${item.rewardName}</strong>
-                    <span class="coupon-secret-code-badge">CODE: ${ticketIdDisplay}</span>
-                    <span class="coupon-timestamp"><i class="fa-solid fa-clock"></i> ได้รับ: ${dateStr} - ${timeStr}</span>
-                    <span class="coupon-timestamp" id="${countdownSpanId}" style="color:#00ffff; margin-top:5px; font-family: 'Space Grotesk', sans-serif; font-size:0.75rem;">
+                    <strong class="coupon-info-title">🎫 ${displayTitle}</strong>
+                    <span class="coupon-secret-code-badge">CODE: ${displayCode}</span>
+                    <span class="coupon-timestamp"><i class="fa-solid fa-clock"></i> ได้รับเมื่อ: ${dateStr} - ${timeStr}</span>
+                    <span class="coupon-timestamp" id="${countdownSpanId}" style="color:#00ffff; margin-top:4px; font-size:0.75rem;">
                         <i class="fa-solid fa-hourglass-half fa-spin-pulse"></i> กำลังประมวลผลเวลา...
                     </span>
                 </div>
-                <span class="coupon-status-ready">READY</span>
+                <button type="button" class="save-voucher-img-btn" onclick="generateVoucherCardImage('${escapeQuotes(displayTitle)}', '${escapeQuotes(displayCode)}', '${escapeQuotes(displayTicketId)}')">
+                    <i class="fa-solid fa-image"></i> บันทึกรูป Voucher
+                </button>
             `;
             myCouponsList.appendChild(div);
         });
 
         if (!hasValidCoupons) {
-             myCouponsList.innerHTML = `<div style="color:#333; text-align:center; padding-top:100px; font-size:0.85rem;">🎁 ตู้เซฟของคุณยังว่างเปล่า<br>กดเปิดกล่องสุ่มสไลด์เพื่อลุ้นรับคูปองกันน้า BRO!</div>`;
+             myCouponsList.innerHTML = `<div style="color:#555; text-align:center; padding:40px; grid-column:1/-1; font-size:0.85rem;">🎁 ตู้เซฟของคุณยังว่างเปล่า<br>เลือกกดรับ Gift Voucher งานอีเวนต์เพื่อเก็บตั๋วส่วนลดไว้ที่นี่ครับน้า!</div>`;
         } else {
-             myCouponsList.scrollTop = myCouponsList.scrollHeight;
-             
-             // ⏱️ สตาร์ทมอเตอร์นับถอยหลัง (อัปเดตเข็มวิทุกๆ 1 วินาที)
              vaultCountdownTimer = setInterval(() => {
                  const now = Date.now();
                  activeCountdowns.forEach(data => {
@@ -1079,10 +1081,8 @@ function listenToMySavedCouponsVault(uid) {
                          if (timeDiff <= 0) {
                              el.innerHTML = `<i class="fa-solid fa-ban"></i> หมดอายุแล้ว!`;
                              el.style.color = "#ff3333";
-                             // ระเบิดทิ้งออโต้เมื่อหมดเวลาต่อหน้าต่อตา
                              database.ref(`users_rewards_vault/${data.uid}/${data.key}`).remove();
                          } else {
-                             // แปลงหน่วยมิลลิวินาทีเป็น วัน, ชั่วโมง, นาที, วินาที
                              const d = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
                              const h = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
                              const m = Math.floor((timeDiff / 1000 / 60) % 60);
@@ -1093,8 +1093,6 @@ function listenToMySavedCouponsVault(uid) {
                              timeString += `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
                              
                              el.innerHTML = `<i class="fa-solid fa-hourglass-half"></i> หมดอายุใน: <strong>${timeString}</strong>`;
-                             
-                             // กิมมิค: ถ้าเวลาเหลือน้อยกว่า 1 วัน ให้ไฟไซเรนเปลี่ยนเป็นสีส้ม (#ffaa00) เตือนให้รีบใช้!
                              el.style.color = d < 1 ? "#ffaa00" : "#00ffff";
                          }
                      }
@@ -1104,131 +1102,107 @@ function listenToMySavedCouponsVault(uid) {
     });
 }
 
-database.ref('udg_lucky_wheel_rewards').on('value', (snapshot) => {
-    const data = snapshot.val();
-    wheelItemsList = [];
-    if (data) {
-        Object.keys(data).forEach(k => { wheelItemsList.push({ id: k, ...data[k] }); });
+function escapeQuotes(str) {
+    return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+// 🎨 ฟังก์ชันวาดรูปภาพ Gift Voucher บน Canvas และเปิด Modal ดาวน์โหลด
+function generateVoucherCardImage(eventTitle, voucherCode, ticketId) {
+    const canvas = document.getElementById('voucherCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    // 1. วาดพื้นหลังโทน Cyberpunk
+    const grad = ctx.createLinearGradient(0, 0, 800, 420);
+    grad.addColorStop(0, '#0b0e14');
+    grad.addColorStop(0.5, '#151821');
+    grad.addColorStop(1, '#080a0f');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 800, 420);
+
+    // 2. วาดเส้นกรอบนีออน Cyan & Yellow Glow
+    ctx.strokeStyle = '#00f2fe';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(15, 15, 770, 390);
+
+    ctx.strokeStyle = '#ffaa00';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(22, 22, 756, 376);
+
+    // 3. วาดโลโก้ค่าย UDG Header
+    ctx.fillStyle = '#00f2fe';
+    ctx.font = 'bold 20px "Space Grotesk", sans-serif';
+    ctx.fillText('UNDERGROUND CULTURE TH', 45, 55);
+
+    ctx.fillStyle = '#ffaa00';
+    ctx.font = 'bold 12px "Space Grotesk", sans-serif';
+    ctx.fillText('SPONSORED BY UDG • OFFICIAL EVENT TICKET', 45, 75);
+
+    // เส้นคั่นส่วนบน
+    ctx.strokeStyle = '#2a2f3d';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(45, 95);
+    ctx.lineTo(755, 95);
+    ctx.stroke();
+
+    // 4. วาดชื่องานอีเวนต์ (Event Title)
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 28px "Kanit", sans-serif';
+    
+    // ตัดคำให้พอดีความกว้าง
+    let cleanTitle = eventTitle.replace('[GIFT VOUCHER] ', '');
+    if (cleanTitle.length > 32) {
+        cleanTitle = cleanTitle.substring(0, 30) + '...';
     }
-    preloadAllRewardImages(wheelItemsList); 
-    buildInitialCsgoStrip();
-    renderVisiblePool();
-});
+    ctx.fillText(cleanTitle, 45, 145);
 
-function corePhysicsCaseSpin(winnerItem) {
-    return new Promise((resolve) => {
-        if (!csgoStrip) return resolve();
-        
-        csgoStrip.style.transition = 'none';
-        csgoStrip.style.transform = 'translateX(0px)';
-        csgoStrip.innerHTML = '';
+    ctx.fillStyle = '#9aa3b4';
+    ctx.font = '16px "Kanit", sans-serif';
+    ctx.fillText('สิทธิ์ส่วนลดพิเศษสำหรับเข้าร่วมงานอีเวนต์', 45, 175);
 
-        const totalItemsInSpin = 60;   
-        const targetStopCardIndex = 45; 
+    // 5. กล่องแสดงรหัสโค้ด (Voucher Code Box)
+    ctx.fillStyle = '#1f2330';
+    ctx.fillRect(45, 205, 710, 110);
+    ctx.strokeStyle = '#00f2fe';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(45, 205, 710, 110);
 
-        for (let i = 0; i < totalItemsInSpin; i++) {
-            let currentItem;
-            if (i === targetStopCardIndex) {
-                currentItem = winnerItem;
-            } else {
-                currentItem = wheelItemsList[Math.floor(Math.random() * wheelItemsList.length)];
-            }
-            csgoStrip.appendChild(createItemCardNode(currentItem, i));
-        }
+    ctx.fillStyle = '#ffaa00';
+    ctx.font = 'bold 14px "Space Grotesk", sans-serif';
+    ctx.fillText('VOUCHER CODE / REF NUMBER:', 65, 235);
 
-        const currentWrapperWidth = csgoStrip.parentElement.getBoundingClientRect().width;
-        const currentActualCardWidth = csgoStrip.children[0].getBoundingClientRect().width || 130;
-        const realCenterLine = currentWrapperWidth / 2;
-        const innerCardOffset = (currentActualCardWidth / 2) + (Math.floor(Math.random() * 6) - 3);
-        const finalStopX = -((targetStopCardIndex * currentActualCardWidth) + innerCardOffset - realCenterLine);
+    ctx.fillStyle = '#00f2fe';
+    ctx.font = 'bold 36px monospace';
+    ctx.fillText(voucherCode, 65, 285);
 
-        setTimeout(() => {
-            csgoStrip.style.transition = 'transform 6.5s cubic-bezier(0.1, 0.85, 0.15, 1)';
-            csgoStrip.style.transform = `translateX(${finalStopX}px)`;
-        }, 80);
+    // 6. ท้ายตั๋ว (Footer Terms)
+    ctx.fillStyle = '#626b7d';
+    ctx.font = '13px "Kanit", sans-serif';
+    ctx.fillText('* บันทึกรูปภาพนี้แล้วนำไปแสดงที่หน้างาน หรือส่งยืนยันสิทธิ์ทาง IG: undergroundculture.th', 45, 355);
+    ctx.fillText(`REF ID: ${ticketId} • VALID FOR 1 TIME USE ONLY`, 45, 378);
 
-        setTimeout(() => { resolve(); }, 6800);
-    });
+    // 7. แปลง Canvas เป็น Data URL แล้วเซ็ตใส่ปุ่มดาวน์โหลด
+    const imageURL = canvas.toDataURL('image/png');
+    const downloadBtn = document.getElementById('downloadVoucherImageBtn');
+    if (downloadBtn) {
+        downloadBtn.href = imageURL;
+        downloadBtn.download = `UDG-Voucher-${voucherCode}.png`;
+    }
+
+    // 8. แสดง Modal
+    const modal = document.getElementById('voucherImageModal');
+    if (modal) modal.classList.add('active');
 }
 
-if (demoSpinBtn) {
-    demoSpinBtn.addEventListener('click', async () => {
-        if (isCaseSpinning || wheelItemsList.length === 0) return;
-
-        isCaseSpinning = true;
-        demoSpinBtn.innerText = "TEST SPINNING...";
-        openCaseBtn.style.opacity = '0.5';
-
-        const mockWinnerIndex = Math.floor(Math.random() * wheelItemsList.length);
-        const actualWinnerItem = wheelItemsList[mockWinnerIndex];
-
-        await corePhysicsCaseSpin(actualWinnerItem);
-
-        await showErrorAlert("🔬 DEMO SPIN RESULTS", `[โหมดทดลองหมุนเล่นเพื่อความบันเทิง]<br>กล่องสุ่มดร็อปได้ไอเท็มตัวอย่าง:<br><strong style="color:#00ffff; font-size:1.25rem;">[ ${actualWinnerItem.name} ]</strong><br><br><span style="color:#666; font-size:0.8rem;">*แก้ไขสมการเรดาร์จับพิกเซล คราวนี้เปิดในแอป IG ขีดแดงก็ผ่ากลางตรงชิ้นแล้วครับน้า*</span>`, true);
-
-        buildInitialCsgoStrip();
-        isCaseSpinning = false;
-        demoSpinBtn.innerHTML = `<i class="fa-solid fa-flask"></i> TEST SPIN`;
-        openCaseBtn.style.opacity = '1';
+// ผูกเหตุการณ์ปิด Modal รูปภาพ Voucher
+const closeVoucherImageBtn = document.getElementById('closeVoucherImageBtn');
+const voucherImageModal = document.getElementById('voucherImageModal');
+if (closeVoucherImageBtn && voucherImageModal) {
+    closeVoucherImageBtn.addEventListener('click', () => {
+        voucherImageModal.classList.remove('active');
     });
 }
-
-if (openCaseBtn) {
-    openCaseBtn.addEventListener('click', async () => {
-        const currentUser = firebase.auth().currentUser;
-        if (!currentUser) {
-            showErrorAlert("ACCESS DENIED", "❌ YOU MUST LOGIN FIRST!<br>กรุณากดล็อกอินสมาชิกด้านบนสุดเพื่อสุ่มรับสิทธิ์ของรางวัลจริงประจำวันครับน้า!");
-            return;
-        }
-        if (isCaseSpinning || wheelItemsList.length === 0) return;
-
-        const uid = currentUser.uid;
-        const displayName = currentUser.displayName || "MEMBER UDG";
-        const todayKey = new Date().toDateString();
-
-        const checkSnapshot = await database.ref(`users_wheel_cooldown/${uid}/${todayKey}`).once('value');
-        if (checkSnapshot.exists()) {
-            showErrorAlert("DAILY LIMIT REACHED", "❌ วันนี้น้ากดรับสิทธิ์เปิดกล่องไปแล้วครับ!<br>จำกัดสิทธิ์สุ่มเปิดกล่องวันละ 1 ครั้ง พรุ่งนี้ค่อยแวะมาแก้ตัวใหม่น้า BRO", false);
-            return;
-        }
-
-        isCaseSpinning = true;
-        openCaseBtn.innerText = "OPENING CASE...";
-        if (demoSpinBtn) demoSpinBtn.style.opacity = '0.5';
-
-        let totalRateWeight = 0;
-        wheelItemsList.forEach(item => { totalRateWeight += parseFloat(item.rateWeight || 0); });
-        let randomPointer = Math.random() * totalRateWeight;
-        let targetWinnerIndex = 0;
-        for (let i = 0; i < wheelItemsList.length; i++) {
-            randomPointer -= parseFloat(wheelItemsList[i].rateWeight || 0);
-            if (randomPointer <= 0) { targetWinnerIndex = i; break; }
-        }
-        
-        const finalWinnerItem = wheelItemsList[targetWinnerIndex];
-
-        await corePhysicsCaseSpin(finalWinnerItem);
-
-        database.ref(`users_wheel_cooldown/${uid}/${todayKey}`).set({ spun: true, timestamp: Date.now() });
-        
-        const randomSecretCode = "UDG-" + Math.random().toString(36).substring(2, 7).toUpperCase();
-        database.ref(`users_rewards_vault/${uid}`).push({
-            rewardName: finalWinnerItem.name,
-            userName: displayName,
-            ticketId: randomSecretCode,
-            wonTimestamp: Date.now()
-        });
-        incrementUserStat('cases');
-
-        await showErrorAlert("🏆 CASE UNBOXED COMPLETED", `ยินดีด้วยครับน้าบักหำทิว! ได้ของรางวัลตรงปกตรงใจ:<br><strong style="color:#fff000; font-size:1.3rem;">[ ${finalWinnerItem.name} ]</strong><br><br><span style="color: #ff3333; font-weight: bold;">[กรุณาแคปหน้าจอไว้เป็นหลักฐานทันที]</span><br><br>รหัสรหัสตั๋ว CODE ลับยืนยันสิทธิ์: <strong style="color:#00ffff; font-family:monospace;">${randomSecretCode}</strong><br>ระบบอัปเดตใส่ตู้เซฟฝั่งขวาจอเรียบร้อย แคปหน้าจอส่งเคลมทางอินสตาแกรมได้เลยครับ! 🔥`, true);
-
-        buildInitialCsgoStrip();
-        isCaseSpinning = false;
-        openCaseBtn.innerHTML = `<i class="fa-solid fa-box-open"></i> OPEN CASE`;
-        if (demoSpinBtn) demoSpinBtn.style.opacity = '1';
-    });
-}
-
 // =================================================================
 // 🚪 เครื่องยนต์ล็อกอิน 
 // =================================================================
@@ -2410,3 +2384,4 @@ async function claimEventVoucher(eventId) {
         }
     });
 }
+
