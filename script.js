@@ -1004,7 +1004,7 @@ function preloadAllRewardImages(itemsArray) {
 }
 
 // =================================================================
-// 🎟️ MY REWARDS VAULT & AUTOMATIC VOUCHER IMAGE GENERATOR
+// 🎟️ MY REWARDS VAULT & AUTOMATIC VOUCHER IMAGE GENERATOR (WITH AVATAR & LOGO)
 // =================================================================
 let vaultCountdownTimer = null;
 
@@ -1046,6 +1046,7 @@ function listenToMySavedCouponsVault(uid) {
             const displayTitle = item.rewardName || item.eventTitle || "GIFT VOUCHER";
             const displayCode = item.voucherCode || item.ticketId || "UDG-VOUCHER";
             const displayTicketId = item.ticketId || displayCode;
+            const itemUserName = item.userName || (firebase.auth().currentUser ? firebase.auth().currentUser.displayName : "MEMBER UDG");
 
             const countdownSpanId = `countdown-${k}`;
             activeCountdowns.push({ id: countdownSpanId, expireTime: expireTime, key: k, uid: uid });
@@ -1061,7 +1062,7 @@ function listenToMySavedCouponsVault(uid) {
                         <i class="fa-solid fa-hourglass-half fa-spin-pulse"></i> กำลังประมวลผลเวลา...
                     </span>
                 </div>
-                <button type="button" class="save-voucher-img-btn" onclick="generateVoucherCardImage('${escapeQuotes(displayTitle)}', '${escapeQuotes(displayCode)}', '${escapeQuotes(displayTicketId)}')">
+                <button type="button" class="save-voucher-img-btn" onclick="generateVoucherCardImage('${escapeQuotes(displayTitle)}', '${escapeQuotes(displayCode)}', '${escapeQuotes(displayTicketId)}', '${escapeQuotes(itemUserName)}')">
                     <i class="fa-solid fa-image"></i> บันทึกรูป Voucher
                 </button>
             `;
@@ -1106,11 +1107,33 @@ function escapeQuotes(str) {
     return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
 
-// 🎨 ฟังก์ชันวาดรูปภาพ Gift Voucher บน Canvas และเปิด Modal ดาวน์โหลด
-function generateVoucherCardImage(eventTitle, voucherCode, ticketId) {
+// 🖼️ Helper ฟังก์ชันโหลดรูปภาพแบบ Async
+function loadCanvasImage(src) {
+    return new Promise((resolve) => {
+        if (!src) return resolve(null);
+        const img = new Image();
+        img.crossOrigin = "anonymous"; // ป้องกันปัญหา Canvas Tainted
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+    });
+}
+
+// 🎨 ฟังก์ชันวาดรูปภาพ Gift Voucher พร้อมโลโก้ ขาวใส.png มุมขวาบน และโปรไฟล์ User ด้านล่าง
+async function generateVoucherCardImage(eventTitle, voucherCode, ticketId, userName) {
     const canvas = document.getElementById('voucherCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
+
+    const currentUser = firebase.auth().currentUser;
+    const userPhotoUrl = currentUser ? currentUser.photoURL : null;
+    const finalUserName = userName || (currentUser ? currentUser.displayName : "MEMBER UDG");
+
+    // โหลดรูปภาพเตรียมไว้ล่วงหน้า
+    const [logoImg, avatarImg] = await Promise.all([
+        loadCanvasImage('image/ขาวใส.png'),
+        loadCanvasImage(userPhotoUrl)
+    ]);
 
     // 1. วาดพื้นหลังโทน Cyberpunk
     const grad = ctx.createLinearGradient(0, 0, 800, 420);
@@ -1129,7 +1152,14 @@ function generateVoucherCardImage(eventTitle, voucherCode, ticketId) {
     ctx.lineWidth = 1;
     ctx.strokeRect(22, 22, 756, 376);
 
-    // 3. วาดโลโก้ค่าย UDG Header
+    // 3. วาดโลโก้ ขาวใส.png ไว้ที่มุมขวาบน
+    if (logoImg) {
+        ctx.save();
+        ctx.drawImage(logoImg, 705, 30, 55, 55);
+        ctx.restore();
+    }
+
+    // 4. วาดโลโก้ข้อความ UDG Header
     ctx.fillStyle = '#00f2fe';
     ctx.font = 'bold 20px "Space Grotesk", sans-serif';
     ctx.fillText('UNDERGROUND CULTURE TH', 45, 55);
@@ -1143,46 +1173,90 @@ function generateVoucherCardImage(eventTitle, voucherCode, ticketId) {
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(45, 95);
-    ctx.lineTo(755, 95);
+    ctx.lineTo(690, 95); // เว้นหลบโลโก้ขวาบนเล็กน้อย
     ctx.stroke();
 
-    // 4. วาดชื่องานอีเวนต์ (Event Title)
+    // 5. วาดชื่องานอีเวนต์ (Event Title)
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 28px "Kanit", sans-serif';
+    ctx.font = 'bold 26px "Kanit", sans-serif';
     
-    // ตัดคำให้พอดีความกว้าง
     let cleanTitle = eventTitle.replace('[GIFT VOUCHER] ', '');
     if (cleanTitle.length > 32) {
         cleanTitle = cleanTitle.substring(0, 30) + '...';
     }
-    ctx.fillText(cleanTitle, 45, 145);
+    ctx.fillText(cleanTitle, 45, 140);
 
     ctx.fillStyle = '#9aa3b4';
-    ctx.font = '16px "Kanit", sans-serif';
-    ctx.fillText('สิทธิ์ส่วนลดพิเศษสำหรับเข้าร่วมงานอีเวนต์', 45, 175);
+    ctx.font = '15px "Kanit", sans-serif';
+    ctx.fillText('สิทธิ์ส่วนลดพิเศษสำหรับเข้าร่วมงานอีเวนต์', 45, 168);
 
-    // 5. กล่องแสดงรหัสโค้ด (Voucher Code Box)
+    // 6. กล่องแสดงรหัสโค้ด (Voucher Code Box)
     ctx.fillStyle = '#1f2330';
-    ctx.fillRect(45, 205, 710, 110);
+    ctx.fillRect(45, 190, 710, 100);
     ctx.strokeStyle = '#00f2fe';
     ctx.lineWidth = 2;
-    ctx.strokeRect(45, 205, 710, 110);
+    ctx.strokeRect(45, 190, 710, 100);
 
     ctx.fillStyle = '#ffaa00';
-    ctx.font = 'bold 14px "Space Grotesk", sans-serif';
-    ctx.fillText('VOUCHER CODE / REF NUMBER:', 65, 235);
+    ctx.font = 'bold 13px "Space Grotesk", sans-serif';
+    ctx.fillText('VOUCHER CODE / REF NUMBER:', 65, 218);
 
     ctx.fillStyle = '#00f2fe';
-    ctx.font = 'bold 36px monospace';
-    ctx.fillText(voucherCode, 65, 285);
+    ctx.font = 'bold 34px monospace';
+    ctx.fillText(voucherCode, 65, 264);
 
-    // 6. ท้ายตั๋ว (Footer Terms)
+    // 7. โซนแสดงชื่อ USER & รูปโปรไฟล์ (มุมซ้ายล่าง)
+    const avatarCenterX = 70;
+    const avatarCenterY = 338;
+    const avatarRadius = 22;
+
+    if (avatarImg) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(avatarCenterX, avatarCenterY, avatarRadius, 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(avatarImg, avatarCenterX - avatarRadius, avatarCenterY - avatarRadius, avatarRadius * 2, avatarRadius * 2);
+        ctx.restore();
+
+        // กรอบวงกลมนีออนครอบอวตาร
+        ctx.strokeStyle = '#00f2fe';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(avatarCenterX, avatarCenterY, avatarRadius, 0, Math.PI * 2, true);
+        ctx.stroke();
+    } else {
+        // รูปโปรไฟล์สแตนด์บายกรณีไม่มีรูป
+        ctx.fillStyle = '#1f2330';
+        ctx.beginPath();
+        ctx.arc(avatarCenterX, avatarCenterY, avatarRadius, 0, Math.PI * 2, true);
+        ctx.fill();
+        ctx.strokeStyle = '#00f2fe';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = '#00f2fe';
+        ctx.font = '16px "Kanit", sans-serif';
+        ctx.fillText('👤', avatarCenterX - 8, avatarCenterY + 6);
+    }
+
+    // แสดงชื่อ USER
+    ctx.fillStyle = '#00f2fe';
+    ctx.font = 'bold 11px "Space Grotesk", sans-serif';
+    ctx.fillText('CLAIMED BY MEMBER:', 105, 330);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 16px "Kanit", sans-serif';
+    let displayUserName = finalUserName;
+    if (displayUserName.length > 25) displayUserName = displayUserName.substring(0, 23) + '...';
+    ctx.fillText(displayUserName, 105, 352);
+
+    // 8. ท้ายตั๋ว (Footer Terms)
     ctx.fillStyle = '#626b7d';
-    ctx.font = '13px "Kanit", sans-serif';
-    ctx.fillText('* บันทึกรูปภาพนี้แล้วนำไปแสดงที่หน้างาน หรือส่งยืนยันสิทธิ์ทาง IG: undergroundculture.th', 45, 355);
-    ctx.fillText(`REF ID: ${ticketId} • VALID FOR 1 TIME USE ONLY`, 45, 378);
+    ctx.font = '12px "Kanit", sans-serif';
+    ctx.fillText(`REF ID: ${ticketId} • VALID FOR 1 TIME USE ONLY`, 45, 390);
 
-    // 7. แปลง Canvas เป็น Data URL แล้วเซ็ตใส่ปุ่มดาวน์โหลด
+    // 9. แปลง Canvas เป็น Data URL แล้วยัดใส่ปุ่มดาวน์โหลด
     const imageURL = canvas.toDataURL('image/png');
     const downloadBtn = document.getElementById('downloadVoucherImageBtn');
     if (downloadBtn) {
@@ -1190,18 +1264,9 @@ function generateVoucherCardImage(eventTitle, voucherCode, ticketId) {
         downloadBtn.download = `UDG-Voucher-${voucherCode}.png`;
     }
 
-    // 8. แสดง Modal
+    // 10. แสดง Modal หน้าต่างดาวน์โหลด
     const modal = document.getElementById('voucherImageModal');
     if (modal) modal.classList.add('active');
-}
-
-// ผูกเหตุการณ์ปิด Modal รูปภาพ Voucher
-const closeVoucherImageBtn = document.getElementById('closeVoucherImageBtn');
-const voucherImageModal = document.getElementById('voucherImageModal');
-if (closeVoucherImageBtn && voucherImageModal) {
-    closeVoucherImageBtn.addEventListener('click', () => {
-        voucherImageModal.classList.remove('active');
-    });
 }
 // =================================================================
 // 🚪 เครื่องยนต์ล็อกอิน 

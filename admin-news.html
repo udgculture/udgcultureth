@@ -319,71 +319,30 @@
         </table>
         <a href="index.html" class="back-link" style="margin-top: 30px;">&larr; กลับไปหน้าหลักเพจ UDG</a>
     </div>
-
-  <!-- 🎡 [แท็บที่ 8] จากเดิม LUCKY WHEEL ให้เปลี่ยนข้อความเป็น CS:GO CASE CONTROL PANEL -->
-<div class="admin-box" id="wheelPanelBox" style="display: none; border-color: #ff007f; box-shadow: 0 0 30px rgba(255, 0, 127, 0.05);">
-    <h2><i class="fa-solid fa-box-open" style="color: #ff007f;"></i> UDG CYBER CASE UNBOXING DESK</h2>
-    <p style="color: #555; font-size: 0.85rem;">เพิ่ม ลบ ของรางวัลในกล่อง พร้อมล็อก % เรทโอกาสดร็อป และระบบสแกนเคลมรหัสตั๋วลับกันโกง</p>
-
-    <div style="background: #0f0f0f; padding: 15px; border-radius: 6px; border: 1px solid #1a1a1a; margin-top: 15px;">
-        <h3 style="font-size: 0.95rem; color: #ff007f; margin-bottom: 10px;"><i class="fa-solid fa-plus"></i> ADD REWARD ITEM TO CASE</h3>
+<!-- 🎟️ [แท็บ] USER REWARDS SEARCH DESK -->
+    <div class="admin-box" id="wheelPanelBox" style="display: none; border-color: #39ff14; box-shadow: 0 0 30px rgba(57, 255, 20, 0.05);">
+        <h2><i class="fa-solid fa-magnifying-glass-chart" style="color: #39ff14;"></i> USER REWARDS SEARCH DESK</h2>
+        <p style="color: #555; font-size: 0.85rem;">พิมพ์ค้นหาชื่อบัญชีผู้ใช้ หรือป้อนรหัส CODE 5 หลักเพื่อตรวจสอบตั๋วของแท้และกดปุ่ม USED ตัดเคลมสิทธิ์</p>
         
-        <div class="form-group" style="margin-top: 0;">
-            <label style="color: #ff007f;">REWARD NAME (ชื่อของรางวัล / รหัสคูปองส่วนลด)</label>
-            <input type="text" id="newWheelName" placeholder="เช่น: DISCOUNT10% หรือ เสื้อยืดค่าย UDG ฟรี">
+        <div class="form-group" style="margin-top: 20px; position: relative;">
+            <input type="text" id="adminUserRewardSearchInput" placeholder="SEARCH USER DISPLAY NAME OR TICKET CODE..." style="border-color: #333; padding-left: 40px;">
+            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #444; font-size: 0.9rem;"></i>
         </div>
-        
-       <!-- 📸 ระบบอัปโหลดรูปไอเท็มของรางวัล -->
-        <div class="form-group">
-            <label style="color: #ff007f;">REWARD IMAGE (อัปโหลดรูปไอเท็ม หรือวางลิงก์)</label>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                <input type="file" id="newWheelImgFile" accept="image/*" style="background: #111; padding: 10px; border: 1px dashed #ff007f; border-radius: 4px; color: #aaa; cursor: pointer; font-size: 0.85rem;">
-                <input type="text" id="newWheelImg" placeholder="ปล่อยว่างไว้ระบบจะดึงรูปโลโก้ค่ายมาใช้แทน">
-            </div>
-            <span id="wheelUploadStatus" style="font-size: 0.8rem; font-family: 'Space Grotesk', sans-serif; display: none; margin-top: 5px;"></span>
-        </div>
-        <div class="form-group">
-            <label style="color: #ff007f;">DROP RATE CHANCE (%)</label>
-            <input type="number" id="newWheelRate" placeholder="เช่น: 10 (หมายถึงโอกาสดร็อป 10%)" min="0" max="100">
-        </div>
-        
-        <button type="button" class="post-btn" id="addWheelItemBtn" style="background: linear-gradient(45deg, #ff007f, #ffaa00); color: #000; margin-top: 15px; padding: 12px;"><i class="fa-solid fa-square-plus"></i> PUBLISH TO CASE</button>
-    </div>
 
-    <table class="artist-list-table" style="margin-top: 25px;">
-        <thead><tr><th>ของรางวัลภายในกล่องสุ่ม</th><th>ล็อกเรทดร็อป</th><th>จัดการ</th></tr></thead>
-        <tbody id="wheel-list-tbody"><tr><td colspan="3" style="color:#444; text-align:center;">⏳ กำลังดึงถังรายการของรางวัล...</td></tr></tbody>
-    </table>
-    
-    <!-- ส่วนอื่นๆ ด้านล่าง (ตารางเช็คประวัติและการกด USED) ปล่อยไว้เหมือนเดิมได้เลยครับน้า ตึงอยู่แล้ว -->
-
-        <!-- 🔍 🎰 แผงประวัติรางวัลและการเคลมรหัส USED ออกจากคลาวด์สองฝั่ง -->
-        <div style="margin-top: 40px; background: #0f0f0f; padding: 20px; border-radius: 6px; border: 1px solid #ff007f; box-shadow: 0 0 15px rgba(255, 0, 127, 0.05);">
-            <h3 style="font-family: 'Space Grotesk', sans-serif; color: #fff; font-size: 1.1rem; margin-bottom: 5px;">
-                <i class="fa-solid fa-magnifying-glass-chart" style="color: #39ff14;"></i> USER REWARDS SEARCH DESK
-            </h3>
-            <p style="color: #555; font-size: 0.8rem; margin-bottom: 15px;">พิมพ์ค้นหาชื่อบัญชีผู้ใช้ หรือป้อนรหัส CODE 5 หลักเพื่อตรวจสอบตั๋วของแท้และกดปุ่ม USED ตัดเคลมสิทธิ์ป้องกันฐานข้อมูลบวม</p>
-            
-            <div class="form-group" style="margin-top: 0; position: relative;">
-                <input type="text" id="adminUserRewardSearchInput" placeholder="SEARCH USER DISPLAY NAME OR TICKET CODE..." style="border-color: #333; padding-left: 40px;">
-                <i class="fa-solid fa-user" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #444; font-size: 0.9rem;"></i>
-            </div>
-
-            <div style="max-height: 400px; overflow-y: auto; margin-top: 15px; border: 1px solid #222; border-radius: 4px;">
-                <table class="artist-list-table" style="margin-top: 0; font-size: 0.85rem;">
-                    <thead style="position: sticky; top: 0; z-index: 10;">
-                        <tr>
-                            <th style="background: #111; color: #39ff14;">ชื่อบัญชี (User)</th>
-                            <th style="background: #111; color: #39ff14;">ของรางวัลที่ได้รับ</th>
-                            <th style="background: #111; color: #39ff14;">วันที่ได้รับสิทธิ์</th>
-                            <th style="background: #111; color: #ff3333; text-align: center;">ปุ่มเคลมสิทธิ์</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-user-rewards-tbody">
-                        <tr><td colspan="4" style="color:#555; text-align:center; padding: 20px;">⏳ กำลังกวาดสายสัญญาณสแกนประวัติรางวัลสมาชิกทั้งหมดหลังบ้าน...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <div style="max-height: 480px; overflow-y: auto; margin-top: 15px; border: 1px solid #222; border-radius: 4px;">
+            <table class="artist-list-table" style="margin-top: 0; font-size: 0.85rem;">
+                <thead style="position: sticky; top: 0; z-index: 10;">
+                    <tr>
+                        <th style="background: #111; color: #39ff14;">ชื่อบัญชีผู้ใช้ (User)</th>
+                        <th style="background: #111; color: #39ff14;">ของรางวัล / Gift Voucher</th>
+                        <th style="background: #111; color: #39ff14;">วันที่ได้รับสิทธิ์</th>
+                        <th style="background: #111; color: #ff3333; text-align: center;">จัดการ / เคลมสิทธิ์</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-user-rewards-tbody">
+                    <tr><td colspan="4" style="color:#555; text-align:center; padding: 20px;">⏳ กำลังกวาดสายสัญญาณสแกนประวัติรางวัลสมาชิกทั้งหมดหลังบ้าน...</td></tr>
+                </tbody>
+            </table>
         </div>
 
         <a href="index.html" class="back-link" style="margin-top: 30px;">&larr; กลับไปหน้าหลักเพจ UDG</a>

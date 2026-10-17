@@ -468,18 +468,15 @@ function removeRewardFromWheelCloud(key) {
 }
 
 // =================================================================
-// ─── 🔍 🎰 ADMINDESK: ENGINE สแกนประวัติและระบบเคลมทำลายดาต้าถาวร (ฉบับหายขาด 100%) ───
+// 🔍 🎰 ADMINDESK: ENGINE สแกนประวัติและระบบเคลมทำลายดาต้าถาวร
 // =================================================================
 const adminSearchInput = document.getElementById('adminUserRewardSearchInput');
 const adminUserRewardsTbody = document.getElementById('admin-user-rewards-tbody');
-let globalAllUsersRewardsCache = []; // ถังพักความจำด่วนสำหรับระบบเสิร์ชค้นหา
+let globalAllUsersRewardsCache = [];
 
-// 🎯 สัญญาณดาวเทียมหลัก: ดักฟังถังข้อมูลประวัติรางวัลแบบซิงค์สายตรงคู่วาล์วชิ้นเดียว
 database.ref('users_rewards_vault').on('value', (snapshot) => {
     if (!adminUserRewardsTbody) return;
     const allVaultData = snapshot.val();
-    
-    // ⚔️ ล้างขยะตกค้าง: สั่งล้างถังแคชความจำเดิมทิ้งทันทีที่มีการขยับลบข้อมูลบนคลาวด์
     globalAllUsersRewardsCache = [];
 
     if (!allVaultData) {
@@ -491,7 +488,6 @@ database.ref('users_rewards_vault').on('value', (snapshot) => {
     const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
 
     try {
-        // กวาดสายสัญญาณเจาะลึกแกะกล่องข้อมูลทีละไอดีผู้ใช้ (UID)
         Object.keys(allVaultData).forEach(uid => {
             const userItems = allVaultData[uid];
             if (userItems && typeof userItems === 'object') {
@@ -500,19 +496,24 @@ database.ref('users_rewards_vault').on('value', (snapshot) => {
                     if (info) {
                         const itemTime = info.wonTimestamp || info.timestamp || currentTime;
 
-                        // 🚨 เช็กหมดอายุ 7 วัน ถ้าเกินก็ระเบิดทิ้งจากฐานข้อมูลออโต้เลย
+                        // ลบรายการหมดอายุเกิน 7 วันออโต้
                         if (currentTime - itemTime > sevenDaysMs) {
                             database.ref(`users_rewards_vault/${uid}/${itemKey}`).remove();
-                            return; // ข้ามคิว ไม่เก็บเข้าตารางให้แอดมินรกตา
+                            return;
                         }
 
-                        // 🎯 มัดสายไฟสำคัญ: บังคับบันทึกเข้าถังแคชหลักเฉพาะของที่ยังไม่หมดอายุ
+                        // 🎯 ดึงชื่อ User จริง ถ้าไม่พบหรือเป็นคำว่า Anonymous ให้แสดงเป็น MEMBER UDG
+                        let realUserName = info.userName || info.username || info.displayName;
+                        if (!realUserName || realUserName.toUpperCase().includes("ANONYMOUS")) {
+                            realUserName = "MEMBER UDG";
+                        }
+
                         globalAllUsersRewardsCache.push({
                             userUid: uid,
                             couponKey: itemKey,
-                            accountName: info.userName || info.username || "ANONYMOUS USER", 
-                            rewardName: info.rewardName || "UNKNOWN REWARD",
-                            ticketId: info.ticketId || "NO-CODE", 
+                            accountName: realUserName,
+                            rewardName: info.rewardName || info.eventTitle || "GIFT VOUCHER",
+                            ticketId: info.ticketId || info.voucherCode || "NO-CODE", 
                             timestamp: itemTime
                         });
                     }
@@ -520,10 +521,7 @@ database.ref('users_rewards_vault').on('value', (snapshot) => {
             }
         });
 
-        // จัดคิวเรียงประวัติตามเวลาล่าสุดขึ้นก่อนเสมอ
         globalAllUsersRewardsCache.sort((a, b) => b.timestamp - a.timestamp);
-        
-        // สั่งพ่นตารางข้อมูลใหม่ล่าสุดอัปเดตแบบเรียลไทม์
         const currentSearchQuery = adminSearchInput ? adminSearchInput.value : "";
         renderFilteredUserRewards(currentSearchQuery);
         
@@ -532,11 +530,9 @@ database.ref('users_rewards_vault').on('value', (snapshot) => {
         adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#ff3333; text-align:center; padding: 20px;">❌ เกิดข้อผิดพลาดทางเทคนิค: ${error.message}</td></tr>`;
     }
 });
-// ฟังก์ชันสั่งเขียนโครงตารางประวัติผู้ใช้งานพร้อมปุ่ม USED
+
 function renderFilteredUserRewards(filterText) {
     if (!adminUserRewardsTbody) return;
-    
-    // ⚔️ ตัดปัญหาตารางเบิ้ล: สั่งล้าง HTML บรรทัดเก่าทิ้งให้เกลี้ยงก่อนจะวาดใหม่
     adminUserRewardsTbody.innerHTML = '';
     const query = filterText.toLowerCase().trim();
 
@@ -545,17 +541,15 @@ function renderFilteredUserRewards(filterText) {
         return;
     }
 
-    // ตัวกรองช่องพิมพ์ค้นหาด่วน
     const filteredList = globalAllUsersRewardsCache.filter(item => {
         const ticketStr = item.ticketId ? item.ticketId.toLowerCase() : "";
         const nameStr = item.accountName ? item.accountName.toLowerCase() : "";
         const rewardStr = item.rewardName ? item.rewardName.toLowerCase() : "";
-        
         return nameStr.includes(query) || rewardStr.includes(query) || ticketStr.includes(query);
     });
 
     if (filteredList.length === 0) {
-        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#ff007f; text-align:center; padding: 15px;">❌ ไม่พบข้อมูลชื่อแร็ปเปอร์หรือรหัสตั๋วที่ตรงกับ "[ ${filterText} ]" ครับน้า</td></tr>`;
+        adminUserRewardsTbody.innerHTML = `<tr><td colspan="4" style="color:#ff007f; text-align:center; padding: 15px;">❌ ไม่พบข้อมูลชื่อสมาชิกหรือรหัสตั๋วที่ตรงกับ "[ ${filterText} ]" ครับน้า</td></tr>`;
         return;
     }
 
@@ -564,24 +558,61 @@ function renderFilteredUserRewards(filterText) {
         const dateStr = new Date(item.timestamp).toLocaleString('th-TH', { 
             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
         });
-        
         const currentTicketId = item.ticketId ? item.ticketId : "NO-ID";
         
         tr.innerHTML = `
-            <td style="color:#fff; font-weight:bold;"><i class="fa-solid fa-circle-user" style="color:#ffaa00; font-size:0.8rem; margin-right:5px;"></i> ${item.accountName}</td>
+            <td style="color:#fff; font-weight:bold;"><i class="fa-solid fa-circle-user" style="color:#00ffff; font-size:0.85rem; margin-right:5px;"></i> ${item.accountName}</td>
             <td>
-                <span style="color:#00ffff; font-family:monospace; font-weight:bold; display:block;">[ ${item.rewardName} ]</span>
-                <span style="color:#fff000; font-family:monospace; font-size:0.75rem; font-weight:bold; background:rgba(255,240,0,0.05); padding:1px 4px; border-radius:2px; border:1px solid rgba(255,240,0,0.1); margin-top:3px; display:inline-block;">CODE: ${currentTicketId}</span>
+                <span style="color:#ffaa00; font-family:monospace; font-weight:bold; display:block;">[ ${item.rewardName} ]</span>
+                <span style="color:#00ffff; font-family:monospace; font-size:0.75rem; font-weight:bold; background:rgba(0,242,254,0.05); padding:1px 6px; border-radius:2px; border:1px solid rgba(0,242,254,0.2); margin-top:3px; display:inline-block;">CODE: ${currentTicketId}</span>
             </td>
-            <td style="color:#555; font-size:0.75rem; font-family:monospace;">${dateStr}</td>
+            <td style="color:#aaa; font-size:0.75rem; font-family:monospace;">${dateStr}</td>
             <td style="text-align: center;">
-                <!-- ปุ่มสับเคลมสิทธิ์พ่วงสไนเปอร์ คัดแยกคีย์ UID และคีย์ของรางวัลตรงจุดของแท้ -->
                 <button type="button" class="delete-artist-btn" style="color:#ff3333; font-weight:800; background:rgba(255,51,51,0.03); border:1px solid rgba(255,51,51,0.2); padding:5px 10px; border-radius:4px; cursor:pointer;" onclick="markCouponAsUsedInCloud('${item.userUid}', '${item.couponKey}', '${currentTicketId}')">
                     <i class="fa-solid fa-eraser"></i> USED
                 </button>
             </td>
         `;
         adminUserRewardsTbody.appendChild(tr);
+    });
+}
+
+function markCouponAsUsedInCloud(userUid, couponKey, ticketId) {
+    if (!userUid || !ticketId || ticketId === "NO-ID" || ticketId === "NO-CODE") {
+        alert("❌ ข้อผิดพลาด: ไม่สามารถดึงรหัสตั๋วหรือไอดีผู้ใช้มาประมวลผลลัพธ์ได้ครับน้า");
+        return;
+    }
+    
+    if (confirm(`🚨 ยืนยันการเคลมสิทธิ์และทำลายตั๋วรหัส [ ${ticketId} ] ใช่หรือไม่?\n(ตั๋วใบนี้จะโดนลบถาวรออกจากตู้เซฟผู้ใช้หน้าบ้านและตารางแอดมินพร้อมกันออโต้ครับน้า)`)) {
+        const userRef = database.ref(`users_rewards_vault/${userUid}`);
+        
+        userRef.once('value').then((snapshot) => {
+            const items = snapshot.val();
+            if (!items) {
+                alert("❌ สัญญาณขาดหาย: ไม่พบข้อมูลคูปองหลงเหลือในตู้เซฟของผู้ใช้รายนี้แล้วครับ");
+                return;
+            }
+            
+            let targetRealFirebaseKey = null;
+            Object.keys(items).forEach(actualKey => {
+                if (items[actualKey] && (items[actualKey].ticketId === ticketId || items[actualKey].voucherCode === ticketId)) {
+                    targetRealFirebaseKey = actualKey;
+                }
+            });
+            
+            const keyToDelete = targetRealFirebaseKey || couponKey;
+            userRef.child(keyToDelete).remove().then(() => {
+                alert(`🔥 เคลียร์สิทธิ์ตั๋วรหัส ${ticketId} ออกจากระบบเรียบร้อยครับน้า!`);
+            }).catch((error) => {
+                alert(`❌ เกิดข้อผิดพลาดในการลบ: ${error.message}`);
+            });
+        });
+    }
+}
+
+if (adminSearchInput) {
+    adminSearchInput.addEventListener('input', (e) => {
+        renderFilteredUserRewards(e.target.value);
     });
 }
 
@@ -1341,3 +1372,12 @@ function deleteVoucherData(key) {
         database.ref(`udg_events_vouchers/${key}`).remove();
     }
 }
+database.ref(`users_rewards_vault/${uid}`).push({
+    rewardName: `[GIFT VOUCHER] ${val.title}`,
+    voucherCode: voucherCode,
+    ticketId: secretTicketId,
+    eventTitle: val.title,
+    sponsor: "UDG Culture TH",
+    userName: displayName, // 🔥 บันทึกชื่อบัญชีผู้ใช้ลงคลาวด์เสมอ
+    wonTimestamp: Date.now()
+})
