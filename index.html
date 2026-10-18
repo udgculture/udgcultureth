@@ -88,7 +88,7 @@
 <nav class="sticky-nav">
     <div class="nav-container">
         <a href="#" class="nav-link active" data-section="home"><i class="fa-solid fa-house"></i> <span>HOME</span></a>
-        <a href="#featured" class="nav-link" data-section="featured"><i class="fa-solid fa-fire"></i> <span>FEATURED</span></a>
+        <a href="#GIGS" class="nav-link" data-section="GIGS"><i class="fa-solid fa-fire"></i> <span>GIGS</span></a>
         <a href="#news" class="nav-link" data-section="news"><i class="fa-solid fa-newspaper"></i> <span>NEWS</span></a>
         <a href="#vouchers" class="nav-link" data-section="vouchers"><i class="fa-solid fa-ticket"></i> <span>VOUCHERS</span></a>
         <a href="#charts" class="nav-link" data-section="charts"><i class="fa-solid fa-ranking-star"></i> <span>CHARTS</span></a>
@@ -119,7 +119,7 @@
     <main>
       
         <!-- โซนข่าวเด่น + Top Charts -->
-        <section id="featured" class="featured-section">
+        <section >
             <article class="featured-card" id="live-featured-card">
                 <div class="loading-state">⏳ กำลังโหลดข้อมูลข่าวเด่นประจำเพจ UDG...</div>
             </article>
@@ -164,7 +164,11 @@
                 </button>
             </div>
         </section>
-
+        <!-- Upcoming Gigs & Sponsor -->
+        <section class="section-block" id="GIGS" class="GIGS-section">
+            <h2 class="section-title">UPCOMING GIGS</h2>
+            <div class="gig-list"></div>
+        </section>
         <!-- โซนรีวิวอัลบั้ม -->
         <section class="section-block">
             <h2 id="albums" class="section-title">ALBUM DISCUSSIONS</h2>
@@ -271,11 +275,7 @@
             </div>
         </section>
 
-        <!-- Upcoming Gigs & Sponsor -->
-        <section class="section-block">
-            <h2 class="section-title">UPCOMING GIGS</h2>
-            <div class="gig-list"></div>
-        </section>
+
 
         <section class="section-block">
             <h2 class="section-title">ADVERTISE WITH US</h2>
